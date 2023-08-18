@@ -1,0 +1,58 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# .env file
+.env
+
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+build
+
+# misc
+.DS_Store
+*.pem
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+!.env.example
+!.env.appStore.example
+
+# vercel
+.vercel
+
+### VisualStudioCode template
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+# Typescript
+tsconfig.tsbuildinfo
+
+# turbo
+.turbo
+
+# Builds
+dist
+target
+.anchor
+.crates
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+yarn-error.log
+outputs

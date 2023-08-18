@@ -1,0 +1,37 @@
+{
+  "name": "@underdog-protocol/underdog-core-sdk",
+  "version": "0.0.0",
+  "description": "Interface to the underdog-core smart contract",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/underdogprotocol/underdog-program-library"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup --config ../../tsup.config.ts",
+    "clean": "rm -rf node_modules .turbo dist tsconfig.tsbuildinfo",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-bubblegum": "1.0.0-alpha.8",
+    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.24",
+    "@metaplex-foundation/mpl-toolbox": "^0.8.0",
+    "@metaplex-foundation/umi": "^0.8.7",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.7",
+    "@underdog-protocol/spl-utils": "*"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.4"
+  }
+}
