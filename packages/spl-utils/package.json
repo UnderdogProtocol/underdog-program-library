@@ -30,7 +30,8 @@
     "@solana/spl-account-compression": "^0.1.7",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.43.4",
-    "axios": "^1.4.0"
+    "axios": "^1.4.0",
+    "bs58": "^5.0.0"
   },
   "devDependencies": {
     "@types/bs58": "^4.0.1",
