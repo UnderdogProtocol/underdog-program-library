@@ -27,7 +27,7 @@ export const resolveProjectPrefix = (
 ) => stuff[args.projectType].project;
 
 export const resolveProjectMintPrefix = (
-  context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, "eddsa" | "programs">,
   accounts: {},
   args: { projectType: string },
   programId: PublicKey,
@@ -35,7 +35,7 @@ export const resolveProjectMintPrefix = (
 ) => stuff[args.projectType].projectMint;
 
 export const resolveProjectVaultPrefix = (
-  context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, "eddsa" | "programs">,
   accounts: {},
   args: { projectType: string },
   programId: PublicKey,
@@ -43,7 +43,7 @@ export const resolveProjectVaultPrefix = (
 ) => stuff[args.projectType].projectVault;
 
 export const resolveNftMintPrefix = (
-  context: Pick<Context, 'eddsa' | 'programs'>,
+  context: Pick<Context, "eddsa" | "programs">,
   accounts: {},
   args: { projectType: string },
   programId: PublicKey,

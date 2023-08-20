@@ -6,6 +6,8 @@ import {
   hashMetadataData,
 } from "@metaplex-foundation/mpl-bubblegum";
 import { Context, PublicKey } from "@metaplex-foundation/umi";
+
+import { PROJECT_MINT_PREFIX, PROJECT_PREFIX } from "./constants";
 import { findOrgAccountPda, findProjectPda } from "./generated";
 
 export const hashProjectNft = (
@@ -23,18 +25,8 @@ export const hashProjectNft = (
     delegated?: boolean;
   }
 ) => {
-  const {
-    superAdminAddress,
-    orgId,
-    projectId,
-    name,
-    symbol,
-    uri,
-    owner,
-    merkleTree,
-    leafIndex,
-    delegated,
-  } = input;
+  const { superAdminAddress, orgId, projectId, name, symbol, uri, owner, merkleTree, leafIndex, delegated } =
+    input;
 
   const orgAccountPda = findOrgAccountPda(context, {
     superAdminAddress,
@@ -42,13 +34,13 @@ export const hashProjectNft = (
   });
 
   const projectAccountPda = findProjectPda(context, {
-    prefix: "project",
+    prefix: PROJECT_PREFIX,
     orgAccount: orgAccountPda[0],
     projectId,
   });
 
   const projectMintPda = findProjectPda(context, {
-    prefix: "project-mint",
+    prefix: PROJECT_MINT_PREFIX,
     orgAccount: orgAccountPda[0],
     projectId,
   });
@@ -85,6 +77,6 @@ export const hashProjectNft = (
       metadata,
     }),
     creatorsHash: hashMetadataCreators(creators),
-    dataHash: hashMetadataData(metadata)
+    dataHash: hashMetadataData(metadata),
   };
 };

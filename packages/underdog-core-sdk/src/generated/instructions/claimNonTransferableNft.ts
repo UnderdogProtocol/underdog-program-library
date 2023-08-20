@@ -5,7 +5,13 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-
+import {
+  findClaimAccountPda,
+  findLegacyProjectPda,
+  findOrgAccountPda,
+  findOrgControlAccountPda,
+} from '../accounts';
+import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -31,13 +37,6 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findLegacyNftPda } from '@underdog-protocol/spl-utils';
-import {
-  findClaimAccountPda,
-  findLegacyProjectPda,
-  findOrgAccountPda,
-  findOrgControlAccountPda,
-} from '../accounts';
-import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type ClaimNonTransferableNftInstructionAccounts = {
@@ -46,6 +45,9 @@ export type ClaimNonTransferableNftInstructionAccounts = {
   orgControlAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
   nonTransferableProject?: PublicKey | Pda;
+  nonTransferableProjectMint?: Pda;
+  nonTransferableProjectMetadata?: PublicKey | Pda;
+  nonTransferableProjectMasterEdition?: PublicKey | Pda;
   nonTransferableNftMint?: Pda;
   nonTransferableNftEscrow?: Pda;
   nonTransferableNftClaim?: PublicKey | Pda;
@@ -66,6 +68,7 @@ export type ClaimNonTransferableNftInstructionData = {
   orgId: string;
   projectIdStr: string;
   nftIdStr: string;
+  projectMintBump: number;
   nftMintBump: number;
   nftEscrowBump: number;
 };
@@ -75,6 +78,7 @@ export type ClaimNonTransferableNftInstructionDataArgs = {
   orgId: string;
   projectIdStr: string;
   nftIdStr: string;
+  projectMintBump: number;
   nftMintBump: number;
   nftEscrowBump: number;
 };
@@ -108,6 +112,7 @@ export function getClaimNonTransferableNftInstructionDataSerializer(
         ['orgId', string()],
         ['projectIdStr', string()],
         ['nftIdStr', string()],
+        ['projectMintBump', u8()],
         ['nftMintBump', u8()],
         ['nftEscrowBump', u8()],
       ],
@@ -126,7 +131,7 @@ export function getClaimNonTransferableNftInstructionDataSerializer(
 // Args.
 export type ClaimNonTransferableNftInstructionArgs = PickPartial<
   ClaimNonTransferableNftInstructionDataArgs,
-  'nftMintBump' | 'nftEscrowBump'
+  'nftMintBump' | 'nftEscrowBump' | 'projectMintBump'
 >;
 
 // Instruction.
@@ -194,6 +199,50 @@ export function claimNonTransferableNft(
             projectId: input.projectIdStr,
           }),
           true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'nonTransferableProjectMint',
+    input.nonTransferableProjectMint
+      ? ([input.nonTransferableProjectMint, false] as const)
+      : ([
+          findLegacyProjectPda(context, {
+            type: 'nt-project-mint',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectIdStr,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'nonTransferableProjectMetadata',
+    input.nonTransferableProjectMetadata
+      ? ([input.nonTransferableProjectMetadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(
+              resolvedAccounts.nonTransferableProjectMint[0],
+              false
+            ),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'nonTransferableProjectMasterEdition',
+    input.nonTransferableProjectMasterEdition
+      ? ([input.nonTransferableProjectMasterEdition, false] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(
+              resolvedAccounts.nonTransferableProjectMint[0],
+              false
+            ),
+          }),
+          false,
         ] as const)
   );
   addObjectProperty(
@@ -349,6 +398,11 @@ export function claimNonTransferableNft(
     'nftEscrowBump',
     input.nftEscrowBump ?? resolvedAccounts.nonTransferableNftEscrow[0][1]
   );
+  addObjectProperty(
+    resolvingArgs,
+    'projectMintBump',
+    input.projectMintBump ?? resolvedAccounts.nonTransferableProjectMint[0][1]
+  );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
@@ -356,6 +410,24 @@ export function claimNonTransferableNft(
   addAccountMeta(keys, signers, resolvedAccounts.orgControlAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.nonTransferableProject, false);
+  addAccountMeta(
+    keys,
+    signers,
+    resolvedAccounts.nonTransferableProjectMint,
+    false
+  );
+  addAccountMeta(
+    keys,
+    signers,
+    resolvedAccounts.nonTransferableProjectMetadata,
+    false
+  );
+  addAccountMeta(
+    keys,
+    signers,
+    resolvedAccounts.nonTransferableProjectMasterEdition,
+    false
+  );
   addAccountMeta(keys, signers, resolvedAccounts.nonTransferableNftMint, false);
   addAccountMeta(
     keys,

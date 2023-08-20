@@ -5,7 +5,17 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-
+import {
+  resolveNftMintPrefix,
+  resolveProjectMintPrefix,
+  resolveProjectPrefix,
+} from '../../resolvers';
+import {
+  findLegacyProjectPda,
+  findOrgAccountPda,
+  findOrgControlAccountPda,
+} from '../accounts';
+import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -30,25 +40,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findLegacyNftPda } from '@underdog-protocol/spl-utils';
-import {
-  resolveNftMintPrefix,
-  resolveProjectMintPrefix,
-  resolveProjectPrefix,
-} from '../../resolvers';
-import {
-  findLegacyProjectPda,
-  findOrgAccountPda,
-  findOrgControlAccountPda,
-  findOrgMemberAccountPda,
-} from '../accounts';
-import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type VerifyLegacyNftCollectionInstructionAccounts = {
   authority?: Signer;
   orgControlAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
-  memberAccount?: PublicKey | Pda;
   legacyProject?: PublicKey | Pda;
   legacyProjectMint?: Pda;
   legacyProjectMetadata?: PublicKey | Pda;
@@ -66,7 +63,6 @@ export type VerifyLegacyNftCollectionInstructionAccounts = {
 export type VerifyLegacyNftCollectionInstructionData = {
   discriminator: Array<number>;
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectIdStr: string;
   nftIdStr: string;
@@ -80,7 +76,6 @@ export type VerifyLegacyNftCollectionInstructionData = {
 
 export type VerifyLegacyNftCollectionInstructionDataArgs = {
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectIdStr: string;
   nftIdStr: string;
@@ -118,7 +113,6 @@ export function getVerifyLegacyNftCollectionInstructionDataSerializer(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['superAdminAddress', publicKeySerializer()],
-        ['memberAddress', publicKeySerializer()],
         ['orgId', string()],
         ['projectIdStr', string()],
         ['nftIdStr', string()],
@@ -198,19 +192,6 @@ export function verifyLegacyNftCollection(
           findOrgAccountPda(context, {
             superAdminAddress: input.superAdminAddress,
             orgId: input.orgId,
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'memberAccount',
-    input.memberAccount
-      ? ([input.memberAccount, false] as const)
-      : ([
-          findOrgMemberAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            member: input.memberAddress,
           }),
           false,
         ] as const)
@@ -407,7 +388,6 @@ export function verifyLegacyNftCollection(
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgControlAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
-  addAccountMeta(keys, signers, resolvedAccounts.memberAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.legacyProject, false);
   addAccountMeta(keys, signers, resolvedAccounts.legacyProjectMint, false);
   addAccountMeta(keys, signers, resolvedAccounts.legacyProjectMetadata, false);

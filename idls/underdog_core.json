@@ -964,11 +964,6 @@
           "isSigner": false
         },
         {
-          "name": "memberAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "legacyProject",
           "isMut": true,
           "isSigner": false
@@ -1048,11 +1043,6 @@
         },
         {
           "name": "orgAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "memberAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -1162,6 +1152,21 @@
         {
           "name": "nonTransferableProject",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMasterEdition",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1741,6 +1746,10 @@
             "type": "string"
           },
           {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
             "name": "nftMintBump",
             "type": "u8"
           },
@@ -2007,10 +2016,6 @@
             "type": "publicKey"
           },
           {
-            "name": "memberAddress",
-            "type": "publicKey"
-          },
-          {
             "name": "claimerAddress",
             "type": "publicKey"
           },
@@ -2245,10 +2250,6 @@
         "fields": [
           {
             "name": "superAdminAddress",
-            "type": "publicKey"
-          },
-          {
-            "name": "memberAddress",
             "type": "publicKey"
           },
           {

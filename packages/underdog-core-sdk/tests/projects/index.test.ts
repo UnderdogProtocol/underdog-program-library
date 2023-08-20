@@ -1,4 +1,11 @@
 import {
+  fetchTreeConfigFromSeeds,
+  getMerkleProof,
+  getMerkleProofAtIndex,
+  getMerkleRoot,
+  verifyLeaf,
+} from "@metaplex-foundation/mpl-bubblegum";
+import {
   PublicKey,
   createBigInt,
   generateSigner,
@@ -6,6 +13,8 @@ import {
   publicKeyBytes,
   sol,
 } from "@metaplex-foundation/umi";
+
+import { createTree } from "../../src";
 import {
   fetchProjectFromSeeds,
   findOrgAccountPda,
@@ -15,16 +24,8 @@ import {
   mintSftV2,
   transferAssetV1,
 } from "../../src/generated";
-import { createUmi } from "../setup";
-import {
-  fetchTreeConfigFromSeeds,
-  getMerkleProof,
-  getMerkleProofAtIndex,
-  getMerkleRoot,
-  verifyLeaf,
-} from "@metaplex-foundation/mpl-bubblegum";
-import { createTree } from "../../src";
 import { hashProjectNft } from "../../src/verify";
+import { createUmi } from "../setup";
 
 describe("Projects", () => {
   const umi = createUmi();
@@ -309,5 +310,4 @@ describe("Projects", () => {
       }).sendAndConfirm(umi);
     });
   });
-
 });

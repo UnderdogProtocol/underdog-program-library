@@ -5,7 +5,13 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-
+import {
+  findClaimAccountPda,
+  findLegacyProjectPda,
+  findOrgAccountPda,
+  findOrgControlAccountPda,
+} from '../accounts';
+import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -30,21 +36,12 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import { findLegacyNftPda } from '@underdog-protocol/spl-utils';
-import {
-  findClaimAccountPda,
-  findLegacyProjectPda,
-  findOrgAccountPda,
-  findOrgControlAccountPda,
-  findOrgMemberAccountPda,
-} from '../accounts';
-import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintNonTransferableNftInstructionAccounts = {
   authority?: Signer;
   orgControlAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
-  memberAccount?: PublicKey | Pda;
   nonTransferableProject?: PublicKey | Pda;
   nonTransferableProjectMint?: Pda;
   nonTransferableProjectMetadata?: PublicKey | Pda;
@@ -65,7 +62,6 @@ export type MintNonTransferableNftInstructionAccounts = {
 export type MintNonTransferableNftInstructionData = {
   discriminator: Array<number>;
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   claimerAddress: PublicKey;
   orgId: string;
   projectIdStr: string;
@@ -78,7 +74,6 @@ export type MintNonTransferableNftInstructionData = {
 
 export type MintNonTransferableNftInstructionDataArgs = {
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   claimerAddress: PublicKey;
   orgId: string;
   projectIdStr: string;
@@ -115,7 +110,6 @@ export function getMintNonTransferableNftInstructionDataSerializer(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['superAdminAddress', publicKeySerializer()],
-        ['memberAddress', publicKeySerializer()],
         ['claimerAddress', publicKeySerializer()],
         ['orgId', string()],
         ['projectIdStr', string()],
@@ -187,19 +181,6 @@ export function mintNonTransferableNft(
           findOrgAccountPda(context, {
             superAdminAddress: input.superAdminAddress,
             orgId: input.orgId,
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'memberAccount',
-    input.memberAccount
-      ? ([input.memberAccount, false] as const)
-      : ([
-          findOrgMemberAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            member: input.memberAddress,
           }),
           false,
         ] as const)
@@ -402,7 +383,6 @@ export function mintNonTransferableNft(
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgControlAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
-  addAccountMeta(keys, signers, resolvedAccounts.memberAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.nonTransferableProject, false);
   addAccountMeta(
     keys,

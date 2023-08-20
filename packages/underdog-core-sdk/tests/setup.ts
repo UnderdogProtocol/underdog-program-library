@@ -1,3 +1,4 @@
+import { createSplAssociatedTokenProgram, createSplTokenProgram } from "@metaplex-foundation/mpl-toolbox";
 import {
   createUmi as baseCreateUmi,
   createSignerFromKeypair,
@@ -7,19 +8,15 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 import { defaultPlugins } from "@metaplex-foundation/umi-bundle-defaults";
-import { initializeOwner } from "../src/generated";
 import { Keypair } from "@solana/web3.js";
+
+import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
-import { createSplAssociatedTokenProgram, createSplTokenProgram } from "@metaplex-foundation/mpl-toolbox";
 
 export const createUmi = () => {
-  const umi = baseCreateUmi().use(
-    defaultPlugins("http://localhost:8899", { commitment: "processed" })
-  );
+  const umi = baseCreateUmi().use(defaultPlugins("http://localhost:8899", { commitment: "processed" }));
 
-  const underdogKeypair = Keypair.fromSecretKey(
-    Uint8Array.from(underdogSecretKey)
-  );
+  const underdogKeypair = Keypair.fromSecretKey(Uint8Array.from(underdogSecretKey));
 
   umi.use(
     keypairIdentity(

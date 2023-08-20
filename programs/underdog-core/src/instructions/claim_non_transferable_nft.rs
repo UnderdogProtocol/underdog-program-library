@@ -3,7 +3,10 @@ use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Approve, Mint, Token, TokenAccount, Transfer};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use shared_utils::{freeze_delegated_account, FreezeDelegatedAccount};
+use shared_utils::{
+  freeze_delegated_account, verify_sized_collection_item, FreezeDelegatedAccount,
+  VerifySizedCollectionItem,
+};
 
 use crate::state::*;
 
@@ -13,6 +16,7 @@ pub struct ClaimNonTransferableNftArgs {
   pub org_id: String,
   pub project_id_str: String,
   pub nft_id_str: String,
+  pub project_mint_bump: u8,
   pub nft_mint_bump: u8,
   pub nft_escrow_bump: u8,
 }
@@ -46,6 +50,30 @@ pub struct ClaimNonTransferableNft<'info> {
     bump=non_transferable_project.bump
   )]
   pub non_transferable_project: Box<Account<'info, LegacyProject>>,
+
+  /// CHECK: Handled by cpi
+  #[account(
+      seeds = [NON_TRANSFERABLE_PROJECT_MINT_PREFIX.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref()],
+      bump=args.project_mint_bump,
+  )]
+  pub non_transferable_project_mint: UncheckedAccount<'info>,
+
+  /// CHECK: Handled by cpi
+  #[account(
+      mut,
+      seeds = ["metadata".as_bytes(), token_metadata_program.key().as_ref(), non_transferable_project_mint.key().as_ref()],
+      seeds::program = token_metadata_program.key(),
+      bump,
+    )]
+  pub non_transferable_project_metadata: UncheckedAccount<'info>,
+
+  /// CHECK: Handled By cpi account
+  #[account(
+      seeds = ["metadata".as_bytes(), token_metadata_program.key().as_ref(), non_transferable_project_mint.key().as_ref(), "edition".as_bytes()],
+      seeds::program = token_metadata_program.key(),
+      bump,
+    )]
+  pub non_transferable_project_master_edition: UncheckedAccount<'info>,
 
   #[account(
     mut,
@@ -122,6 +150,25 @@ impl<'info> ClaimNonTransferableNft<'info> {
     };
     CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
   }
+
+  fn verify_sized_collection_item_ctx(
+    &self,
+  ) -> CpiContext<'_, '_, '_, 'info, VerifySizedCollectionItem<'info>> {
+    let cpi_accounts = VerifySizedCollectionItem {
+      payer: self.authority.to_account_info().clone(),
+      metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
+      collection_authority: self.non_transferable_project.to_account_info(),
+      collection_mint: self.non_transferable_project_mint.to_account_info(),
+      collection_metadata: self.non_transferable_project_metadata.to_account_info(),
+      collection_master_edition: self
+        .non_transferable_project_master_edition
+        .to_account_info(),
+    };
+    CpiContext::new(
+      self.token_metadata_program.to_account_info().clone(),
+      cpi_accounts,
+    )
+  }
 }
 
 pub fn handler(
@@ -134,6 +181,14 @@ pub fn handler(
     args.project_id_str.as_ref(),
     &[ctx.accounts.non_transferable_project.bump],
   ];
+
+  verify_sized_collection_item(
+    ctx
+      .accounts
+      .verify_sized_collection_item_ctx()
+      .with_signer(&[&project_signer_seeds[..]]),
+    None,
+  )?;
 
   anchor_spl::token::transfer(
     ctx

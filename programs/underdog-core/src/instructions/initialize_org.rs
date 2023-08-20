@@ -17,29 +17,29 @@ pub struct InitializeOrgContext<'info> {
   pub authority: Signer<'info>,
 
   #[account(
-        mut,
-        constraint = owner_account.owner == authority.key(),
-        seeds = [b"ownership".as_ref()],
-        bump=owner_account.bump
-    )]
+    mut,
+    constraint = owner_account.owner == authority.key(),
+    seeds = [OWNER_PREFIX.as_ref()],
+    bump=owner_account.bump
+  )]
   pub owner_account: Box<Account<'info, InitialOwner>>,
 
   #[account(
-        init,
-        payer = authority,
-        space = ORG_ACCOUNT_SIZE,
-        seeds = [ORG_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
-        bump
-    )]
+    init,
+    payer = authority,
+    space = ORG_ACCOUNT_SIZE,
+    seeds = [ORG_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
+    bump
+  )]
   pub org_account: Box<Account<'info, OrgAccount>>,
 
   #[account(
-        init,
-        payer = authority,
-        space = ORG_CONTROL_ACCOUNT_SIZE,
-        seeds = [ORG_CONTROL_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
-        bump
-    )]
+    init,
+    payer = authority,
+    space = ORG_CONTROL_ACCOUNT_SIZE,
+    seeds = [ORG_CONTROL_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
+    bump
+  )]
   pub org_control_account: Box<Account<'info, OrgControlAccount>>,
 
   #[account(

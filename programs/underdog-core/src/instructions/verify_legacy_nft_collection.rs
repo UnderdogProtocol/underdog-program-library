@@ -11,7 +11,6 @@ use crate::state::*;
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct VerifyLegacyNftCollectionArgs {
   pub super_admin_address: Pubkey,
-  pub member_address: Pubkey,
   pub org_id: String,
   pub project_id_str: String,
   pub nft_id_str: String,
@@ -42,13 +41,6 @@ pub struct VerifyLegacyNftCollection<'info> {
     bump=org_account.bump
 )]
   pub org_account: Box<Account<'info, OrgAccount>>,
-
-  #[account(
-    constraint = member_account.active == true,
-    seeds = [ORG_MEMBER_PREFIX.as_ref(),org_account.key().as_ref(),args.super_admin_address.as_ref()],
-    bump=member_account.bump
-  )]
-  pub member_account: Box<Account<'info, OrgMemberAccount>>,
 
   #[account(
     mut,

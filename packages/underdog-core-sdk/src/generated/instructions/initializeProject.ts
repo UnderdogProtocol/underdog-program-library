@@ -5,7 +5,13 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-
+import {
+  findOrgAccountPda,
+  findOrgControlAccountPda,
+  findOrgMemberAccountPda,
+  findProjectPda,
+} from '../accounts';
+import { addAccountMeta, addObjectProperty } from '../shared';
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -30,13 +36,6 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findOrgAccountPda,
-  findOrgControlAccountPda,
-  findOrgMemberAccountPda,
-  findProjectPda,
-} from '../accounts';
-import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeProjectInstructionAccounts = {

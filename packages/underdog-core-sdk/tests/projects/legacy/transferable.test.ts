@@ -1,4 +1,6 @@
 import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
+
+import { mintTransferableNftAndVerifyCollection } from "../../../src";
 import {
   fetchLegacyProjectFromSeeds,
   findOrgAccountPda,
@@ -6,7 +8,6 @@ import {
   initializeOrg,
 } from "../../../src/generated";
 import { createUmi } from "../../setup";
-import { mintTransferableNftAndVerifyCollection } from "../../../src";
 
 describe("Transferable Projects", () => {
   const umi = createUmi();

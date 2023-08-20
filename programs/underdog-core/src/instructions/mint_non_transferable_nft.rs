@@ -14,7 +14,6 @@ use crate::state::*;
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct MintNonTransferableNftArgs {
   pub super_admin_address: Pubkey,
-  pub member_address: Pubkey,
   pub claimer_address: Pubkey,
   pub org_id: String,
   pub project_id_str: String,
@@ -44,13 +43,6 @@ pub struct MintNonTransferableNft<'info> {
     bump=org_account.bump
   )]
   pub org_account: Box<Account<'info, OrgAccount>>,
-
-  #[account(
-    constraint = member_account.active == true,
-    seeds = [ORG_MEMBER_PREFIX.as_ref(),org_account.key().as_ref(),args.member_address.as_ref()],
-    bump=member_account.bump
-  )]
-  pub member_account: Box<Account<'info, OrgMemberAccount>>,
 
   #[account(
     mut,

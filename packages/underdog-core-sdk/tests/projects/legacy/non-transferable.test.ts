@@ -1,4 +1,8 @@
+import { fetchAllTokenByOwnerAndMint } from "@metaplex-foundation/mpl-toolbox";
 import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
+
+import { findLegacyNftPda } from "@underdog-protocol/spl-utils";
+
 import {
   burnNonTransferableNft,
   claimNonTransferableNft,
@@ -8,15 +12,10 @@ import {
   findOrgAccountPda,
   initializeLegacyProject,
   initializeOrg,
+  mintNonTransferableNft,
   revokeNonTransferableNft,
 } from "../../../src/generated";
 import { createUmi } from "../../setup";
-import { mintNonTransferableNftAndVerifyCollection } from "../../../src";
-import {
-  fetchAllTokenByOwnerAndMint,
-  fetchToken,
-} from "@metaplex-foundation/mpl-toolbox";
-import { findLegacyNftPda } from "@underdog-protocol/spl-utils";
 
 describe("Non-Transferable Projects", () => {
   const umi = createUmi();
@@ -71,11 +70,10 @@ describe("Non-Transferable Projects", () => {
   });
 
   it("mints a non-transferable nft", async () => {
-    await mintNonTransferableNftAndVerifyCollection(umi, {
+    await mintNonTransferableNft(umi, {
       authority: orgControlSigner,
       superAdminAddress,
       orgId,
-      memberAddress: superAdminAddress,
       claimerAddress,
       projectIdStr,
       nftIdStr,
@@ -116,11 +114,7 @@ describe("Non-Transferable Projects", () => {
       nftIdStr,
     }).sendAndConfirm(umi);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(
-      umi,
-      claimerAddress,
-      nftMintAddress
-    );
+    const tokens = await fetchAllTokenByOwnerAndMint(umi, claimerAddress, nftMintAddress);
 
     expect(tokens.length).toEqual(1);
   });
@@ -136,11 +130,7 @@ describe("Non-Transferable Projects", () => {
       nftIdStr,
     }).sendAndConfirm(umi);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(
-      umi,
-      claimerAddress,
-      nftMintAddress
-    );
+    const tokens = await fetchAllTokenByOwnerAndMint(umi, claimerAddress, nftMintAddress);
 
     expect(tokens.length).toEqual(0);
   });
@@ -151,7 +141,7 @@ describe("Non-Transferable Projects", () => {
       findLegacyProjectPda(umi, {
         type: "nt-proj",
         orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
-        projectId: projectIdStr
+        projectId: projectIdStr,
       })[0],
       nftMintAddress
     );
@@ -172,7 +162,7 @@ describe("Non-Transferable Projects", () => {
       findLegacyProjectPda(umi, {
         type: "nt-proj",
         orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
-        projectId: projectIdStr
+        projectId: projectIdStr,
       })[0],
       nftMintAddress
     );
