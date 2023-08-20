@@ -26,9 +26,7 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function promiseAllInOrder<T>(
-  it: (() => Promise<T>)[]
-): Promise<Iterable<T>> {
+async function promiseAllInOrder<T>(it: (() => Promise<T>)[]): Promise<Iterable<T>> {
   let ret: T[] = [];
   for (const i of it) {
     ret.push(await i());
@@ -289,9 +287,7 @@ export const awaitTransactionSignatureConfirmation = async (
       // eslint-disable-next-line no-loop-func
       (async () => {
         try {
-          const signatureStatuses = await connection.getSignatureStatuses([
-            txid,
-          ]);
+          const signatureStatuses = await connection.getSignatureStatuses([txid]);
           status = signatureStatuses && signatureStatuses.value[0];
           if (!done) {
             if (!status) {
@@ -303,10 +299,7 @@ export const awaitTransactionSignatureConfirmation = async (
               console.log("REST no confirmations for", txid, status);
             } else {
               console.log("REST confirmation for", txid, status);
-              if (
-                !status.confirmationStatus ||
-                status.confirmationStatus == commitment
-              ) {
+              if (!status.confirmationStatus || status.confirmationStatus == commitment) {
                 done = true;
                 resolve(status);
               }
@@ -397,8 +390,7 @@ export async function sendAndConfirmWithRetry(
       true
     );
 
-    if (!confirmation)
-      throw new Error("Timed out awaiting confirmation on transaction");
+    if (!confirmation) throw new Error("Timed out awaiting confirmation on transaction");
 
     if (confirmation.err) {
       const tx = await connection.getTransaction(txid, {
@@ -445,10 +437,7 @@ export function bufferToTransaction(solanaTransaction: Buffer) {
   return Transaction.from(solanaTransaction);
 }
 
-async function withRetries<A>(
-  tries: number,
-  input: () => Promise<A>
-): Promise<A> {
+async function withRetries<A>(tries: number, input: () => Promise<A>): Promise<A> {
   for (let i = 0; i < tries; i++) {
     try {
       return await input();
@@ -478,18 +467,14 @@ export async function bulkSendTransactions(
     const thisRet: string[] = [];
     // Continually send in bulk while resetting blockhash until we send them all
     while (true) {
-      const recentBlockhash = await withRetries(5, () =>
-        provider.connection.getLatestBlockhash("confirmed")
-      );
+      const recentBlockhash = await withRetries(5, () => provider.connection.getLatestBlockhash("confirmed"));
       const blockhashedTxs = await Promise.all(
         chunk.map(async (tx) => {
           tx.recentBlockhash = recentBlockhash.blockhash;
           return tx;
         })
       );
-      const signedTxs = await (
-        provider as AnchorProvider
-      ).wallet.signAllTransactions(blockhashedTxs);
+      const signedTxs = await (provider as AnchorProvider).wallet.signAllTransactions(blockhashedTxs);
 
       const txsWithSigs = signedTxs.map((tx, index) => {
         return {
@@ -518,9 +503,7 @@ export async function bulkSendTransactions(
 
       const retSet = new Set(thisRet);
 
-      chunk = txsWithSigs
-        .filter(({ sig }) => !retSet.has(sig))
-        .map(({ transaction }) => transaction);
+      chunk = txsWithSigs.filter(({ sig }) => !retSet.has(sig)).map(({ transaction }) => transaction);
 
       triesRemaining--;
       if (triesRemaining <= 0) {
@@ -552,9 +535,7 @@ export async function bulkSendRawTransactions(
   let totalProgress = 0;
   const ret: string[] = [];
   if (!lastValidBlockHeight) {
-    const blockhash = await withRetries(5, () =>
-      connection.getLatestBlockhash("confirmed")
-    );
+    const blockhash = await withRetries(5, () => connection.getLatestBlockhash("confirmed"));
     lastValidBlockHeight = blockhash.lastValidBlockHeight;
   }
 
@@ -566,10 +547,7 @@ export async function bulkSendRawTransactions(
     let lastRetry = 0;
 
     while (pendingCount > 0) {
-      if (
-        (await withRetries(5, () => connection.getBlockHeight())) >
-        lastValidBlockHeight
-      ) {
+      if ((await withRetries(5, () => connection.getBlockHeight())) > lastValidBlockHeight) {
         return ret;
       }
 
@@ -595,19 +573,13 @@ export async function bulkSendRawTransactions(
           currentBatchProgress: currentBatchProgress,
           currentBatchSize: txBatchSize,
         });
-      const failures = completed
-        .map((status) => status !== null && status.meta?.err)
-        .filter(truthy);
+      const failures = completed.map((status) => status !== null && status.meta?.err).filter(truthy);
 
       if (failures.length > 0) {
         console.error(failures);
         throw new Error("Failed to run txs");
       }
-      ret.push(
-        ...txids
-          .map((txid, idx) => (statuses[idx] == null ? null : txid))
-          .filter(truthy)
-      );
+      ret.push(...txids.map((txid, idx) => (statuses[idx] == null ? null : txid)).filter(truthy));
       chunk = chunk.filter((_, index) => statuses[index] === null);
       txids = txids.filter((_, index) => statuses[index] === null);
       pendingCount -= completed.length;

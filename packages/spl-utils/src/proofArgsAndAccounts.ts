@@ -1,16 +1,14 @@
-import { Asset, AssetProof, getAsset, getAssetProof } from "./das";
 import { ConcurrentMerkleTreeAccount } from "@solana/spl-account-compression";
 import { Connection, PublicKey, AccountMeta } from "@solana/web3.js";
+
+import { Asset, AssetProof, getAsset, getAssetProof } from "./das";
 
 export type ProofArgsAndAccountsArgs = {
   connection: Connection;
   assetId: PublicKey;
   assetEndpoint?: string;
   getAssetFn?: (url: string, assetId: PublicKey) => Promise<Asset | undefined>;
-  getAssetProofFn?: (
-    url: string,
-    assetId: PublicKey
-  ) => Promise<AssetProof | undefined>;
+  getAssetProofFn?: (url: string, assetId: PublicKey) => Promise<AssetProof | undefined>;
 };
 export async function proofArgsAndAccounts({
   connection,

@@ -1,15 +1,9 @@
 export * from "./transaction";
 export * from "./utils";
-export * from "./types";
 export * from "./constants";
 export * from "./pdas";
 
-export type {
-  AssetProof,
-  Asset,
-  AssetsByOwnerOpts,
-  SearchAssetsOpts,
-} from "./das";
+export type { AssetProof, Asset, AssetsByOwnerOpts, SearchAssetsOpts } from "./das";
 export { getAsset, getAssetProof, getAssetsByOwner, searchAssets } from "./das";
 
 export { proofArgsAndAccounts } from "./proofArgsAndAccounts";
