@@ -1,6 +1,6 @@
 {
   "name": "@underdog-protocol/underdog-identity-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Interface to the underdog-identity smart contract",
   "publishConfig": {
     "access": "public",
@@ -30,7 +30,7 @@
     "@metaplex-foundation/mpl-toolbox": "^0.8.0",
     "@metaplex-foundation/umi": "^0.8.7",
     "@metaplex-foundation/umi-bundle-defaults": "^0.8.7",
-    "@underdog-protocol/spl-utils": "*"
+    "@underdog-protocol/spl-utils": "0.2.0"
   },
   "devDependencies": {
     "@metaplex-foundation/kinobi": "^0.12.3",
