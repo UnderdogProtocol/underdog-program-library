@@ -2,7 +2,6 @@ import { createSplAssociatedTokenProgram, createSplTokenProgram } from "@metaple
 import {
   createUmi as baseCreateUmi,
   createSignerFromKeypair,
-  generateSigner,
   keypairIdentity,
   publicKey,
   sol,
