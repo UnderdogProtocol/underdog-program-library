@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use mpl_bubblegum::program::Bubblegum;
 use mpl_bubblegum::state::TreeConfig;
-use shared_utils::{transfer, Transfer};
+use shared_utils::{delegated_transfer, Transfer};
 use spl_account_compression::{program::SplAccountCompression, Noop};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
@@ -106,7 +106,7 @@ pub fn handler<'info>(
     &[ctx.accounts.project_account.bump],
   ]];
 
-  transfer(
+  delegated_transfer(
     ctx
       .accounts
       .transfer_ctx()

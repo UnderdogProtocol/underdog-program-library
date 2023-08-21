@@ -12,6 +12,7 @@
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "clippy": "cargo clippy --all-targets -- -D warnings -A clippy::result_large_err -A clippy::too_many_arguments",
     "underdog-core-sdk": "yarn workspace @underdog-protocol/underdog-core-sdk",
+    "generate:id": "yarn workspace @underdog-protocol/underdog-identity-sdk generate",
     "generate": "yarn generate:idls && yarn generate:clients",
     "generate:clients": "node ./configs/kinobi.js",
     "generate:idls": "node ./shank.js"

@@ -2044,6 +2044,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "underdog-identity"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "mpl-bubblegum",
+ "mpl-token-auth-rules",
+ "proc-macro-crate 1.2.1",
+ "shared-utils",
+ "solana-program",
+ "spl-account-compression",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"

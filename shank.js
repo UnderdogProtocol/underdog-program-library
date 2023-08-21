@@ -13,3 +13,12 @@ generateIdl({
   binaryInstallDir,
   programDir: path.join(programDir, "underdog-core"),
 });
+
+generateIdl({
+  generator: "anchor",
+  programName: "underdog_identity",
+  programId: "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd",
+  idlDir,
+  binaryInstallDir,
+  programDir: path.join(programDir, "underdog-identity"),
+});
