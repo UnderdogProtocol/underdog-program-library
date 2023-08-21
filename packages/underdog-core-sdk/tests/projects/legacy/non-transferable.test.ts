@@ -1,8 +1,6 @@
 import { fetchAllTokenByOwnerAndMint } from "@metaplex-foundation/mpl-toolbox";
 import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
 
-import { findLegacyNftPda } from "@underdog-protocol/spl-utils";
-
 import {
   burnNonTransferableNft,
   claimNonTransferableNft,
@@ -16,6 +14,7 @@ import {
   revokeNonTransferableNft,
 } from "../../../src/generated";
 import { createUmi } from "../../setup";
+import { findLegacyNftPda } from "../../../src";
 
 describe("Non-Transferable Projects", () => {
   const umi = createUmi();

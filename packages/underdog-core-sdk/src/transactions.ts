@@ -3,7 +3,6 @@ import { findMetadataPda, findMasterEditionPda } from "@metaplex-foundation/mpl-
 import { createAccount, createLut } from "@metaplex-foundation/mpl-toolbox";
 import { Context, PublicKey, Signer, transactionBuilder } from "@metaplex-foundation/umi";
 
-import { SPL_ACCOUNT_COMPRESSION_PROGRAM_ID } from "@underdog-protocol/spl-utils";
 
 import {
   NON_TRANSFERABLE_PROJECT_MINT_PREFIX,
@@ -79,7 +78,7 @@ export const createTree = async (
         newAccount: input.merkleTree,
         lamports,
         space,
-        programId: context.programs.getPublicKey("splAccountCompression", SPL_ACCOUNT_COMPRESSION_PROGRAM_ID),
+        programId: context.programs.getPublicKey("splAccountCompression"),
       })
     )
     .add(

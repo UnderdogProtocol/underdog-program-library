@@ -29,8 +29,7 @@
     "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.24",
     "@metaplex-foundation/mpl-toolbox": "^0.8.0",
     "@metaplex-foundation/umi": "^0.8.7",
-    "@metaplex-foundation/umi-bundle-defaults": "^0.8.7",
-    "@underdog-protocol/spl-utils": "0.2.0"
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.7"
   },
   "devDependencies": {
     "@metaplex-foundation/kinobi": "^0.12.3",

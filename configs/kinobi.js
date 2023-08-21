@@ -218,7 +218,7 @@ kinobi.update(
       account: "legacyNftMint",
       ignoreIfOptional: true,
       ...k.pdaDefault("legacyNft", {
-        importFrom: "@underdog-protocol/spl-utils",
+        importFrom: "../../pdas",
         seeds: {
           prefix: k.argDefault("nftMintPrefix"),
           orgAccount: k.accountDefault("orgAccount"),
@@ -328,7 +328,7 @@ kinobi.update(
       account: "transferableNftMint",
       ignoreIfOptional: true,
       ...k.pdaDefault("legacyNft", {
-        importFrom: "@underdog-protocol/spl-utils",
+        importFrom: "../../pdas",
         seeds: {
           prefix: k.valueDefault(k.vScalar("t-nft-mint")),
           orgAccount: k.accountDefault("orgAccount"),
@@ -396,7 +396,7 @@ kinobi.update(
       account: "nonTransferableNftMint",
       ignoreIfOptional: true,
       ...k.pdaDefault("legacyNft", {
-        importFrom: "@underdog-protocol/spl-utils",
+        importFrom: "../../pdas",
         seeds: {
           prefix: k.valueDefault(k.vScalar("nt-nft-mint")),
           orgAccount: k.accountDefault("orgAccount"),
@@ -409,7 +409,7 @@ kinobi.update(
       account: "nonTransferableNftEscrow",
       ignoreIfOptional: true,
       ...k.pdaDefault("legacyNft", {
-        importFrom: "@underdog-protocol/spl-utils",
+        importFrom: "../../pdas",
         seeds: {
           prefix: k.valueDefault(k.vScalar("nt-nft-mint-esc")),
           orgAccount: k.accountDefault("orgAccount"),
