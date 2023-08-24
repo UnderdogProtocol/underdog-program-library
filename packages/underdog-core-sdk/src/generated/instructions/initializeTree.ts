@@ -5,8 +5,7 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-import { findInitialOwnerPda } from '../accounts';
-import { addAccountMeta, addObjectProperty } from '../shared';
+
 import { findTreeConfigPda } from '@metaplex-foundation/mpl-bubblegum';
 import {
   AccountMeta,
@@ -26,6 +25,8 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findInitialOwnerPda } from '../accounts';
+import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeTreeInstructionAccounts = {

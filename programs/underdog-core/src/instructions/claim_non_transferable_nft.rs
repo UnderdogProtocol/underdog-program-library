@@ -4,8 +4,11 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Approve, Mint, Token, TokenAccount, Transfer};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
 use shared_utils::{
-  freeze_delegated_account, verify_collection, FreezeDelegatedAccount, VerifyCollection,
+  freeze_delegated_account, verify_collection, verify_sized_collection_item,
+  FreezeDelegatedAccount, VerifyCollection, VerifySizedCollectionItem,
 };
+
+use crate::token_metadata::Metadata;
 
 use crate::state::*;
 
@@ -64,7 +67,7 @@ pub struct ClaimNonTransferableNft<'info> {
       seeds::program = token_metadata_program.key(),
       bump,
     )]
-  pub non_transferable_project_metadata: UncheckedAccount<'info>,
+  pub non_transferable_project_metadata: Box<Account<'info, Metadata>>,
 
   /// CHECK: Handled By cpi account
   #[account(
@@ -150,8 +153,27 @@ impl<'info> ClaimNonTransferableNft<'info> {
     CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
   }
 
-  fn verify_collection_item_ctx(&self) -> CpiContext<'_, '_, '_, 'info, VerifyCollection<'info>> {
+  fn verify_collection_ctx(&self) -> CpiContext<'_, '_, '_, 'info, VerifyCollection<'info>> {
     let cpi_accounts = VerifyCollection {
+      payer: self.authority.to_account_info().clone(),
+      metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
+      collection_authority: self.non_transferable_project.to_account_info(),
+      collection_mint: self.non_transferable_project_mint.to_account_info(),
+      collection_metadata: self.non_transferable_project_metadata.to_account_info(),
+      collection_master_edition: self
+        .non_transferable_project_master_edition
+        .to_account_info(),
+    };
+    CpiContext::new(
+      self.token_metadata_program.to_account_info().clone(),
+      cpi_accounts,
+    )
+  }
+
+  fn verify_sized_collection_item_ctx(
+    &self,
+  ) -> CpiContext<'_, '_, '_, 'info, VerifySizedCollectionItem<'info>> {
+    let cpi_accounts = VerifySizedCollectionItem {
       payer: self.authority.to_account_info().clone(),
       metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
       collection_authority: self.non_transferable_project.to_account_info(),
@@ -179,13 +201,28 @@ pub fn handler(
     &[ctx.accounts.non_transferable_project.bump],
   ];
 
-  verify_collection(
-    ctx
-      .accounts
-      .verify_collection_item_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-    None,
-  )?;
+  if ctx
+    .accounts
+    .non_transferable_project_metadata
+    .collection_details
+    .is_some()
+  {
+    verify_sized_collection_item(
+      ctx
+        .accounts
+        .verify_sized_collection_item_ctx()
+        .with_signer(&[&project_signer_seeds[..]]),
+      None,
+    )?;
+  } else {
+    verify_collection(
+      ctx
+        .accounts
+        .verify_collection_ctx()
+        .with_signer(&[&project_signer_seeds[..]]),
+      None,
+    )?;
+  }
 
   anchor_spl::token::transfer(
     ctx

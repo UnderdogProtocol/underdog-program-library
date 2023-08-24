@@ -5,18 +5,7 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-import {
-  resolveProjectMintPrefix,
-  resolveProjectPrefix,
-  resolveProjectVaultPrefix,
-} from '../../resolvers';
-import {
-  findLegacyProjectPda,
-  findOrgAccountPda,
-  findOrgControlAccountPda,
-  findOrgMemberAccountPda,
-} from '../accounts';
-import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
+
 import {
   findMasterEditionPda,
   findMetadataPda,
@@ -40,6 +29,18 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  resolveProjectMintPrefix,
+  resolveProjectPrefix,
+  resolveProjectVaultPrefix,
+} from '../../resolvers';
+import {
+  findLegacyProjectPda,
+  findOrgAccountPda,
+  findOrgControlAccountPda,
+  findOrgMemberAccountPda,
+} from '../accounts';
+import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeLegacyProjectInstructionAccounts = {

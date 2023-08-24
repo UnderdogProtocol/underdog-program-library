@@ -1,3 +1,11 @@
 {
   "extends": "./tsconfig.base.json",
+  "ts-node": {
+    "files": true,
+    "experimentalResolverFeatures": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "types": ["node"]
+    }
+  }
 }

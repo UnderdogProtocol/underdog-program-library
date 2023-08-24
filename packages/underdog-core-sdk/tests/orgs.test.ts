@@ -1,11 +1,16 @@
 import { createBigInt, generateSigner } from "@metaplex-foundation/umi";
 import {
   addOrgMember,
+  convertLegacyProject,
+  fetchLegacyProjectFromSeeds,
   fetchOrgAccountFromSeeds,
   fetchOrgControlAccountFromSeeds,
   fetchOrgMemberAccountFromSeeds,
+  fetchProjAccountFromSeeds,
   findOrgAccountPda,
+  findProjAccountPda,
   initializeOrg,
+  makeLegacyProject,
   updateOrgMember,
 } from "../src/generated";
 import { createUmi } from "./setup";

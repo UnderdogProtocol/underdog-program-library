@@ -156,6 +156,38 @@ pub fn verify_collection<'info>(
 }
 
 #[derive(Accounts)]
+pub struct VerifySizedCollectionItem<'info> {
+  pub payer: AccountInfo<'info>,
+  pub metadata: AccountInfo<'info>,
+  pub collection_authority: AccountInfo<'info>,
+  pub collection_mint: AccountInfo<'info>,
+  pub collection_metadata: AccountInfo<'info>,
+  pub collection_master_edition: AccountInfo<'info>,
+}
+
+pub fn verify_sized_collection_item<'info>(
+  ctx: CpiContext<'_, '_, '_, 'info, VerifySizedCollectionItem<'info>>,
+  collection_authority_record: Option<Pubkey>,
+) -> Result<()> {
+  let ix = mpl_token_metadata::instruction::verify_sized_collection_item(
+    ID,
+    *ctx.accounts.metadata.key,
+    *ctx.accounts.collection_authority.key,
+    *ctx.accounts.payer.key,
+    *ctx.accounts.collection_mint.key,
+    *ctx.accounts.collection_metadata.key,
+    *ctx.accounts.collection_master_edition.key,
+    collection_authority_record,
+  );
+  solana_program::program::invoke_signed(
+    &ix,
+    &ToAccountInfos::to_account_infos(&ctx),
+    ctx.signer_seeds,
+  )
+  .map_err(Into::into)
+}
+
+#[derive(Accounts)]
 pub struct FreezeDelegatedAccount<'info> {
   pub metadata: AccountInfo<'info>,
   pub delegate: AccountInfo<'info>,

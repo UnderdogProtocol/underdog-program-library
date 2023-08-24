@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 pub mod instructions;
 pub mod state;
+pub mod token_metadata;
 
 use instructions::*;
 
