@@ -4,8 +4,7 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Approve, Mint, Token, TokenAccount, Transfer};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
 use shared_utils::{
-  freeze_delegated_account, verify_sized_collection_item, FreezeDelegatedAccount,
-  VerifySizedCollectionItem,
+  freeze_delegated_account, verify_collection, FreezeDelegatedAccount, VerifyCollection,
 };
 
 use crate::state::*;
@@ -151,10 +150,8 @@ impl<'info> ClaimNonTransferableNft<'info> {
     CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
   }
 
-  fn verify_sized_collection_item_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, VerifySizedCollectionItem<'info>> {
-    let cpi_accounts = VerifySizedCollectionItem {
+  fn verify_collection_item_ctx(&self) -> CpiContext<'_, '_, '_, 'info, VerifyCollection<'info>> {
+    let cpi_accounts = VerifyCollection {
       payer: self.authority.to_account_info().clone(),
       metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
       collection_authority: self.non_transferable_project.to_account_info(),
@@ -182,10 +179,10 @@ pub fn handler(
     &[ctx.accounts.non_transferable_project.bump],
   ];
 
-  verify_sized_collection_item(
+  verify_collection(
     ctx
       .accounts
-      .verify_sized_collection_item_ctx()
+      .verify_collection_item_ctx()
       .with_signer(&[&project_signer_seeds[..]]),
     None,
   )?;

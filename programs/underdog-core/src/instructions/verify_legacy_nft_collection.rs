@@ -4,7 +4,7 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
 
-use shared_utils::{verify_sized_collection_item, VerifySizedCollectionItem};
+use shared_utils::{verify_collection, VerifyCollection};
 
 use crate::state::*;
 
@@ -91,10 +91,8 @@ pub struct VerifyLegacyNftCollection<'info> {
 }
 
 impl<'info> VerifyLegacyNftCollection<'info> {
-  fn verify_sized_collection_item_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, VerifySizedCollectionItem<'info>> {
-    let cpi_accounts = VerifySizedCollectionItem {
+  fn verify_collection_ctx(&self) -> CpiContext<'_, '_, '_, 'info, VerifyCollection<'info>> {
+    let cpi_accounts = VerifyCollection {
       payer: self.authority.to_account_info().clone(),
       metadata: self.legacy_nft_metadata.to_account_info().clone(),
       collection_authority: self.legacy_project.to_account_info(),
@@ -120,10 +118,10 @@ pub fn handler(
     &[ctx.accounts.legacy_project.bump],
   ];
 
-  verify_sized_collection_item(
+  verify_collection(
     ctx
       .accounts
-      .verify_sized_collection_item_ctx()
+      .verify_collection_ctx()
       .with_signer(&[&project_signer_seeds[..]]),
     None,
   )?;

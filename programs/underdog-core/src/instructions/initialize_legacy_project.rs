@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use mpl_token_metadata::state::{CollectionDetails, DataV2};
+use mpl_token_metadata::state::DataV2;
 use shared_utils::{
   create_master_edition_v3, create_metadata_accounts_v3, CreateMasterEditionV3,
   CreateMetadataAccountsV3,
@@ -184,7 +184,7 @@ pub fn handler(
     data,
     true,
     true,
-    Some(CollectionDetails::V1 { size: 0 }),
+    None,
   )?;
 
   create_master_edition_v3(
