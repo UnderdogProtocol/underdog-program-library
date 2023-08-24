@@ -61,7 +61,7 @@ pub struct InitializeLegacyProject<'info> {
         seeds = [args.project_prefix.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref()],
         bump
     )]
-  pub legacy_project: Box<Account<'info, LegacyProject>>,
+  pub legacy_project: Box<Account<'info, ProjAccount>>,
 
   #[account(
         init,
@@ -148,15 +148,15 @@ pub fn handler(
   let org_account = &mut ctx.accounts.org_account;
   let legacy_project = &mut ctx.accounts.legacy_project;
 
-  legacy_project.super_admin_address = args.super_admin_address;
-  legacy_project.org_address = org_account.key();
-  legacy_project.project_id = args.project_id_str.parse::<u64>().unwrap();
+  legacy_project.superadmin = args.super_admin_address;
+  legacy_project.org = org_account.key();
+  legacy_project.projcount = args.project_id_str.parse::<u64>().unwrap();
   legacy_project.bump = *ctx.bumps.get("legacy_project").unwrap();
 
   let bump = legacy_project.bump;
   let signer_seeds = [
     args.project_prefix.as_ref(),
-    ctx.accounts.legacy_project.org_address.as_ref(),
+    ctx.accounts.legacy_project.org.as_ref(),
     args.project_id_str.as_ref(),
     &[bump],
   ];

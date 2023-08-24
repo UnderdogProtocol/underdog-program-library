@@ -5,7 +5,6 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
-
 import {
   Account,
   Context,
@@ -24,6 +23,7 @@ import {
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u64,
   u8,
@@ -172,4 +172,45 @@ export function getProjAccountGpaBuilder(
 
 export function getProjAccountSize(): number {
   return 81;
+}
+
+export function findProjAccountPda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: {
+    type: string;
+
+    orgAccount: PublicKey;
+
+    projectId: string;
+  }
+): Pda {
+  const programId = context.programs.getPublicKey(
+    'underdogCore',
+    'updg8JyjrmFE2h3d71p71zRXDR8q4C6Up8dDoeq3LTM'
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: 'variable' }).serialize(seeds.type),
+    publicKeySerializer().serialize(seeds.orgAccount),
+    string({ size: 'variable' }).serialize(seeds.projectId),
+  ]);
+}
+
+export async function fetchProjAccountFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findProjAccountPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<ProjAccount> {
+  return fetchProjAccount(context, findProjAccountPda(context, seeds), options);
+}
+
+export async function safeFetchProjAccountFromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findProjAccountPda>[1],
+  options?: RpcGetAccountOptions
+): Promise<ProjAccount | null> {
+  return safeFetchProjAccount(
+    context,
+    findProjAccountPda(context, seeds),
+    options
+  );
 }

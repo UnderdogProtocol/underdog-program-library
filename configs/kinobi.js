@@ -33,6 +33,9 @@ kinobi.update(
     legacyProject: {
       seeds: [k.stringSeed("type"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
     },
+    projAccount: {
+      seeds: [k.stringSeed("type"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
+    },
     compressedProject: {
       seeds: [k.stringConstantSeed("c-proj"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
     },
@@ -357,7 +360,7 @@ kinobi.update(
     {
       account: "nonTransferableProject",
       ignoreIfOptional: true,
-      ...k.pdaDefault("legacyProject", {
+      ...k.pdaDefault("projAccount", {
         seeds: {
           type: k.valueDefault(k.vScalar("nt-proj")),
           orgAccount: k.accountDefault("orgAccount"),
@@ -493,7 +496,6 @@ const nonTransferableNftDefaults = {
     },
   },
   args: {
-
     nftMintBump: {
       defaultsTo: k.accountBumpDefault("nonTransferableNftMint"),
     },

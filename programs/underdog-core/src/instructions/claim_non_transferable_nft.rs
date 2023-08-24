@@ -49,7 +49,7 @@ pub struct ClaimNonTransferableNft<'info> {
     seeds = [NON_TRANSFERABLE_PROJECT_PREFIX.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref()],
     bump=non_transferable_project.bump
   )]
-  pub non_transferable_project: Box<Account<'info, LegacyProject>>,
+  pub non_transferable_project: Box<Account<'info, ProjAccount>>,
 
   /// CHECK: Handled by cpi
   #[account(
@@ -177,7 +177,7 @@ pub fn handler(
 ) -> Result<()> {
   let project_signer_seeds = [
     NON_TRANSFERABLE_PROJECT_PREFIX.as_ref(),
-    ctx.accounts.non_transferable_project.org_address.as_ref(),
+    ctx.accounts.non_transferable_project.org.as_ref(),
     args.project_id_str.as_ref(),
     &[ctx.accounts.non_transferable_project.bump],
   ];

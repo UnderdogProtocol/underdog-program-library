@@ -56,7 +56,7 @@ pub struct MintTransferableNft<'info> {
     seeds = [TRANSFERABLE_PROJECT_PREFIX.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref()],
     bump=transferable_project.bump
   )]
-  pub transferable_project: Box<Account<'info, LegacyProject>>,
+  pub transferable_project: Box<Account<'info, ProjAccount>>,
 
   /// CHECK: Handled by cpi
   #[account(
@@ -160,7 +160,7 @@ impl<'info> MintTransferableNft<'info> {
 pub fn handler(ctx: Context<MintTransferableNft>, args: MintTransferableNftArgs) -> Result<()> {
   let project_signer_seeds = [
     TRANSFERABLE_PROJECT_PREFIX.as_ref(),
-    ctx.accounts.transferable_project.org_address.as_ref(),
+    ctx.accounts.transferable_project.org.as_ref(),
     args.project_id_str.as_ref(),
     &[ctx.accounts.transferable_project.bump],
   ];

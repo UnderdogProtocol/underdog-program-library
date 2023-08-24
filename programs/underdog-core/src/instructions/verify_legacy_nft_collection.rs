@@ -47,7 +47,7 @@ pub struct VerifyLegacyNftCollection<'info> {
     seeds = [args.project_prefix.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref()],
     bump=legacy_project.bump
   )]
-  pub legacy_project: Box<Account<'info, LegacyProject>>,
+  pub legacy_project: Box<Account<'info, ProjAccount>>,
 
   /// CHECK: Handled by cpi
   #[account(
@@ -115,7 +115,7 @@ pub fn handler(
 ) -> Result<()> {
   let project_signer_seeds = [
     args.project_prefix.as_ref(),
-    ctx.accounts.legacy_project.org_address.as_ref(),
+    ctx.accounts.legacy_project.org.as_ref(),
     args.project_id_str.as_ref(),
     &[ctx.accounts.legacy_project.bump],
   ];
