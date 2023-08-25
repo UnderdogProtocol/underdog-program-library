@@ -1,12 +1,18 @@
-import { generateSigner, publicKey, publicKeyBytes, sol } from "@metaplex-foundation/umi";
-import { createContext } from "./setup";
 import {
-  fetchLinkFromSeeds,
-  findLinkPda,
-  initializeLinkV0,
-  transferAssetV0,
-} from "../src/generated";
-import { Creator, createTree, getMerkleProofAtIndex, getMerkleRoot, hashLeaf, hashMetadataCreators, hashMetadataData, mintV1, verifyLeaf } from "@metaplex-foundation/mpl-bubblegum";
+  Creator,
+  createTree,
+  getMerkleProofAtIndex,
+  getMerkleRoot,
+  hashLeaf,
+  hashMetadataCreators,
+  hashMetadataData,
+  mintV1,
+  verifyLeaf,
+} from "@metaplex-foundation/mpl-bubblegum";
+import { generateSigner, publicKey, publicKeyBytes, sol } from "@metaplex-foundation/umi";
+
+import { fetchLinkFromSeeds, findLinkPda, initializeLinkV0, transferAssetV0 } from "../src/generated";
+import { createContext } from "./setup";
 
 describe("Initialize Link", () => {
   const context = createContext();
@@ -55,11 +61,10 @@ describe("Initialize Link", () => {
       uses: undefined,
       tokenProgramVersion: undefined,
       creators,
-    }
-
+    };
 
     const creatorHash = hashMetadataCreators(creators);
-    const dataHash = hashMetadataData(metadata)
+    const dataHash = hashMetadataData(metadata);
     const leafHash = hashLeaf(context, {
       merkleTree: merkleTreeSigner.publicKey,
       owner: link,
@@ -110,7 +115,7 @@ describe("Initialize Link", () => {
         merkleTree: merkleTreeSigner.publicKey,
         root: publicKeyBytes(getMerkleRoot([publicKey(transferredLeafHash)], maxDepth)),
         leaf: transferredLeafHash,
-        index: leafIndex
+        index: leafIndex,
       }).sendAndConfirm(context);
     });
   });

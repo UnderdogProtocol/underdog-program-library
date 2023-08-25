@@ -5,6 +5,7 @@ import {
   getMerkleRoot,
   verifyLeaf,
 } from "@metaplex-foundation/mpl-bubblegum";
+import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
 import {
   PublicKey,
   createBigInt,
@@ -28,7 +29,6 @@ import {
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
 import { createContext } from "../setup";
-import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("Projects", () => {
   const context = createContext();
@@ -107,8 +107,8 @@ describe("Projects", () => {
         name,
         symbol,
         uri,
-        sellerFeeBasisPoints
-      }
+        sellerFeeBasisPoints,
+      },
     }).sendAndConfirm(context);
 
     const projectMetadata = await fetchMetadataFromSeeds(context, { mint: projectMint });
@@ -132,7 +132,7 @@ describe("Projects", () => {
       name,
       symbol,
       uri,
-      sellerFeeBasisPoints
+      sellerFeeBasisPoints,
     });
 
     beforeAll(async () => {
@@ -182,7 +182,7 @@ describe("Projects", () => {
       symbol,
       uri,
       delegated: true,
-      sellerFeeBasisPoints
+      sellerFeeBasisPoints,
     });
 
     beforeAll(async () => {
@@ -245,7 +245,7 @@ describe("Projects", () => {
           symbol,
           uri,
           delegated: false,
-          sellerFeeBasisPoints
+          sellerFeeBasisPoints,
         }).leafHash
       );
 
@@ -333,7 +333,7 @@ describe("Projects", () => {
           symbol,
           uri,
           delegated: false,
-          sellerFeeBasisPoints
+          sellerFeeBasisPoints,
         }).leafHash
       );
 

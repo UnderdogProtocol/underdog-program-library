@@ -1,3 +1,4 @@
+import { createSplAccountCompressionProgram } from "@metaplex-foundation/mpl-bubblegum";
 import { createSplAssociatedTokenProgram, createSplTokenProgram } from "@metaplex-foundation/mpl-toolbox";
 import {
   createUmi as baseCreateUmi,
@@ -11,7 +12,6 @@ import { Keypair } from "@solana/web3.js";
 
 import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
-import { createSplAccountCompressionProgram } from "@metaplex-foundation/mpl-bubblegum";
 
 export const createContext = () => {
   const context = baseCreateUmi().use(defaultPlugins("http://localhost:8899", { commitment: "processed" }));
