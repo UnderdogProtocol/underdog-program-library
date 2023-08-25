@@ -16,6 +16,7 @@ pub mod revoke_non_transferable_nft;
 pub mod transfer_asset_v1;
 pub mod update_org_member;
 pub mod update_owner;
+pub mod update_project_v0;
 pub mod verify_legacy_nft_collection;
 
 pub use add_org_member::*;
@@ -36,4 +37,5 @@ pub use revoke_non_transferable_nft::*;
 pub use transfer_asset_v1::*;
 pub use update_org_member::*;
 pub use update_owner::*;
+pub use update_project_v0::*;
 pub use verify_legacy_nft_collection::*;

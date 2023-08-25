@@ -3,12 +3,15 @@ use anchor_spl::token::Mint;
 use mpl_bubblegum::state::metaplex_adapter::{
   Collection, Creator, MetadataArgs, TokenProgramVersion,
 };
+use mpl_bubblegum::state::metaplex_anchor::TokenMetadata;
 use mpl_bubblegum::state::{metaplex_adapter::TokenStandard, TreeConfig};
 use mpl_bubblegum::{
   cpi::{accounts::MintToCollectionV1, mint_to_collection_v1},
   program::Bubblegum,
 };
 use spl_account_compression::{program::SplAccountCompression, Noop};
+
+use crate::state::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct MintNftV2Args {
@@ -22,8 +25,6 @@ pub struct MintNftV2Args {
   pub uri: String,
   pub is_delegated: Option<bool>,
 }
-
-use crate::state::*;
 
 #[derive(Accounts)]
 #[instruction(args: MintNftV2Args)]
@@ -75,9 +76,9 @@ pub struct MintNftV2<'info> {
         seeds::program = token_metadata_program.key(),
         bump,
     )]
-  pub project_metadata: UncheckedAccount<'info>,
+  pub project_metadata: Box<Account<'info, TokenMetadata>>,
 
-  /// CHECK: Handled By cpi account
+  /// CHECK: Handled by cpi
   #[account(
         seeds = ["metadata".as_bytes(), token_metadata_program.key().as_ref(), project_mint.key().as_ref(), "edition".as_bytes()],
         seeds::program = token_metadata_program.key(),
@@ -190,7 +191,7 @@ pub fn handler(ctx: Context<MintNftV2>, args: MintNftV2Args) -> Result<()> {
         share: 0,
       },
     ],
-    seller_fee_basis_points: 0,
+    seller_fee_basis_points: ctx.accounts.project_metadata.data.seller_fee_basis_points,
   };
 
   let mut project = ctx.accounts.project_account.to_account_info();

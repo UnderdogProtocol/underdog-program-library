@@ -24,4 +24,5 @@ export * from './revokeNonTransferableNft';
 export * from './transferAssetV1';
 export * from './updateOrgMember';
 export * from './updateOwner';
+export * from './updateProjectV0';
 export * from './verifyLegacyNftCollection';

@@ -23,6 +23,7 @@ export const hashProjectNft = (
     symbol?: string;
     uri: string;
     delegated?: boolean;
+    sellerFeeBasisPoints: number;
   }
 ) => {
   const { superAdminAddress, orgId, projectId, name, symbol, uri, owner, merkleTree, leafIndex, delegated } =
@@ -54,7 +55,7 @@ export const hashProjectNft = (
     name,
     symbol,
     uri,
-    sellerFeeBasisPoints: 0,
+    sellerFeeBasisPoints: input.sellerFeeBasisPoints || 0,
     primarySaleHappened: true,
     isMutable: true,
     editionNonce: 0,

@@ -13,36 +13,36 @@ import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
 import { createSplAccountCompressionProgram } from "@metaplex-foundation/mpl-bubblegum";
 
-export const createUmi = () => {
-  const umi = baseCreateUmi().use(defaultPlugins("http://localhost:8899", { commitment: "processed" }));
+export const createContext = () => {
+  const context = baseCreateUmi().use(defaultPlugins("http://localhost:8899", { commitment: "processed" }));
 
   const underdogKeypair = Keypair.fromSecretKey(Uint8Array.from(underdogSecretKey));
 
-  umi.use(
+  context.use(
     keypairIdentity(
-      createSignerFromKeypair(umi, {
+      createSignerFromKeypair(context, {
         publicKey: publicKey(underdogKeypair.publicKey.toBase58()),
         secretKey: underdogKeypair.secretKey,
       })
     )
   );
-  umi.programs.add(createSplTokenProgram());
-  umi.programs.add(createSplAssociatedTokenProgram());
-  umi.programs.add(createSplAccountCompressionProgram());
+  context.programs.add(createSplTokenProgram());
+  context.programs.add(createSplAssociatedTokenProgram());
+  context.programs.add(createSplAccountCompressionProgram());
 
-  return umi;
+  return context;
 };
 
 async function globalSetup() {
   console.log("\nGlobal setup...");
 
-  const umi = await createUmi();
+  const context = await createContext();
 
   console.log("Requesting airdrop...");
-  await umi.rpc.airdrop(umi.identity.publicKey, sol(10));
+  await context.rpc.airdrop(context.identity.publicKey, sol(10));
 
   console.log("Initializing program owner...");
-  await initializeOwner(umi, {}).sendAndConfirm(umi);
+  await initializeOwner(context, {}).sendAndConfirm(context);
 }
 
 export default globalSetup;

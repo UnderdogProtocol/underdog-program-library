@@ -1,49 +1,44 @@
 import { createBigInt, generateSigner } from "@metaplex-foundation/umi";
 import {
   addOrgMember,
-  convertLegacyProject,
-  fetchLegacyProjectFromSeeds,
   fetchOrgAccountFromSeeds,
   fetchOrgControlAccountFromSeeds,
   fetchOrgMemberAccountFromSeeds,
-  fetchProjAccountFromSeeds,
   findOrgAccountPda,
-  findProjAccountPda,
   initializeOrg,
-  makeLegacyProject,
   updateOrgMember,
 } from "../src/generated";
-import { createUmi } from "./setup";
+import { createContext } from "./setup";
 
 describe("Orgs", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const superAdminAddress = generateSigner(umi).publicKey;
+  const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
-  const orgControlAddress = generateSigner(umi).publicKey;
-  const memberAddress = generateSigner(umi).publicKey;
+  const orgControlAddress = generateSigner(context).publicKey;
+  const memberAddress = generateSigner(context).publicKey;
 
   it("should initialize org", async () => {
-    await initializeOrg(umi, {
+    await initializeOrg(context, {
       superAdminAddress,
       orgId: orgId,
       orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const orgAccount = await fetchOrgAccountFromSeeds(umi, {
+    const orgAccount = await fetchOrgAccountFromSeeds(context, {
       superAdminAddress,
       orgId,
     });
     expect(orgAccount.owner).toEqual(superAdminAddress);
     expect(orgAccount.counter).toEqual(createBigInt(orgId));
 
-    const orgControlAccount = await fetchOrgControlAccountFromSeeds(umi, {
+    const orgControlAccount = await fetchOrgControlAccountFromSeeds(context, {
       superAdminAddress,
       orgId,
     });
     expect(orgControlAccount.orgControl).toEqual(orgControlAddress);
 
-    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(umi, {
+    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(context, {
       orgAccount: orgAccount.publicKey,
       member: superAdminAddress,
     });
@@ -52,14 +47,14 @@ describe("Orgs", () => {
   });
 
   it("should add org member", async () => {
-    await addOrgMember(umi, {
+    await addOrgMember(context, {
       superAdminAddress,
       orgId,
       memberAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       member: memberAddress,
     });
     expect(orgMemberAccount.member).toEqual(memberAddress);
@@ -67,15 +62,15 @@ describe("Orgs", () => {
   });
 
   it("should update org member to inactive", async () => {
-    await updateOrgMember(umi, {
+    await updateOrgMember(context, {
       superAdminAddress,
       orgId,
       memberAddress,
       active: false
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       member: memberAddress,
     });
     expect(orgMemberAccount.active).toEqual(false);

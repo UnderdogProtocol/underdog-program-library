@@ -46,6 +46,10 @@ pub mod underdog_core {
     initialize_project::handler(ctx, args)
   }
 
+  pub fn update_project_v0(ctx: Context<UpdateProjectV0>, args: UpdateProjectV0Args) -> Result<()> {
+    update_project_v0::handler(ctx, args)
+  }
+
   pub fn mint_nft_v2(ctx: Context<MintNftV2>, args: MintNftV2Args) -> Result<()> {
     mint_nft_v2::handler(ctx, args)
   }

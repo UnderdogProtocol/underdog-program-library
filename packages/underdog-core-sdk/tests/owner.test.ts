@@ -1,33 +1,33 @@
 
 import { generateSigner, signerIdentity, sol } from "@metaplex-foundation/umi";
 import { fetchInitialOwnerFromSeeds, updateOwner } from "../src/generated";
-import { createUmi } from "./setup";
+import { createContext } from "./setup";
 
 describe("Initialize Owner", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const ownerSigner = umi.identity;
-  const tempOwnerSigner = generateSigner(umi);
+  const ownerSigner = context.identity;
+  const tempOwnerSigner = generateSigner(context);
 
   beforeAll(async () => {
-    await umi.rpc.airdrop(tempOwnerSigner.publicKey, sol(1));
+    await context.rpc.airdrop(tempOwnerSigner.publicKey, sol(1));
   });
 
   it("initializes program owner", async () => {
-    const initialOwnerAccount = await fetchInitialOwnerFromSeeds(umi);
-    expect(initialOwnerAccount.owner).toEqual(umi.identity.publicKey);
+    const initialOwnerAccount = await fetchInitialOwnerFromSeeds(context);
+    expect(initialOwnerAccount.owner).toEqual(context.identity.publicKey);
   });
 
   it("updates program owner", async () => {
-    await updateOwner(umi, { newOwner: tempOwnerSigner.publicKey }).sendAndConfirm(umi);
+    await updateOwner(context, { newOwner: tempOwnerSigner.publicKey }).sendAndConfirm(context);
 
-    const initialOwnerAccount = await fetchInitialOwnerFromSeeds(umi);
+    const initialOwnerAccount = await fetchInitialOwnerFromSeeds(context);
     expect(initialOwnerAccount.owner).toEqual(tempOwnerSigner.publicKey);
 
-    umi.use(signerIdentity(tempOwnerSigner));
+    context.use(signerIdentity(tempOwnerSigner));
   });
 
   afterAll(async () => {
-    await updateOwner(umi, { newOwner: ownerSigner.publicKey }).sendAndConfirm(umi);
+    await updateOwner(context, { newOwner: ownerSigner.publicKey }).sendAndConfirm(context);
   });
 });

@@ -13,22 +13,22 @@ import {
   mintNonTransferableNft,
   revokeNonTransferableNft,
 } from "../../../src/generated";
-import { createUmi } from "../../setup";
+import { createContext } from "../../setup";
 import { findLegacyNftPda } from "../../../src";
 
 describe("Non-Transferable Projects", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const superAdminAddress = generateSigner(umi).publicKey;
+  const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
   const projectId = 1;
   const projectIdStr = projectId.toString();
   const nftId = 1;
   const nftIdStr = nftId.toString();
-  const orgControlSigner = generateSigner(umi);
+  const orgControlSigner = generateSigner(context);
   const orgControlAddress = orgControlSigner.publicKey;
 
-  const claimerSigner = generateSigner(umi);
+  const claimerSigner = generateSigner(context);
   const claimerAddress = claimerSigner.publicKey;
 
   const name = "Non-Transferable NFT";
@@ -36,18 +36,18 @@ describe("Non-Transferable Projects", () => {
   const uri = "https://example.com";
 
   beforeAll(async () => {
-    await initializeOrg(umi, {
+    await initializeOrg(context, {
       superAdminAddress,
       orgId: orgId,
       orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    await umi.rpc.airdrop(orgControlAddress, sol(1));
-    await umi.rpc.airdrop(claimerAddress, sol(1));
+    await context.rpc.airdrop(orgControlAddress, sol(1));
+    await context.rpc.airdrop(claimerAddress, sol(1));
   });
 
   it("creates a non-transferable project", async () => {
-    await initializeLegacyProject(umi, {
+    await initializeLegacyProject(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
@@ -57,10 +57,10 @@ describe("Non-Transferable Projects", () => {
       symbol,
       uri,
       projectType: "n",
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const nonTransferableProject = await fetchLegacyProjectFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+    const nonTransferableProject = await fetchLegacyProjectFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       projectId: projectIdStr,
       type: "nt-proj",
     });
@@ -69,7 +69,7 @@ describe("Non-Transferable Projects", () => {
   });
 
   it("mints a non-transferable nft", async () => {
-    await mintNonTransferableNft(umi, {
+    await mintNonTransferableNft(context, {
       authority: orgControlSigner,
       superAdminAddress,
       orgId,
@@ -79,10 +79,10 @@ describe("Non-Transferable Projects", () => {
       name,
       symbol,
       uri,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const claimAccount = await fetchClaimAccountFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, {
+    const claimAccount = await fetchClaimAccountFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, {
         superAdminAddress,
         orgId,
       })[0],
@@ -93,9 +93,9 @@ describe("Non-Transferable Projects", () => {
     expect(claimAccount.claimer).toEqual(claimerAddress);
   });
 
-  const nftMintAddress = findLegacyNftPda(umi, {
+  const nftMintAddress = findLegacyNftPda(context, {
     prefix: "nt-nft-mint",
-    orgAccount: findOrgAccountPda(umi, {
+    orgAccount: findOrgAccountPda(context, {
       superAdminAddress,
       orgId,
     })[0],
@@ -104,22 +104,22 @@ describe("Non-Transferable Projects", () => {
   })[0];
 
   it("claims a non-transferable nft", async () => {
-    await claimNonTransferableNft(umi, {
+    await claimNonTransferableNft(context, {
       authority: orgControlSigner,
       claimer: claimerSigner,
       superAdminAddress,
       orgId,
       projectIdStr,
       nftIdStr,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(umi, claimerAddress, nftMintAddress);
+    const tokens = await fetchAllTokenByOwnerAndMint(context, claimerAddress, nftMintAddress);
 
     expect(tokens.length).toEqual(1);
   });
 
   it("revokes a non-transferable nft", async () => {
-    await revokeNonTransferableNft(umi, {
+    await revokeNonTransferableNft(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
@@ -127,19 +127,19 @@ describe("Non-Transferable Projects", () => {
       orgId,
       projectIdStr,
       nftIdStr,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(umi, claimerAddress, nftMintAddress);
+    const tokens = await fetchAllTokenByOwnerAndMint(context, claimerAddress, nftMintAddress);
 
     expect(tokens.length).toEqual(0);
   });
 
   it("burns a non-transferable nft", async () => {
     const tokensBeforeBurn = await fetchAllTokenByOwnerAndMint(
-      umi,
-      findLegacyProjectPda(umi, {
+      context,
+      findLegacyProjectPda(context, {
         type: "nt-proj",
-        orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+        orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
         projectId: projectIdStr,
       })[0],
       nftMintAddress
@@ -147,20 +147,20 @@ describe("Non-Transferable Projects", () => {
 
     expect(tokensBeforeBurn.length).toEqual(1);
 
-    await burnNonTransferableNft(umi, {
+    await burnNonTransferableNft(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       nftIdStr,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
     const tokensAfterBurn = await fetchAllTokenByOwnerAndMint(
-      umi,
-      findLegacyProjectPda(umi, {
+      context,
+      findLegacyProjectPda(context, {
         type: "nt-proj",
-        orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+        orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
         projectId: projectIdStr,
       })[0],
       nftMintAddress

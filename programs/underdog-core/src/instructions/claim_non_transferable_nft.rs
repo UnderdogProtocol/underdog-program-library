@@ -2,13 +2,11 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Approve, Mint, Token, TokenAccount, Transfer};
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
+use mpl_bubblegum::state::metaplex_anchor::{MplTokenMetadata, TokenMetadata};
 use shared_utils::{
   freeze_delegated_account, verify_collection, verify_sized_collection_item,
   FreezeDelegatedAccount, VerifyCollection, VerifySizedCollectionItem,
 };
-
-use crate::token_metadata::Metadata;
 
 use crate::state::*;
 
@@ -67,7 +65,7 @@ pub struct ClaimNonTransferableNft<'info> {
       seeds::program = token_metadata_program.key(),
       bump,
     )]
-  pub non_transferable_project_metadata: Box<Account<'info, Metadata>>,
+  pub non_transferable_project_metadata: Box<Account<'info, TokenMetadata>>,
 
   /// CHECK: Handled By cpi account
   #[account(

@@ -14,31 +14,38 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 
-import { createTree } from "../../src";
+import { PROJECT_MINT_PREFIX, PROJECT_PREFIX, createTree } from "../../src";
 import {
   fetchProjectFromSeeds,
   findOrgAccountPda,
+  findProjectPda,
   initializeOrg,
   initializeProject,
   mintNftV2,
   mintSftV2,
   transferAssetV1,
+  updateProjectV0,
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
-import { createUmi } from "../setup";
+import { createContext } from "../setup";
+import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("Projects", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const superAdminAddress = generateSigner(umi).publicKey;
+  const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
-  const projectId = 1;
-  const orgControlSigner = generateSigner(umi);
+  const orgAccount = findOrgAccountPda(context, { superAdminAddress, orgId })[0];
+
+  const orgControlSigner = generateSigner(context);
   const orgControlAddress = orgControlSigner.publicKey;
 
-  const owner = generateSigner(umi).publicKey;
+  const projectId = 1;
+  const projectMint = findProjectPda(context, { prefix: PROJECT_MINT_PREFIX, orgAccount, projectId })[0];
 
-  const merkleTreeSigner = generateSigner(umi);
+  const owner = generateSigner(context).publicKey;
+
+  const merkleTreeSigner = generateSigner(context);
   const merkleTree = merkleTreeSigner.publicKey;
   const maxDepth = 3;
   const maxBufferSize = 8;
@@ -46,52 +53,76 @@ describe("Projects", () => {
   const name = "Project NFT";
   const symbol = "PN";
   const uri = "https://google.com";
+  const sellerFeeBasisPoints = 100;
 
   const leaves: PublicKey[] = [];
 
   beforeAll(async () => {
-    await initializeOrg(umi, {
+    await initializeOrg(context, {
       superAdminAddress,
       orgId: orgId,
       orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    await umi.rpc.airdrop(orgControlAddress, sol(10));
+    await context.rpc.airdrop(orgControlAddress, sol(10));
 
     await (
-      await createTree(umi, {
+      await createTree(context, {
         maxDepth,
         maxBufferSize,
         merkleTree: merkleTreeSigner,
       })
-    ).sendAndConfirm(umi);
+    ).sendAndConfirm(context);
   });
 
   it("initializes a project", async () => {
-    await initializeProject(umi, {
+    await initializeProject(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
       orgId,
       projectId,
-      name,
-      symbol,
-      uri,
-    }).sendAndConfirm(umi);
+      name: "",
+      symbol: "",
+      uri: "",
+    }).sendAndConfirm(context);
 
-    const project = await fetchProjectFromSeeds(umi, {
+    const project = await fetchProjectFromSeeds(context, {
       prefix: "project",
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       projectId,
     });
 
     expect(project.projectId).toEqual(createBigInt(projectId));
   });
 
+  it("can update a project", async () => {
+    await updateProjectV0(context, {
+      authority: orgControlSigner,
+      superAdminAddress,
+      memberAddress: superAdminAddress,
+      orgId,
+      projectId,
+      metadata: {
+        name,
+        symbol,
+        uri,
+        sellerFeeBasisPoints
+      }
+    }).sendAndConfirm(context);
+
+    const projectMetadata = await fetchMetadataFromSeeds(context, { mint: projectMint });
+
+    expect(projectMetadata.name).toEqual(name);
+    expect(projectMetadata.symbol).toEqual(symbol);
+    expect(projectMetadata.uri).toEqual(uri);
+    expect(projectMetadata.sellerFeeBasisPoints).toEqual(sellerFeeBasisPoints);
+  });
+
   describe("Mint NFT", () => {
     const leafIndex = 0;
 
-    const { leafHash } = hashProjectNft(umi, {
+    const { leafHash } = hashProjectNft(context, {
       superAdminAddress,
       orgId,
       projectId,
@@ -101,10 +132,11 @@ describe("Projects", () => {
       name,
       symbol,
       uri,
+      sellerFeeBasisPoints
     });
 
     beforeAll(async () => {
-      await mintNftV2(umi, {
+      await mintNftV2(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -115,31 +147,31 @@ describe("Projects", () => {
         symbol,
         uri,
         isDelegated: false,
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(umi, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
     it("can verify leaf", async () => {
       leaves.push(publicKey(leafHash));
 
-      await verifyLeaf(umi, {
+      await verifyLeaf(context, {
         merkleTree,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: publicKeyBytes(leaves[leafIndex]),
         index: leafIndex,
         proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
   });
 
   describe("Mint & Transfer Delegated NFT", () => {
     const leafIndex = 1;
 
-    const { leafHash, creatorsHash, dataHash } = hashProjectNft(umi, {
+    const { leafHash, creatorsHash, dataHash } = hashProjectNft(context, {
       superAdminAddress,
       orgId,
       projectId,
@@ -150,10 +182,11 @@ describe("Projects", () => {
       symbol,
       uri,
       delegated: true,
+      sellerFeeBasisPoints
     });
 
     beforeAll(async () => {
-      await mintNftV2(umi, {
+      await mintNftV2(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -164,28 +197,28 @@ describe("Projects", () => {
         symbol,
         uri,
         isDelegated: true,
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(umi, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
     it("can verify leaf", async () => {
       leaves.push(publicKey(leafHash));
 
-      await verifyLeaf(umi, {
+      await verifyLeaf(context, {
         merkleTree,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: publicKeyBytes(leaves[leafIndex]),
         index: leafIndex,
         proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
 
     it("can transfer and verify nft", async () => {
-      await transferAssetV1(umi, {
+      await transferAssetV1(context, {
         newLeafOwner: superAdminAddress,
         leafOwner: owner,
         merkleTree,
@@ -198,10 +231,10 @@ describe("Projects", () => {
         leafIndex,
         creatorHash: creatorsHash,
         proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
 
       leaves[leafIndex] = publicKey(
-        hashProjectNft(umi, {
+        hashProjectNft(context, {
           superAdminAddress,
           orgId,
           projectId,
@@ -212,23 +245,24 @@ describe("Projects", () => {
           symbol,
           uri,
           delegated: false,
+          sellerFeeBasisPoints
         }).leafHash
       );
 
-      await verifyLeaf(umi, {
+      await verifyLeaf(context, {
         merkleTree,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: publicKeyBytes(leaves[leafIndex]),
         index: leafIndex,
         proof: getMerkleProof(leaves, maxDepth, leaves[leafIndex]),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
   });
 
   describe("Mint & Transfer Delegated SFT", () => {
     const leafIndex = 2;
 
-    const { leafHash, creatorsHash, dataHash } = hashProjectNft(umi, {
+    const { leafHash, creatorsHash, dataHash } = hashProjectNft(context, {
       superAdminAddress,
       orgId,
       projectId,
@@ -239,10 +273,11 @@ describe("Projects", () => {
       symbol,
       uri,
       delegated: true,
+      sellerFeeBasisPoints,
     });
 
     beforeAll(async () => {
-      await mintSftV2(umi, {
+      await mintSftV2(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -250,28 +285,28 @@ describe("Projects", () => {
         memberAddress: superAdminAddress,
         projectId,
         isDelegated: true,
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(umi, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
     it("can verify leaf", async () => {
       leaves.push(publicKey(leafHash));
 
-      await verifyLeaf(umi, {
+      await verifyLeaf(context, {
         merkleTree,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: publicKeyBytes(leaves[leafIndex]),
         index: leafIndex,
         proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
 
     it("can transfer and verify sft", async () => {
-      await transferAssetV1(umi, {
+      await transferAssetV1(context, {
         newLeafOwner: superAdminAddress,
         leafOwner: owner,
         merkleTree,
@@ -284,10 +319,10 @@ describe("Projects", () => {
         leafIndex,
         creatorHash: creatorsHash,
         proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
 
       leaves[leafIndex] = publicKey(
-        hashProjectNft(umi, {
+        hashProjectNft(context, {
           superAdminAddress,
           orgId,
           projectId,
@@ -298,16 +333,17 @@ describe("Projects", () => {
           symbol,
           uri,
           delegated: false,
+          sellerFeeBasisPoints
         }).leafHash
       );
 
-      await verifyLeaf(umi, {
+      await verifyLeaf(context, {
         merkleTree,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: publicKeyBytes(leaves[leafIndex]),
         index: leafIndex,
         proof: getMerkleProof(leaves, maxDepth, leaves[leafIndex]),
-      }).sendAndConfirm(umi);
+      }).sendAndConfirm(context);
     });
   });
 });

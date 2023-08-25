@@ -527,6 +527,7 @@ kinobi.update(
         },
       },
     },
+    UpdateProjectV0: projectDefaults,
     MintTransferableNft: {
       accounts: {
         receiverTokenAccount: {

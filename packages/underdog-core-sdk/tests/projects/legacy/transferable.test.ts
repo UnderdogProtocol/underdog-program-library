@@ -7,33 +7,33 @@ import {
   initializeLegacyProject,
   initializeOrg,
 } from "../../../src/generated";
-import { createUmi } from "../../setup";
+import { createContext } from "../../setup";
 
 describe("Transferable Projects", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const superAdminAddress = generateSigner(umi).publicKey;
+  const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
   const projectId = 1;
   const projectIdStr = projectId.toString();
   const nftId = 1;
   const nftIdStr = nftId.toString();
 
-  const orgControlSigner = generateSigner(umi);
+  const orgControlSigner = generateSigner(context);
   const orgControlAddress = orgControlSigner.publicKey;
 
   beforeAll(async () => {
-    await initializeOrg(umi, {
+    await initializeOrg(context, {
       superAdminAddress,
       orgId: orgId,
       orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    await umi.rpc.airdrop(orgControlAddress, sol(1));
+    await context.rpc.airdrop(orgControlAddress, sol(1));
   });
 
   it("creates a transferable project", async () => {
-    await initializeLegacyProject(umi, {
+    await initializeLegacyProject(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
@@ -43,10 +43,10 @@ describe("Transferable Projects", () => {
       symbol: "Symbol",
       uri: "Uri",
       projectType: "t",
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const transferableProject = await fetchLegacyProjectFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+    const transferableProject = await fetchLegacyProjectFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       projectId: projectIdStr,
       type: "t-proj",
     });
@@ -55,7 +55,7 @@ describe("Transferable Projects", () => {
   });
 
   it("mints an nft", async () => {
-    await mintTransferableNftAndVerifyCollection(umi, {
+    await mintTransferableNftAndVerifyCollection(context, {
       authority: orgControlSigner,
       receiver: superAdminAddress,
       superAdminAddress,
@@ -66,6 +66,6 @@ describe("Transferable Projects", () => {
       name: "",
       symbol: "",
       uri: "",
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
   });
 });

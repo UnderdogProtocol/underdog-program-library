@@ -6,51 +6,51 @@ import {
   initializeOrg,
   mintCompressedNft,
 } from "../../../src/generated";
-import { createUmi } from "../../setup";
+import { createContext } from "../../setup";
 import { createTree } from "../../../src";
 import { fetchTreeConfigFromSeeds } from "@metaplex-foundation/mpl-bubblegum";
 
 describe("Compressed Projects", () => {
-  const umi = createUmi();
+  const context = createContext();
 
-  const superAdminAddress = generateSigner(umi).publicKey;
+  const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
   const projectId = 1;
   const projectIdStr = projectId.toString();
-  const orgControlSigner = generateSigner(umi);
+  const orgControlSigner = generateSigner(context);
   const orgControlAddress = orgControlSigner.publicKey;
 
-  const merkleTreeSigner = generateSigner(umi);
+  const merkleTreeSigner = generateSigner(context);
   const merkleTree = merkleTreeSigner.publicKey;
   const maxDepth = 3;
   const maxBufferSize = 8;
 
-  const owner = generateSigner(umi).publicKey;
+  const owner = generateSigner(context).publicKey;
 
   const name = "Compressed Project NFT";
   const symbol = "CPN";
   const uri = "https://google.com";
 
   beforeAll(async () => {
-    await initializeOrg(umi, {
+    await initializeOrg(context, {
       superAdminAddress,
       orgId: orgId,
       orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    await umi.rpc.airdrop(orgControlAddress, sol(10));
+    await context.rpc.airdrop(orgControlAddress, sol(10));
 
     await (
-      await createTree(umi, {
+      await createTree(context, {
         maxDepth,
         maxBufferSize,
         merkleTree: merkleTreeSigner,
       })
-    ).sendAndConfirm(umi);
+    ).sendAndConfirm(context);
   });
 
   it("initializes a compressed project", async () => {
-    await initializeCompressedProject(umi, {
+    await initializeCompressedProject(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
@@ -59,10 +59,10 @@ describe("Compressed Projects", () => {
       name,
       symbol,
       uri,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const compressedProject = await fetchCompressedProjectFromSeeds(umi, {
-      orgAccount: findOrgAccountPda(umi, { superAdminAddress, orgId })[0],
+    const compressedProject = await fetchCompressedProjectFromSeeds(context, {
+      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
       projectId: projectIdStr,
     });
 
@@ -70,7 +70,7 @@ describe("Compressed Projects", () => {
   });
 
   it("mints a compressed nft", async () => {
-    await mintCompressedNft(umi, {
+    await mintCompressedNft(context, {
       recipient: owner,
       merkleTree,
       superAdminAddress,
@@ -80,9 +80,9 @@ describe("Compressed Projects", () => {
       name,
       symbol,
       uri,
-    }).sendAndConfirm(umi);
+    }).sendAndConfirm(context);
 
-    const treeConfig = await fetchTreeConfigFromSeeds(umi, { merkleTree });
+    const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
     expect(treeConfig.numMinted).toEqual(createBigInt(1));
   });
 });

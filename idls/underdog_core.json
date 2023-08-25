@@ -320,6 +320,64 @@
       ]
     },
     {
+      "name": "updateProjectV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "orgControlAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "memberAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateProjectV0Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "mintNftV2",
       "accounts": [
         {
@@ -2244,6 +2302,40 @@
       }
     },
     {
+      "name": "UpdateProjectV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "memberAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "type": "u64"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": "UpdateMetadataArgs"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "VerifyLegacyNftCollectionArgs",
       "type": {
         "kind": "struct",
@@ -2287,6 +2379,42 @@
           {
             "name": "nftMintBump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateMetadataArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "docs": [
+              "The name of the asset"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "docs": [
+              "The symbol for the asset"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "URI pointing to JSON representing the asset"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "sellerFeeBasisPoints",
+            "docs": [
+              "Royalty basis points that goes to creators in secondary sales (0-10000)"
+            ],
+            "type": "u16"
           }
         ]
       }

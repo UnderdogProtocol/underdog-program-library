@@ -185,7 +185,7 @@ pub fn handler(ctx: Context<MintSftV2>, args: MintSftV2Args) -> Result<()> {
         share: 0,
       },
     ],
-    seller_fee_basis_points: 0,
+    seller_fee_basis_points: ctx.accounts.project_metadata.data.seller_fee_basis_points,
   };
 
   let mut project = ctx.accounts.project_account.to_account_info();
