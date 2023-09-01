@@ -22,6 +22,7 @@ import {
   findProjectPda,
   initializeOrg,
   initializeProject,
+  initializeProjectV0,
   mintNftV2,
   mintSftV2,
   transferAssetV1,
@@ -76,7 +77,7 @@ describe("Projects", () => {
   });
 
   it("initializes a project", async () => {
-    await initializeProject(context, {
+    await initializeProjectV0(context, {
       authority: orgControlSigner,
       superAdminAddress,
       memberAddress: superAdminAddress,
@@ -85,6 +86,7 @@ describe("Projects", () => {
       name: "",
       symbol: "",
       uri: "",
+      sellerFeeBasisPoints: 0
     }).sendAndConfirm(context);
 
     const project = await fetchProjectFromSeeds(context, {
@@ -94,6 +96,13 @@ describe("Projects", () => {
     });
 
     expect(project.projectId).toEqual(createBigInt(projectId));
+
+    const projectMetadata = await fetchMetadataFromSeeds(context, { mint: projectMint });
+
+    expect(projectMetadata.name).toEqual("");
+    expect(projectMetadata.symbol).toEqual("");
+    expect(projectMetadata.uri).toEqual("");
+    expect(projectMetadata.sellerFeeBasisPoints).toEqual(0);
   });
 
   it("can update a project", async () => {
