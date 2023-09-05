@@ -17,33 +17,30 @@ pub struct AddOrgMemberContext<'info> {
   pub authority: Signer<'info>,
 
   #[account(
-        mut,
-        constraint = owner_account.owner == authority.key(),
-        seeds = [OWNER_PREFIX.as_ref()],
-        bump=owner_account.bump
-    )]
+    mut,
+    constraint = owner_account.owner == authority.key(),
+    seeds = [OWNER_PREFIX.as_ref()],
+    bump=owner_account.bump
+  )]
   pub owner_account: Box<Account<'info, InitialOwner>>,
 
   #[account(
-        mut,
-        seeds = [ORG_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
-        bump=org_account.bump
-    )]
+    mut,
+    seeds = [ORG_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
+    bump=org_account.bump
+  )]
   pub org_account: Box<Account<'info, OrgAccount>>,
 
   #[account(
-        init,
-        payer = authority,
-        space = ORG_MEMBER_ACCOUNT_SIZE,
-        seeds = [ORG_MEMBER_PREFIX.as_ref(),org_account.key().as_ref(),args.member_address.as_ref()],
-        bump
-    )]
+    init,
+    payer = authority,
+    space = ORG_MEMBER_ACCOUNT_SIZE,
+    seeds = [ORG_MEMBER_PREFIX.as_ref(),org_account.key().as_ref(),args.member_address.as_ref()],
+    bump
+  )]
   pub member_account: Box<Account<'info, OrgMemberAccount>>,
 
-  #[account(address = system_program::ID)]
   pub system_program: Program<'info, System>,
-
-  #[account(address = solana_program::sysvar::rent::ID)]
   pub rent: Sysvar<'info, Rent>,
 }
 

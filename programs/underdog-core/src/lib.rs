@@ -127,4 +127,11 @@ pub mod underdog_core {
   ) -> Result<()> {
     burn_non_transferable_nft::handler(ctx, args)
   }
+
+  pub fn update_non_transferable_nft(
+    ctx: Context<UpdateNonTransferableNft>,
+    args: UpdateNonTransferableNftArgs,
+  ) -> Result<()> {
+    update_non_transferable_nft::handler(ctx, args)
+  }
 }

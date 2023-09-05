@@ -2,7 +2,9 @@ const k = require("@metaplex-foundation/kinobi");
 let path = require("path");
 
 // Instanciate Kinobi.
-const kinobi = k.createFromIdls([path.join(__dirname, "..", "idls", "underdog_core.json")]);
+const kinobi = k.createFromIdls([
+  path.join(__dirname, "..", "idls", "underdog_core.json"),
+]);
 
 // Update accounts.
 kinobi.update(
@@ -11,7 +13,11 @@ kinobi.update(
       seeds: [k.stringConstantSeed("ownership")],
     },
     orgAccount: {
-      seeds: [k.stringConstantSeed("org"), k.publicKeySeed("superAdminAddress"), k.stringSeed("orgId")],
+      seeds: [
+        k.stringConstantSeed("org"),
+        k.publicKeySeed("superAdminAddress"),
+        k.stringSeed("orgId"),
+      ],
     },
     orgControlAccount: {
       seeds: [
@@ -21,7 +27,11 @@ kinobi.update(
       ],
     },
     orgMemberAccount: {
-      seeds: [k.stringConstantSeed("member"), k.publicKeySeed("orgAccount"), k.publicKeySeed("member")],
+      seeds: [
+        k.stringConstantSeed("member"),
+        k.publicKeySeed("orgAccount"),
+        k.publicKeySeed("member"),
+      ],
     },
     project: {
       seeds: [
@@ -31,13 +41,25 @@ kinobi.update(
       ],
     },
     legacyProject: {
-      seeds: [k.stringSeed("type"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
+      seeds: [
+        k.stringSeed("type"),
+        k.publicKeySeed("orgAccount"),
+        k.stringSeed("projectId"),
+      ],
     },
     projAccount: {
-      seeds: [k.stringSeed("type"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
+      seeds: [
+        k.stringSeed("type"),
+        k.publicKeySeed("orgAccount"),
+        k.stringSeed("projectId"),
+      ],
     },
     compressedProject: {
-      seeds: [k.stringConstantSeed("c-proj"), k.publicKeySeed("orgAccount"), k.stringSeed("projectId")],
+      seeds: [
+        k.stringConstantSeed("c-proj"),
+        k.publicKeySeed("orgAccount"),
+        k.stringSeed("projectId"),
+      ],
     },
     claimAccount: {
       seeds: [
@@ -55,22 +77,34 @@ kinobi.update(
     {
       account: "associatedTokenProgram",
       ignoreIfOptional: true,
-      ...k.programDefault("splAssociatedToken", "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+      ...k.programDefault(
+        "splAssociatedToken",
+        "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+      ),
     },
     {
       account: "logWrapper",
       ignoreIfOptional: true,
-      ...k.programDefault("splNoop", "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"),
+      ...k.programDefault(
+        "splNoop",
+        "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"
+      ),
     },
     {
       account: "compressionProgram",
       ignoreIfOptional: true,
-      ...k.programDefault("splAccountCompression", "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"),
+      ...k.programDefault(
+        "splAccountCompression",
+        "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"
+      ),
     },
     {
       account: "bubblegumProgram",
       ignoreIfOptional: true,
-      ...k.programDefault("bubblegumProgram", "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"),
+      ...k.programDefault(
+        "bubblegumProgram",
+        "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
+      ),
     },
     {
       account: "bubblegumSigner",
@@ -459,33 +493,49 @@ const ataPdaDefault = (mint = "mint", owner = "owner") =>
 
 const defaultProjectPrefixArg = {
   projectPrefix: {
-    defaultsTo: k.resolverDefault("resolveProjectPrefix", [k.dependsOnArg("projectType")], {
-      importFrom: "../../resolvers",
-    }),
+    defaultsTo: k.resolverDefault(
+      "resolveProjectPrefix",
+      [k.dependsOnArg("projectType")],
+      {
+        importFrom: "../../resolvers",
+      }
+    ),
   },
 };
 
 const defaultProjectMintPrefix = {
   projectMintPrefix: {
-    defaultsTo: k.resolverDefault("resolveProjectMintPrefix", [k.dependsOnArg("projectType")], {
-      importFrom: "../../resolvers",
-    }),
+    defaultsTo: k.resolverDefault(
+      "resolveProjectMintPrefix",
+      [k.dependsOnArg("projectType")],
+      {
+        importFrom: "../../resolvers",
+      }
+    ),
   },
 };
 
 const defaultProjectVaultPrefix = {
   projectVaultPrefix: {
-    defaultsTo: k.resolverDefault("resolveProjectVaultPrefix", [k.dependsOnArg("projectType")], {
-      importFrom: "../../resolvers",
-    }),
+    defaultsTo: k.resolverDefault(
+      "resolveProjectVaultPrefix",
+      [k.dependsOnArg("projectType")],
+      {
+        importFrom: "../../resolvers",
+      }
+    ),
   },
 };
 
 const defaultNftMintPrefix = {
   nftMintPrefix: {
-    defaultsTo: k.resolverDefault("resolveNftMintPrefix", [k.dependsOnArg("projectType")], {
-      importFrom: "../../resolvers",
-    }),
+    defaultsTo: k.resolverDefault(
+      "resolveNftMintPrefix",
+      [k.dependsOnArg("projectType")],
+      {
+        importFrom: "../../resolvers",
+      }
+    ),
   },
 };
 
@@ -567,6 +617,16 @@ kinobi.update(
         ...defaultProjectVaultPrefix,
       },
     },
+    UpdateNonTransferableNft: {
+      args: {
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
+        },
+        nftMintBump: {
+          defaultsTo: k.accountBumpDefault("nonTransferableNftMint"),
+        },
+      },
+    },
     VerifyLegacyNftCollection: {
       args: {
         projectMintBump: {
@@ -597,7 +657,8 @@ kinobi.update(
   new k.TransformNodesVisitor([
     {
       // Use extra "proof" arg as remaining accounts.
-      selector: (node) => k.isInstructionNode(node) && ["transferAssetV1"].includes(node.name),
+      selector: (node) =>
+        k.isInstructionNode(node) && ["transferAssetV1"].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({
@@ -624,7 +685,14 @@ kinobi.update(
 );
 
 // Render JavaScript.
-const jsDir = path.join(__dirname, "..", "packages", "underdog-core-sdk", "src", "generated");
+const jsDir = path.join(
+  __dirname,
+  "..",
+  "packages",
+  "underdog-core-sdk",
+  "src",
+  "generated"
+);
 
 const visitor = new k.RenderJavaScriptVisitor(jsDir, {
   dependencyMap: {

@@ -1477,6 +1477,84 @@
           }
         }
       ]
+    },
+    {
+      "name": "updateNonTransferableNft",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateNonTransferableNftArgs"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -2277,6 +2355,46 @@
           {
             "name": "leafIndex",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateNonTransferableNftArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "nftMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
           }
         ]
       }

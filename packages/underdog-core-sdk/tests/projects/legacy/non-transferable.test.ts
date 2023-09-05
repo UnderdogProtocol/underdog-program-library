@@ -16,6 +16,7 @@ import {
   initializeOrg,
   mintNonTransferableNft,
   revokeNonTransferableNft,
+  updateNonTransferableNft,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 import { findLegacyNftPda } from "../../../src";
@@ -128,6 +129,18 @@ describe("Non-Transferable Projects", () => {
     const metadata = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
 
     expect(metadata.creators.__option).toBe("Some");
+
+    await updateNonTransferableNft(context, {
+      superAdminAddress,
+      orgId: orgId.toString(),
+      projectIdStr: projectId.toString(),
+      nftIdStr: nftId.toString(),
+      name: "Saga Genesis",
+      symbol: "Saga Ge",
+    }).sendAndConfirm(context);
+
+    const metadata2 = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
+    console.log(metadata2)
   });
 
   it("revokes a non-transferable nft", async () => {
