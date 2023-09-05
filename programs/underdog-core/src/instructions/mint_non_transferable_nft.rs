@@ -3,7 +3,7 @@ use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
 use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use mpl_token_metadata::state::{Collection, DataV2};
+use mpl_token_metadata::state::{Collection, Creator, DataV2};
 use shared_utils::{
   create_master_edition_v3, create_metadata_accounts_v3, CreateMasterEditionV3,
   CreateMetadataAccountsV3,
@@ -173,12 +173,34 @@ pub fn handler(
     1,
   )?;
 
+  let creators = vec![
+    Creator {
+      address: ctx
+        .accounts
+        .non_transferable_project
+        .to_account_info()
+        .key(),
+      verified: true,
+      share: 0,
+    },
+    Creator {
+      address: ctx.accounts.org_account.to_account_info().key(),
+      verified: false,
+      share: 0,
+    },
+    Creator {
+      address: args.super_admin_address,
+      verified: false,
+      share: 100,
+    },
+  ];
+
   let data = DataV2 {
     name: args.name,
     symbol: args.symbol,
     uri: args.uri,
     seller_fee_basis_points: 0,
-    creators: None,
+    creators: Some(creators),
     collection: Some(Collection {
       verified: false,
       key: ctx.accounts.non_transferable_project_mint.key(),

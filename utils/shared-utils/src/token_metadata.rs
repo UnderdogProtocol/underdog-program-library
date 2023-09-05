@@ -5,14 +5,12 @@ use mpl_token_metadata::{
 };
 
 #[derive(Accounts)]
-pub struct SignMetadataAccounts<'info> {
+pub struct SignMetadata<'info> {
   pub metadata: AccountInfo<'info>,
   pub creator: AccountInfo<'info>,
 }
 
-pub fn sign_metadata<'info>(
-  ctx: CpiContext<'_, '_, '_, 'info, SignMetadataAccounts<'info>>,
-) -> Result<()> {
+pub fn sign_metadata<'info>(ctx: CpiContext<'_, '_, '_, 'info, SignMetadata<'info>>) -> Result<()> {
   let ix = mpl_token_metadata::instruction::sign_metadata(
     ID,
     *ctx.accounts.metadata.key,

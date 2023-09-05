@@ -39,13 +39,6 @@ pub mod underdog_core {
     initialize_tree::handler(ctx, args)
   }
 
-  pub fn initialize_project(
-    ctx: Context<InitializeProject>,
-    args: InitializeProjectArgs,
-  ) -> Result<()> {
-    initialize_project::handler(ctx, args)
-  }
-
   pub fn initialize_project_v0(
     ctx: Context<InitializeProjectV0>,
     args: InitializeProjectV0Args,

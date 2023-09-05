@@ -15,13 +15,12 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 
-import { PROJECT_MINT_PREFIX, PROJECT_PREFIX, createTree } from "../../src";
+import { PROJECT_MINT_PREFIX, createTree } from "../../src";
 import {
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
   initializeOrg,
-  initializeProject,
   initializeProjectV0,
   mintNftV2,
   mintSftV2,

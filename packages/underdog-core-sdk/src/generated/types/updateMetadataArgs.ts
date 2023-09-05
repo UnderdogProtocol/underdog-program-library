@@ -5,6 +5,7 @@
  *
  * @see https://github.com/metaplex-foundation/kinobi
  */
+
 import {
   Serializer,
   string,

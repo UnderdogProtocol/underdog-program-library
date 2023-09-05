@@ -4,8 +4,8 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Approve, Mint, Token, TokenAccount, Transfer};
 use mpl_bubblegum::state::metaplex_anchor::{MplTokenMetadata, TokenMetadata};
 use shared_utils::{
-  freeze_delegated_account, verify_collection, verify_sized_collection_item,
-  FreezeDelegatedAccount, VerifyCollection, VerifySizedCollectionItem,
+  freeze_delegated_account, sign_metadata, verify_collection, verify_sized_collection_item,
+  FreezeDelegatedAccount, SignMetadata, VerifyCollection, VerifySizedCollectionItem,
 };
 
 use crate::state::*;
@@ -134,6 +134,20 @@ impl<'info> ClaimNonTransferableNft<'info> {
     CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
   }
 
+  fn sign_metadata_ctx(
+    &self,
+    creator: AccountInfo<'info>,
+  ) -> CpiContext<'_, '_, '_, 'info, SignMetadata<'info>> {
+    let cpi_accounts = SignMetadata {
+      metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
+      creator,
+    };
+    CpiContext::new(
+      self.token_metadata_program.to_account_info().clone(),
+      cpi_accounts,
+    )
+  }
+
   fn freeze_delegated_account_ctx(
     &self,
   ) -> CpiContext<'_, '_, '_, 'info, FreezeDelegatedAccount<'info>> {
@@ -199,6 +213,13 @@ pub fn handler(
     &[ctx.accounts.non_transferable_project.bump],
   ];
 
+  let org_signer_seeds = [
+    ORG_PREFIX.as_ref(),
+    args.super_admin_address.as_ref(),
+    args.org_id.as_ref(),
+    &[ctx.accounts.org_account.bump],
+  ];
+
   if ctx
     .accounts
     .non_transferable_project_metadata
@@ -221,6 +242,13 @@ pub fn handler(
       None,
     )?;
   }
+
+  sign_metadata(
+    ctx
+      .accounts
+      .sign_metadata_ctx(ctx.accounts.org_account.to_account_info().clone())
+      .with_signer(&[&org_signer_seeds[..]]),
+  )?;
 
   anchor_spl::token::transfer(
     ctx

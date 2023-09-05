@@ -13,7 +13,6 @@ export * from './initializeCompressedProject';
 export * from './initializeLegacyProject';
 export * from './initializeOrg';
 export * from './initializeOwner';
-export * from './initializeProject';
 export * from './initializeProjectV0';
 export * from './initializeTree';
 export * from './mintCompressedNft';

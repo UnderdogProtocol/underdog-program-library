@@ -1,5 +1,9 @@
 import { fetchAllTokenByOwnerAndMint } from "@metaplex-foundation/mpl-toolbox";
-import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
+import {
+  createBigInt,
+  generateSigner,
+  sol,
+} from "@metaplex-foundation/umi";
 
 import {
   burnNonTransferableNft,
@@ -15,6 +19,7 @@ import {
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 import { findLegacyNftPda } from "../../../src";
+import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("Non-Transferable Projects", () => {
   const context = createContext();
@@ -113,9 +118,16 @@ describe("Non-Transferable Projects", () => {
       nftIdStr,
     }).sendAndConfirm(context);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(context, claimerAddress, nftMintAddress);
-
+    const tokens = await fetchAllTokenByOwnerAndMint(
+      context,
+      claimerAddress,
+      nftMintAddress
+    );
     expect(tokens.length).toEqual(1);
+
+    const metadata = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
+
+    expect(metadata.creators.__option).toBe("Some");
   });
 
   it("revokes a non-transferable nft", async () => {
@@ -129,7 +141,11 @@ describe("Non-Transferable Projects", () => {
       nftIdStr,
     }).sendAndConfirm(context);
 
-    const tokens = await fetchAllTokenByOwnerAndMint(context, claimerAddress, nftMintAddress);
+    const tokens = await fetchAllTokenByOwnerAndMint(
+      context,
+      claimerAddress,
+      nftMintAddress
+    );
 
     expect(tokens.length).toEqual(0);
   });

@@ -242,84 +242,6 @@
       ]
     },
     {
-      "name": "initializeProject",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "orgControlAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "orgAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "memberAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "projectAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "projectMint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "projectVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "projectMetadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "projectMasterEdition",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMetadataProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": "InitializeProjectArgs"
-          }
-        }
-      ]
-    },
-    {
       "name": "initializeProjectV0",
       "accounts": [
         {
@@ -2040,42 +1962,6 @@
           {
             "name": "sellerFeeBasisPoints",
             "type": "u16"
-          }
-        ]
-      }
-    },
-    {
-      "name": "InitializeProjectArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "superAdminAddress",
-            "type": "publicKey"
-          },
-          {
-            "name": "memberAddress",
-            "type": "publicKey"
-          },
-          {
-            "name": "orgId",
-            "type": "string"
-          },
-          {
-            "name": "projectId",
-            "type": "u64"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "symbol",
-            "type": "string"
-          },
-          {
-            "name": "uri",
-            "type": "string"
           }
         ]
       }
