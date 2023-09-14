@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@metaplex-foundation/kinobi": "^0.12.3",
+    "@tooling/typescript": "*",
     "typescript": "^4.3.4"
   }
 }

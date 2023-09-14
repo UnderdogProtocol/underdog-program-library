@@ -31,6 +31,7 @@
     "@metaplex-foundation/umi-bundle-defaults": "^0.8.7"
   },
   "devDependencies": {
+    "@tooling/typescript": "*",
     "typescript": "^4.3.4"
   }
 }

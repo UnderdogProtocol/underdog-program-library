@@ -1,0 +1,13 @@
+{
+  "name": "@tooling/typescript",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "files": [
+    "base.json",
+    "nodejs.json"
+  ],
+  "dependencies": {
+    "typescript": "4.5.4"
+  }
+}

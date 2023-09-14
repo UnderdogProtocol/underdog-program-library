@@ -139,7 +139,7 @@ pub fn handler(
     },
     Creator {
       address: ctx.accounts.org_account.to_account_info().key(),
-      verified: true,
+      verified: false,
       share: 0,
     },
     Creator {
