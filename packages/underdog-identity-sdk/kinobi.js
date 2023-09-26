@@ -28,6 +28,7 @@ kinobi.update(
       ignoreIfOptional: true,
       ...k.pdaDefault("link", {
         seeds: {
+          namespace: k.argDefault("namespace"),
           identifier: k.argDefault("identifier")
         },
       }),

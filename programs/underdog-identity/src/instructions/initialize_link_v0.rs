@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct InitializeLinkV0Args {
+  namespace: String,
   identifier: String,
 }
 
@@ -28,7 +29,7 @@ pub struct InitializeLinkV0<'info> {
     init,
     payer = linker,
     space = LINK_SIZE,
-    seeds = [UNDERDOG_LINK_PREFIX.as_ref(), args.identifier.as_ref()],
+    seeds = [args.namespace.as_ref(), args.identifier.as_ref()],
     bump,
   )]
   pub link: Box<Account<'info, Link>>,

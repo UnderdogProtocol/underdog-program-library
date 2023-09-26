@@ -103,11 +103,6 @@
           "isSigner": true
         },
         {
-          "name": "admin",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "link",
           "isMut": false,
           "isSigner": false
@@ -204,6 +199,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "namespace",
+            "type": "string"
+          },
+          {
             "name": "identifier",
             "type": "string"
           }
@@ -245,6 +244,10 @@
           {
             "name": "leafIndex",
             "type": "u32"
+          },
+          {
+            "name": "namespace",
+            "type": "string"
           },
           {
             "name": "identifier",

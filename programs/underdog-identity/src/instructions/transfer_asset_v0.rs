@@ -12,25 +12,21 @@ pub struct TransferAssetV0Args {
   pub data_hash: [u8; 32],
   pub creator_hash: [u8; 32],
   pub leaf_index: u32,
+  pub namespace: String,
   pub identifier: String,
 }
 
 #[derive(Accounts)]
 #[instruction(args: TransferAssetV0Args)]
 pub struct TransferAssetV0<'info> {
-  #[account(mut)]
+  #[account(
+    mut,
+    constraint = link.address == authority.key()
+  )]
   pub authority: Signer<'info>,
 
   #[account(
-    mut,
-    constraint = admin.address == authority.key(),
-    seeds = [ADMIN_PREFIX.as_ref()],
-    bump=admin.bump
-  )]
-  pub admin: Box<Account<'info, Admin>>,
-
-  #[account(
-    seeds = [UNDERDOG_LINK_PREFIX.as_ref(), args.identifier.as_ref()],
+    seeds = [args.namespace.as_ref(), args.identifier.as_ref()],
     bump = link.bump,
   )]
   pub link: Box<Account<'info, Link>>,

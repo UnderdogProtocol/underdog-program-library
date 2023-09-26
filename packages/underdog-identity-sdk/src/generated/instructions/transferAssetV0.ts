@@ -27,14 +27,13 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAdminPda } from '../accounts';
+import { findLinkPda } from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type TransferAssetV0InstructionAccounts = {
   authority?: Signer;
-  admin?: PublicKey | Pda;
-  link: PublicKey | Pda;
+  link?: PublicKey | Pda;
   receiverAddress: PublicKey | Pda;
   treeAuthority?: PublicKey | Pda;
   merkleTree: PublicKey | Pda;
@@ -52,6 +51,7 @@ export type TransferAssetV0InstructionData = {
   dataHash: Uint8Array;
   creatorHash: Uint8Array;
   leafIndex: number;
+  namespace: string;
   identifier: string;
 };
 
@@ -60,6 +60,7 @@ export type TransferAssetV0InstructionDataArgs = {
   dataHash: Uint8Array;
   creatorHash: Uint8Array;
   leafIndex: number;
+  namespace: string;
   identifier: string;
 };
 
@@ -92,6 +93,7 @@ export function getTransferAssetV0InstructionDataSerializer(
         ['dataHash', bytes({ size: 32 })],
         ['creatorHash', bytes({ size: 32 })],
         ['leafIndex', u32()],
+        ['namespace', string()],
         ['identifier', string()],
       ],
       { description: 'TransferAssetV0InstructionData' }
@@ -131,7 +133,6 @@ export function transferAssetV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    link: [input.link, false] as const,
     receiverAddress: [input.receiverAddress, false] as const,
     merkleTree: [input.merkleTree, true] as const,
   };
@@ -145,10 +146,16 @@ export function transferAssetV0(
   );
   addObjectProperty(
     resolvedAccounts,
-    'admin',
-    input.admin
-      ? ([input.admin, true] as const)
-      : ([findAdminPda(context), true] as const)
+    'link',
+    input.link
+      ? ([input.link, false] as const)
+      : ([
+          findLinkPda(context, {
+            namespace: input.namespace,
+            identifier: input.identifier,
+          }),
+          false,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
@@ -228,7 +235,6 @@ export function transferAssetV0(
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.admin, false);
   addAccountMeta(keys, signers, resolvedAccounts.link, false);
   addAccountMeta(keys, signers, resolvedAccounts.receiverAddress, false);
   addAccountMeta(keys, signers, resolvedAccounts.treeAuthority, false);

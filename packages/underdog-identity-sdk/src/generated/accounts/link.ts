@@ -18,7 +18,7 @@ import {
   deserializeAccount,
   gpaBuilder,
   publicKey as toPublicKey,
-} from "@metaplex-foundation/umi";
+} from '@metaplex-foundation/umi';
 import {
   Serializer,
   array,
@@ -27,7 +27,7 @@ import {
   string,
   struct,
   u8,
-} from "@metaplex-foundation/umi/serializers";
+} from '@metaplex-foundation/umi/serializers';
 
 export type Link = Account<LinkAccountData>;
 
@@ -53,11 +53,11 @@ export function getLinkAccountDataSerializer(
   return mapSerializer<LinkAccountDataArgs, any, LinkAccountData>(
     struct<LinkAccountData>(
       [
-        ["discriminator", array(u8(), { size: 8 })],
-        ["bump", u8()],
-        ["address", publicKeySerializer()],
+        ['discriminator', array(u8(), { size: 8 })],
+        ['bump', u8()],
+        ['address', publicKeySerializer()],
       ],
-      { description: "LinkAccountData" }
+      { description: 'LinkAccountData' }
     ),
     (value) => ({
       ...value,
@@ -80,7 +80,7 @@ export function deserializeLink(
 }
 
 export async function fetchLink(
-  context: Pick<Context, "rpc">,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<Link> {
@@ -88,12 +88,12 @@ export async function fetchLink(
     toPublicKey(publicKey, false),
     options
   );
-  assertAccountExists(maybeAccount, "Link");
+  assertAccountExists(maybeAccount, 'Link');
   return deserializeLink(maybeAccount);
 }
 
 export async function safeFetchLink(
-  context: Pick<Context, "rpc">,
+  context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
 ): Promise<Link | null> {
@@ -105,7 +105,7 @@ export async function safeFetchLink(
 }
 
 export async function fetchAllLink(
-  context: Pick<Context, "rpc">,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<Link[]> {
@@ -114,13 +114,13 @@ export async function fetchAllLink(
     options
   );
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, "Link");
+    assertAccountExists(maybeAccount, 'Link');
     return deserializeLink(maybeAccount);
   });
 }
 
 export async function safeFetchAllLink(
-  context: Pick<Context, "rpc">,
+  context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
 ): Promise<Link[]> {
@@ -133,10 +133,10 @@ export async function safeFetchAllLink(
     .map((maybeAccount) => deserializeLink(maybeAccount as RpcAccount));
 }
 
-export function getLinkGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
+export function getLinkGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
   const programId = context.programs.getPublicKey(
-    "underdogIdentity",
-    "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd"
+    'underdogIdentity',
+    'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return gpaBuilder(context, programId)
     .registerFields<{
@@ -149,7 +149,7 @@ export function getLinkGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
       address: [9, publicKeySerializer()],
     })
     .deserializeUsing<Link>((account) => deserializeLink(account))
-    .whereField("discriminator", [90, 57, 179, 207, 13, 91, 161, 190]);
+    .whereField('discriminator', [90, 57, 179, 207, 13, 91, 161, 190]);
 }
 
 export function getLinkSize(): number {
@@ -157,7 +157,7 @@ export function getLinkSize(): number {
 }
 
 export function findLinkPda(
-  context: Pick<Context, "eddsa" | "programs">,
+  context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     namespace: string;
 
@@ -165,17 +165,17 @@ export function findLinkPda(
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
-    "underdogIdentity",
-    "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd"
+    'underdogIdentity',
+    'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return context.eddsa.findPda(programId, [
-    string({ size: "variable" }).serialize(seeds.namespace),
-    string({ size: "variable" }).serialize(seeds.identifier),
+    string({ size: 'variable' }).serialize(seeds.namespace),
+    string({ size: 'variable' }).serialize(seeds.identifier),
   ]);
 }
 
 export async function fetchLinkFromSeeds(
-  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findLinkPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<Link> {
@@ -183,7 +183,7 @@ export async function fetchLinkFromSeeds(
 }
 
 export async function safeFetchLinkFromSeeds(
-  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
   seeds: Parameters<typeof findLinkPda>[1],
   options?: RpcGetAccountOptions
 ): Promise<Link | null> {

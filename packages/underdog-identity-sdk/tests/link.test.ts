@@ -9,9 +9,19 @@ import {
   mintV1,
   verifyLeaf,
 } from "@metaplex-foundation/mpl-bubblegum";
-import { generateSigner, publicKey, publicKeyBytes, sol } from "@metaplex-foundation/umi";
+import {
+  generateSigner,
+  publicKey,
+  publicKeyBytes,
+  sol,
+} from "@metaplex-foundation/umi";
 
-import { fetchLinkFromSeeds, findLinkPda, initializeLinkV0, transferAssetV0 } from "../src/generated";
+import {
+  fetchLinkFromSeeds,
+  findLinkPda,
+  initializeLinkV0,
+  transferAssetV0,
+} from "../src/generated";
 import { createContext } from "./setup";
 
 describe("Initialize Link", () => {
@@ -19,6 +29,7 @@ describe("Initialize Link", () => {
 
   const linkerSigner = generateSigner(context);
 
+  const namespace = "underdog";
   const email = "kevin@underdogprotocol.com";
 
   beforeAll(async () => {
@@ -28,10 +39,12 @@ describe("Initialize Link", () => {
   it("initializes link", async () => {
     await initializeLinkV0(context, {
       linker: linkerSigner,
+      namespace,
       identifier: email,
     }).sendAndConfirm(context);
 
     const link = await fetchLinkFromSeeds(context, {
+      namespace,
       identifier: email,
     });
 
@@ -39,7 +52,7 @@ describe("Initialize Link", () => {
   });
 
   describe("Transfer", () => {
-    const link = findLinkPda(context, { identifier: email })[0];
+    const link = findLinkPda(context, { namespace, identifier: email })[0];
 
     const maxDepth = 3;
     const merkleTreeSigner = generateSigner(context);
@@ -84,7 +97,7 @@ describe("Initialize Link", () => {
       ).sendAndConfirm(context);
 
       await mintV1(context, {
-        leafOwner: findLinkPda(context, { identifier: email })[0],
+        leafOwner: findLinkPda(context, { namespace, identifier: email })[0],
         merkleTree: merkleTreeSigner.publicKey,
         metadata,
       }).sendAndConfirm(context);
@@ -92,14 +105,18 @@ describe("Initialize Link", () => {
 
     it("can transfer", async () => {
       await transferAssetV0(context, {
+        authority: linkerSigner,
         receiverAddress,
         merkleTree: merkleTreeSigner.publicKey,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash: dataHash,
         creatorHash: creatorHash,
         leafIndex,
+        namespace,
         identifier: email,
-        proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex).map((p) => publicKey(p)),
+        proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex).map((p) =>
+          publicKey(p)
+        ),
       }).sendAndConfirm(context);
     });
 
@@ -113,7 +130,9 @@ describe("Initialize Link", () => {
 
       await verifyLeaf(context, {
         merkleTree: merkleTreeSigner.publicKey,
-        root: publicKeyBytes(getMerkleRoot([publicKey(transferredLeafHash)], maxDepth)),
+        root: publicKeyBytes(
+          getMerkleRoot([publicKey(transferredLeafHash)], maxDepth)
+        ),
         leaf: transferredLeafHash,
         index: leafIndex,
       }).sendAndConfirm(context);
