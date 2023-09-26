@@ -1,4 +1,5 @@
 import {
+  fetchMerkleTree,
   fetchTreeConfigFromSeeds,
   getMerkleProof,
   getMerkleProofAtIndex,
@@ -9,6 +10,7 @@ import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata"
 import {
   PublicKey,
   createBigInt,
+  defaultPublicKey,
   generateSigner,
   publicKey,
   publicKeyBytes,
@@ -17,6 +19,7 @@ import {
 
 import { PROJECT_MINT_PREFIX, createTree } from "../../src";
 import {
+  burnAssetV0,
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
@@ -35,13 +38,20 @@ describe("Projects", () => {
 
   const superAdminAddress = generateSigner(context).publicKey;
   const orgId = "1";
-  const orgAccount = findOrgAccountPda(context, { superAdminAddress, orgId })[0];
+  const orgAccount = findOrgAccountPda(context, {
+    superAdminAddress,
+    orgId,
+  })[0];
 
   const orgControlSigner = generateSigner(context);
   const orgControlAddress = orgControlSigner.publicKey;
 
   const projectId = 1;
-  const projectMint = findProjectPda(context, { prefix: PROJECT_MINT_PREFIX, orgAccount, projectId })[0];
+  const projectMint = findProjectPda(context, {
+    prefix: PROJECT_MINT_PREFIX,
+    orgAccount,
+    projectId,
+  })[0];
 
   const owner = generateSigner(context).publicKey;
 
@@ -85,7 +95,7 @@ describe("Projects", () => {
       name: "",
       symbol: "",
       uri: "",
-      sellerFeeBasisPoints: 0
+      sellerFeeBasisPoints: 0,
     }).sendAndConfirm(context);
 
     const project = await fetchProjectFromSeeds(context, {
@@ -96,7 +106,9 @@ describe("Projects", () => {
 
     expect(project.projectId).toEqual(createBigInt(projectId));
 
-    const projectMetadata = await fetchMetadataFromSeeds(context, { mint: projectMint });
+    const projectMetadata = await fetchMetadataFromSeeds(context, {
+      mint: projectMint,
+    });
 
     expect(projectMetadata.name).toEqual("");
     expect(projectMetadata.symbol).toEqual("");
@@ -119,7 +131,9 @@ describe("Projects", () => {
       },
     }).sendAndConfirm(context);
 
-    const projectMetadata = await fetchMetadataFromSeeds(context, { mint: projectMint });
+    const projectMetadata = await fetchMetadataFromSeeds(context, {
+      mint: projectMint,
+    });
 
     expect(projectMetadata.name).toEqual(name);
     expect(projectMetadata.symbol).toEqual(symbol);
@@ -159,7 +173,9 @@ describe("Projects", () => {
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, {
+        merkleTree,
+      });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
@@ -209,7 +225,9 @@ describe("Projects", () => {
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, {
+        merkleTree,
+      });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
@@ -297,7 +315,9 @@ describe("Projects", () => {
     });
 
     it("increments number of minted nfts", async () => {
-      const treeConfig = await fetchTreeConfigFromSeeds(context, { merkleTree });
+      const treeConfig = await fetchTreeConfigFromSeeds(context, {
+        merkleTree,
+      });
       expect(treeConfig.numMinted).toEqual(createBigInt(leafIndex + 1));
     });
 
@@ -352,6 +372,61 @@ describe("Projects", () => {
         index: leafIndex,
         proof: getMerkleProof(leaves, maxDepth, leaves[leafIndex]),
       }).sendAndConfirm(context);
+    });
+  });
+
+  describe("Mint & Burn Delegated SFT", () => {
+    const leafIndex = 3;
+
+    const { leafHash, creatorsHash, dataHash } = hashProjectNft(context, {
+      superAdminAddress,
+      orgId,
+      projectId,
+      owner,
+      merkleTree,
+      leafIndex,
+      name,
+      symbol,
+      uri,
+      delegated: true,
+      sellerFeeBasisPoints,
+    });
+
+    beforeAll(async () => {
+      await mintSftV2(context, {
+        recipient: owner,
+        merkleTree,
+        superAdminAddress,
+        orgId,
+        memberAddress: superAdminAddress,
+        projectId,
+        isDelegated: true,
+      }).sendAndConfirm(context);
+
+      leaves.push(publicKey(leafHash));
+    });
+
+    it("can burn sft", async () => {
+      await burnAssetV0(context, {
+        leafOwner: owner,
+        merkleTree,
+        superAdminAddress,
+        orgId,
+        memberAddress: superAdminAddress,
+        projectId,
+        root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
+        dataHash,
+        leafIndex,
+        creatorHash: creatorsHash,
+        proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
+      }).sendAndConfirm(context);
+
+      const merkleTreeAccount = await fetchMerkleTree(context, merkleTree);
+      expect(merkleTreeAccount.tree.rightMostPath.leaf).toEqual(
+        defaultPublicKey()
+      );
+
+      leaves[leafIndex] = defaultPublicKey();
     });
   });
 });

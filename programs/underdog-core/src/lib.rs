@@ -65,6 +65,13 @@ pub mod underdog_core {
     transfer_asset_v1::handler(ctx, args)
   }
 
+  pub fn burn_asset_v0<'info>(
+    ctx: Context<'_, '_, '_, 'info, BurnAssetV0<'info>>,
+    args: BurnAssetV0Args,
+  ) -> Result<()> {
+    burn_asset_v0::handler(ctx, args)
+  }
+
   pub fn initialize_legacy_project(
     ctx: Context<InitializeLegacyProject>,
     args: InitializeLegacyProjectArgs,

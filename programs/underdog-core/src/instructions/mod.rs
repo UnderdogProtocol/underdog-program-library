@@ -1,4 +1,5 @@
 pub mod add_org_member;
+pub mod burn_asset_v0;
 pub mod burn_non_transferable_nft;
 pub mod claim_non_transferable_nft;
 pub mod initialize_compressed_project;
@@ -21,6 +22,7 @@ pub mod update_project_v0;
 pub mod verify_legacy_nft_collection;
 
 pub use add_org_member::*;
+pub use burn_asset_v0::*;
 pub use burn_non_transferable_nft::*;
 pub use claim_non_transferable_nft::*;
 pub use initialize_compressed_project::*;

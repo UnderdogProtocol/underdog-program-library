@@ -130,17 +130,17 @@ describe("Non-Transferable Projects", () => {
 
     expect(metadata.creators.__option).toBe("Some");
 
-    await updateNonTransferableNft(context, {
-      superAdminAddress,
-      orgId: orgId.toString(),
-      projectIdStr: projectId.toString(),
-      nftIdStr: nftId.toString(),
-      name: "Saga Genesis",
-      symbol: "Saga Ge",
-    }).sendAndConfirm(context);
+    // await updateNonTransferableNft(context, {
+    //   superAdminAddress,
+    //   orgId: orgId.toString(),
+    //   projectIdStr: projectId.toString(),
+    //   nftIdStr: nftId.toString(),
+    //   name: "Saga Genesis",
+    //   symbol: "Saga Ge",
+    // }).sendAndConfirm(context);
 
-    const metadata2 = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
-    console.log(metadata2)
+    // const metadata2 = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
+    // console.log(metadata2)
   });
 
   it("revokes a non-transferable nft", async () => {

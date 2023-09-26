@@ -7,6 +7,7 @@
  */
 
 export * from './addOrgMember';
+export * from './burnAssetV0';
 export * from './burnNonTransferableNft';
 export * from './claimNonTransferableNft';
 export * from './initializeCompressedProject';

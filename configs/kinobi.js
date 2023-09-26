@@ -658,7 +658,7 @@ kinobi.update(
     {
       // Use extra "proof" arg as remaining accounts.
       selector: (node) =>
-        k.isInstructionNode(node) && ["transferAssetV1"].includes(node.name),
+        k.isInstructionNode(node) && ["transferAssetV1", "burnAssetV0"].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({
