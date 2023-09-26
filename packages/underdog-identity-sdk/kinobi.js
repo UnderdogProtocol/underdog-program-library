@@ -11,7 +11,7 @@ kinobi.update(
       seeds: [k.stringConstantSeed("underdog_identity_admin")],
     },
     link: {
-      seeds: [k.stringConstantSeed("underdog"), k.stringSeed("identifier")],
+      seeds: [k.stringSeed("namespace"), k.stringSeed("identifier")],
     },
   })
 );

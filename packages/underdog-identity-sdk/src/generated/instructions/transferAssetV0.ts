@@ -27,14 +27,14 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAdminPda, findLinkPda } from '../accounts';
+import { findAdminPda } from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type TransferAssetV0InstructionAccounts = {
   authority?: Signer;
   admin?: PublicKey | Pda;
-  link?: PublicKey | Pda;
+  link: PublicKey | Pda;
   receiverAddress: PublicKey | Pda;
   treeAuthority?: PublicKey | Pda;
   merkleTree: PublicKey | Pda;
@@ -131,6 +131,7 @@ export function transferAssetV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
+    link: [input.link, false] as const,
     receiverAddress: [input.receiverAddress, false] as const,
     merkleTree: [input.merkleTree, true] as const,
   };
@@ -148,16 +149,6 @@ export function transferAssetV0(
     input.admin
       ? ([input.admin, true] as const)
       : ([findAdminPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'link',
-    input.link
-      ? ([input.link, false] as const)
-      : ([
-          findLinkPda(context, { identifier: input.identifier }),
-          false,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

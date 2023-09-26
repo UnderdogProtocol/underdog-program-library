@@ -24,7 +24,7 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAdminPda, findLinkPda } from '../accounts';
+import { findAdminPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
@@ -32,7 +32,7 @@ export type InitializeLinkV0InstructionAccounts = {
   authority?: Signer;
   admin?: PublicKey | Pda;
   linker: Signer;
-  link?: PublicKey | Pda;
+  link: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
 };
@@ -105,6 +105,7 @@ export function initializeLinkV0(
   // Resolved inputs.
   const resolvedAccounts = {
     linker: [input.linker, true] as const,
+    link: [input.link, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -120,16 +121,6 @@ export function initializeLinkV0(
     input.admin
       ? ([input.admin, true] as const)
       : ([findAdminPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'link',
-    input.link
-      ? ([input.link, true] as const)
-      : ([
-          findLinkPda(context, { identifier: input.identifier }),
-          true,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
