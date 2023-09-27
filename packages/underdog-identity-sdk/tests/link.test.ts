@@ -1,6 +1,7 @@
 import {
   Creator,
   createTree,
+  fetchMerkleTree,
   getMerkleProofAtIndex,
   getMerkleRoot,
   hashLeaf,
@@ -10,6 +11,7 @@ import {
   verifyLeaf,
 } from "@metaplex-foundation/mpl-bubblegum";
 import {
+  defaultPublicKey,
   generateSigner,
   publicKey,
   publicKeyBytes,
@@ -17,6 +19,7 @@ import {
 } from "@metaplex-foundation/umi";
 
 import {
+  burnAssetV0,
   fetchLinkFromSeeds,
   findLinkPda,
   initializeLinkV0,
@@ -85,7 +88,7 @@ describe("Initialize Link", () => {
       metadata,
     });
 
-    const leaves = [publicKey(leafHash)];
+    const leaves = [publicKey(leafHash), publicKey(leafHash)];
 
     beforeAll(async () => {
       await (
@@ -95,6 +98,12 @@ describe("Initialize Link", () => {
           merkleTree: merkleTreeSigner,
         })
       ).sendAndConfirm(context);
+
+      await mintV1(context, {
+        leafOwner: findLinkPda(context, { namespace, identifier: email })[0],
+        merkleTree: merkleTreeSigner.publicKey,
+        metadata,
+      }).sendAndConfirm(context);
 
       await mintV1(context, {
         leafOwner: findLinkPda(context, { namespace, identifier: email })[0],
@@ -128,14 +137,42 @@ describe("Initialize Link", () => {
         metadata,
       });
 
+      leaves[leafIndex] = publicKey(transferredLeafHash);
+
       await verifyLeaf(context, {
         merkleTree: merkleTreeSigner.publicKey,
-        root: publicKeyBytes(
-          getMerkleRoot([publicKey(transferredLeafHash)], maxDepth)
-        ),
+        root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         leaf: transferredLeafHash,
         index: leafIndex,
       }).sendAndConfirm(context);
+    });
+
+    it("can burn", async () => {
+      const leafIndex = 1;
+
+      await burnAssetV0(context, {
+        authority: linkerSigner,
+        merkleTree: merkleTreeSigner.publicKey,
+        root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
+        dataHash: dataHash,
+        creatorHash: creatorHash,
+        leafIndex,
+        namespace,
+        identifier: email,
+        proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex).map((p) =>
+          publicKey(p)
+        ),
+      }).sendAndConfirm(context);
+
+      const merkleTreeAccount = await fetchMerkleTree(
+        context,
+        merkleTreeSigner.publicKey
+      );
+      expect(merkleTreeAccount.tree.rightMostPath.leaf).toEqual(
+        defaultPublicKey()
+      );
+
+      leaves[leafIndex] = defaultPublicKey();
     });
   });
 });

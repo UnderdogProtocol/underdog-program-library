@@ -32,4 +32,11 @@ pub mod underdog_identity {
   ) -> Result<()> {
     transfer_asset_v0::handler(ctx, args)
   }
+
+  pub fn burn_asset_v0<'info>(
+    ctx: Context<'_, '_, '_, 'info, BurnAssetV0<'info>>,
+    args: BurnAssetV0Args,
+  ) -> Result<()> {
+    burn_asset_v0::handler(ctx, args)
+  }
 }
