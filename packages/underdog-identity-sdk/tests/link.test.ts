@@ -32,7 +32,7 @@ describe("Initialize Link", () => {
 
   const linkerSigner = generateSigner(context);
 
-  const namespace = "underdog";
+  const namespace = "public";
   const email = "kevin@underdogprotocol.com";
 
   beforeAll(async () => {

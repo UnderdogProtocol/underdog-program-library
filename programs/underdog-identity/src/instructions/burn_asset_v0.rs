@@ -77,7 +77,7 @@ pub fn handler<'info>(
   args: BurnAssetV0Args,
 ) -> Result<()> {
   let signer_seeds: &[&[&[u8]]] = &[&[
-    UNDERDOG_LINK_PREFIX.as_ref(),
+    args.namespace.as_ref(),
     args.identifier.as_ref(),
     &[ctx.accounts.link.bump],
   ]];
