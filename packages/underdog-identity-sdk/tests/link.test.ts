@@ -27,6 +27,8 @@ import {
 } from "../src/generated";
 import { createContext } from "./setup";
 
+jest.setTimeout(60_000)
+
 describe("Initialize Link", () => {
   const context = createContext();
 

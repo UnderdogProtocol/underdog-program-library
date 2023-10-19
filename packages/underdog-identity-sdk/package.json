@@ -1,6 +1,6 @@
 {
   "name": "@underdog-protocol/underdog-identity-sdk",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Interface to the underdog-identity smart contract",
   "publishConfig": {
     "access": "public",

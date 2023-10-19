@@ -67,7 +67,7 @@
         {
           "name": "namespaceAdmin",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "namespaceAccount",

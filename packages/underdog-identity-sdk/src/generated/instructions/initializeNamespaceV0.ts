@@ -31,7 +31,7 @@ import { addAccountMeta, addObjectProperty } from '../shared';
 export type InitializeNamespaceV0InstructionAccounts = {
   authority?: Signer;
   admin?: PublicKey | Pda;
-  namespaceAdmin: Signer;
+  namespaceAdmin: PublicKey | Pda;
   namespaceAccount?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;

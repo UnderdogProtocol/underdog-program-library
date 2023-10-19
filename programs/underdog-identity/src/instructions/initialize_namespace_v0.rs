@@ -10,7 +10,7 @@ use crate::state::*;
 #[derive(Accounts)]
 #[instruction(args: InitializeNamespaceV0Args)]
 pub struct InitializeNamespaceV0<'info> {
-  #[account()]
+  #[account(mut)]
   pub authority: Signer<'info>,
 
   #[account(
@@ -21,12 +21,13 @@ pub struct InitializeNamespaceV0<'info> {
   )]
   pub admin: Box<Account<'info, Admin>>,
 
+  /// CHECK: Should this be a signer?
   #[account(mut)]
-  pub namespace_admin: Signer<'info>,
+  pub namespace_admin: AccountInfo<'info>,
 
   #[account(
     init,
-    payer = namespace_admin,
+    payer = authority,
     space = NAMESPACE_SIZE,
     seeds = [args.namespace.as_ref()],
     bump,

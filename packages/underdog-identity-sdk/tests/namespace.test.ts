@@ -7,6 +7,8 @@ import {
 } from "../src/generated";
 import { createContext } from "./setup";
 
+jest.setTimeout(60_000)
+
 describe("Initialize Namespace", () => {
   const context = createContext();
 
@@ -17,14 +19,14 @@ describe("Initialize Namespace", () => {
   const identifier = "your@email.com";
 
   beforeAll(async () => {
-    await context.rpc.airdrop(namespaceSigner.publicKey, sol(1));
+    await context.rpc.airdrop(namespaceSigner.publicKey, sol(5));
     await context.rpc.airdrop(passportSigner.publicKey, sol(1));
   });
 
   it("initializes namespace", async () => {
     await initializeNamespaceV0(context, {
       namespace,
-      namespaceAdmin: namespaceSigner,
+      namespaceAdmin: namespaceSigner.publicKey,
     }).sendAndConfirm(context);
 
     const namespaceAccount = await fetchNamespaceFromSeeds(context, {
