@@ -6,8 +6,10 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './activatePassportV0';
 export * from './burnAssetV0';
 export * from './initializeAdmin';
 export * from './initializeLinkV0';
+export * from './initializeNamespaceV0';
 export * from './transferAssetV0';
 export * from './updateAdmin';

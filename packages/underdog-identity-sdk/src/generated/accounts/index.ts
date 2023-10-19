@@ -8,3 +8,4 @@
 
 export * from './admin';
 export * from './link';
+export * from './namespace';

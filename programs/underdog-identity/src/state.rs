@@ -15,6 +15,19 @@ pub const ADMIN_SIZE: usize = 8 +
 
 #[account]
 #[derive(Default)]
+pub struct Namespace {
+  pub address: Pubkey,
+  pub expiration: u64,
+  pub bump: u8,
+}
+
+pub const NAMESPACE_SIZE: usize = 8 +
+  1 + // bump
+  8 + // expiration
+  32; // address
+
+#[account]
+#[derive(Default)]
 pub struct Link {
   pub bump: u8,
   pub address: Pubkey,

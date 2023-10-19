@@ -52,6 +52,92 @@
       ]
     },
     {
+      "name": "initializeNamespaceV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "namespaceAdmin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "namespaceAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeNamespaceV0Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "activatePassportV0",
+      "accounts": [
+        {
+          "name": "namespaceAdmin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "namespaceAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "passportAdmin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "passport",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "ActivatePassportV0Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "initializeLinkV0",
       "accounts": [
         {
@@ -234,6 +320,26 @@
       }
     },
     {
+      "name": "Namespace",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "publicKey"
+          },
+          {
+            "name": "expiration",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "Link",
       "type": {
         "kind": "struct",
@@ -251,6 +357,22 @@
     }
   ],
   "types": [
+    {
+      "name": "ActivatePassportV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "namespace",
+            "type": "string"
+          },
+          {
+            "name": "identifier",
+            "type": "string"
+          }
+        ]
+      }
+    },
     {
       "name": "BurnAssetV0Args",
       "type": {
@@ -309,6 +431,18 @@
           },
           {
             "name": "identifier",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeNamespaceV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "namespace",
             "type": "string"
           }
         ]

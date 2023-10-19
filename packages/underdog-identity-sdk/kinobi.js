@@ -13,6 +13,9 @@ kinobi.update(
     link: {
       seeds: [k.stringSeed("namespace"), k.stringSeed("identifier")],
     },
+    namespace: {
+      seeds: [k.stringSeed("namespace")],
+    },
   })
 );
 
@@ -31,6 +34,23 @@ kinobi.update(
           namespace: k.argDefault("namespace"),
           identifier: k.argDefault("identifier")
         },
+      }),
+    },
+    {
+      account: "passport",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("link", {
+        seeds: {
+          namespace: k.argDefault("namespace"),
+          identifier: k.argDefault("identifier")
+        },
+      }),
+    },
+    {
+      account: "namespaceAccount",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("namespace", {
+        seeds: { namespace: k.argDefault("namespace") },
       }),
     },
     {
