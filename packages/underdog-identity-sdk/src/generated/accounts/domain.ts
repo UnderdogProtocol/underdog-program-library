@@ -30,117 +30,120 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 
-export type Namespace = Account<NamespaceAccountData>;
+export type Domain = Account<DomainAccountData>;
 
-export type NamespaceAccountData = {
+export type DomainAccountData = {
   discriminator: Array<number>;
-  address: PublicKey;
+  authority: PublicKey;
   expiration: bigint;
   bump: number;
 };
 
-export type NamespaceAccountDataArgs = {
-  address: PublicKey;
+export type DomainAccountDataArgs = {
+  authority: PublicKey;
   expiration: number | bigint;
   bump: number;
 };
 
-/** @deprecated Use `getNamespaceAccountDataSerializer()` without any argument instead. */
-export function getNamespaceAccountDataSerializer(
+/** @deprecated Use `getDomainAccountDataSerializer()` without any argument instead. */
+export function getDomainAccountDataSerializer(
   _context: object
-): Serializer<NamespaceAccountDataArgs, NamespaceAccountData>;
-export function getNamespaceAccountDataSerializer(): Serializer<
-  NamespaceAccountDataArgs,
-  NamespaceAccountData
+): Serializer<DomainAccountDataArgs, DomainAccountData>;
+export function getDomainAccountDataSerializer(): Serializer<
+  DomainAccountDataArgs,
+  DomainAccountData
 >;
-export function getNamespaceAccountDataSerializer(
+export function getDomainAccountDataSerializer(
   _context: object = {}
-): Serializer<NamespaceAccountDataArgs, NamespaceAccountData> {
-  return mapSerializer<NamespaceAccountDataArgs, any, NamespaceAccountData>(
-    struct<NamespaceAccountData>(
+): Serializer<DomainAccountDataArgs, DomainAccountData> {
+  return mapSerializer<DomainAccountDataArgs, any, DomainAccountData>(
+    struct<DomainAccountData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['address', publicKeySerializer()],
+        ['authority', publicKeySerializer()],
         ['expiration', u64()],
         ['bump', u8()],
       ],
-      { description: 'NamespaceAccountData' }
+      { description: 'DomainAccountData' }
     ),
-    (value) => ({ ...value, discriminator: [41, 55, 77, 19, 60, 94, 223, 107] })
-  ) as Serializer<NamespaceAccountDataArgs, NamespaceAccountData>;
+    (value) => ({
+      ...value,
+      discriminator: [167, 191, 231, 63, 146, 41, 115, 27],
+    })
+  ) as Serializer<DomainAccountDataArgs, DomainAccountData>;
 }
 
-/** @deprecated Use `deserializeNamespace(rawAccount)` without any context instead. */
-export function deserializeNamespace(
+/** @deprecated Use `deserializeDomain(rawAccount)` without any context instead. */
+export function deserializeDomain(
   context: object,
   rawAccount: RpcAccount
-): Namespace;
-export function deserializeNamespace(rawAccount: RpcAccount): Namespace;
-export function deserializeNamespace(
+): Domain;
+export function deserializeDomain(rawAccount: RpcAccount): Domain;
+export function deserializeDomain(
   context: RpcAccount | object,
   rawAccount?: RpcAccount
-): Namespace {
+): Domain {
   return deserializeAccount(
     rawAccount ?? (context as RpcAccount),
-    getNamespaceAccountDataSerializer()
+    getDomainAccountDataSerializer()
   );
 }
 
-export async function fetchNamespace(
+export async function fetchDomain(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<Namespace> {
+): Promise<Domain> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  assertAccountExists(maybeAccount, 'Namespace');
-  return deserializeNamespace(maybeAccount);
+  assertAccountExists(maybeAccount, 'Domain');
+  return deserializeDomain(maybeAccount);
 }
 
-export async function safeFetchNamespace(
+export async function safeFetchDomain(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<Namespace | null> {
+): Promise<Domain | null> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists ? deserializeNamespace(maybeAccount) : null;
+  return maybeAccount.exists ? deserializeDomain(maybeAccount) : null;
 }
 
-export async function fetchAllNamespace(
+export async function fetchAllDomain(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<Namespace[]> {
+): Promise<Domain[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, 'Namespace');
-    return deserializeNamespace(maybeAccount);
+    assertAccountExists(maybeAccount, 'Domain');
+    return deserializeDomain(maybeAccount);
   });
 }
 
-export async function safeFetchAllNamespace(
+export async function safeFetchAllDomain(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<Namespace[]> {
+): Promise<Domain[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) => deserializeNamespace(maybeAccount as RpcAccount));
+    .map((maybeAccount) => deserializeDomain(maybeAccount as RpcAccount));
 }
 
-export function getNamespaceGpaBuilder(
+export function getDomainGpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
@@ -150,24 +153,24 @@ export function getNamespaceGpaBuilder(
   return gpaBuilder(context, programId)
     .registerFields<{
       discriminator: Array<number>;
-      address: PublicKey;
+      authority: PublicKey;
       expiration: number | bigint;
       bump: number;
     }>({
       discriminator: [0, array(u8(), { size: 8 })],
-      address: [8, publicKeySerializer()],
+      authority: [8, publicKeySerializer()],
       expiration: [40, u64()],
       bump: [48, u8()],
     })
-    .deserializeUsing<Namespace>((account) => deserializeNamespace(account))
-    .whereField('discriminator', [41, 55, 77, 19, 60, 94, 223, 107]);
+    .deserializeUsing<Domain>((account) => deserializeDomain(account))
+    .whereField('discriminator', [167, 191, 231, 63, 146, 41, 115, 27]);
 }
 
-export function getNamespaceSize(): number {
+export function getDomainSize(): number {
   return 49;
 }
 
-export function findNamespacePda(
+export function findDomainPda(
   context: Pick<Context, 'eddsa' | 'programs'>,
   seeds: {
     namespace: string;
@@ -182,18 +185,18 @@ export function findNamespacePda(
   ]);
 }
 
-export async function fetchNamespaceFromSeeds(
+export async function fetchDomainFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findNamespacePda>[1],
+  seeds: Parameters<typeof findDomainPda>[1],
   options?: RpcGetAccountOptions
-): Promise<Namespace> {
-  return fetchNamespace(context, findNamespacePda(context, seeds), options);
+): Promise<Domain> {
+  return fetchDomain(context, findDomainPda(context, seeds), options);
 }
 
-export async function safeFetchNamespaceFromSeeds(
+export async function safeFetchDomainFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
-  seeds: Parameters<typeof findNamespacePda>[1],
+  seeds: Parameters<typeof findDomainPda>[1],
   options?: RpcGetAccountOptions
-): Promise<Namespace | null> {
-  return safeFetchNamespace(context, findNamespacePda(context, seeds), options);
+): Promise<Domain | null> {
+  return safeFetchDomain(context, findDomainPda(context, seeds), options);
 }

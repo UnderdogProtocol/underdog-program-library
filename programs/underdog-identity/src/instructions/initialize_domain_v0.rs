@@ -1,15 +1,15 @@
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
-pub struct InitializeNamespaceV0Args {
+pub struct InitializeDomainV0Args {
   namespace: String,
 }
 
 use crate::state::*;
 
 #[derive(Accounts)]
-#[instruction(args: InitializeNamespaceV0Args)]
-pub struct InitializeNamespaceV0<'info> {
+#[instruction(args: InitializeDomainV0Args)]
+pub struct InitializeDomainV0<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
 
@@ -23,30 +23,30 @@ pub struct InitializeNamespaceV0<'info> {
 
   /// CHECK: Should this be a signer?
   #[account(mut)]
-  pub namespace_admin: AccountInfo<'info>,
+  pub domain_authority: AccountInfo<'info>,
 
   #[account(
     init,
     payer = authority,
-    space = NAMESPACE_SIZE,
+    space = DOMAIN_SIZE,
     seeds = [args.namespace.as_ref()],
     bump,
   )]
-  pub namespace_account: Box<Account<'info, Namespace>>,
+  pub domain: Box<Account<'info, Domain>>,
 
   pub system_program: Program<'info, System>,
   pub rent: Sysvar<'info, Rent>,
 }
 
 pub fn handler<'info>(
-  ctx: Context<InitializeNamespaceV0>,
-  _args: InitializeNamespaceV0Args,
+  ctx: Context<InitializeDomainV0>,
+  _args: InitializeDomainV0Args,
 ) -> Result<()> {
-  let namespace_account = &mut ctx.accounts.namespace_account;
+  let domain = &mut ctx.accounts.domain;
 
-  namespace_account.address = ctx.accounts.namespace_admin.to_account_info().key();
-  namespace_account.expiration = 0;
-  namespace_account.bump = *ctx.bumps.get("namespace_account").unwrap();
+  domain.authority = ctx.accounts.domain_authority.to_account_info().key();
+  domain.expiration = 0;
+  domain.bump = *ctx.bumps.get("domain").unwrap();
 
   Ok(())
 }

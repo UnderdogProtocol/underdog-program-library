@@ -24,14 +24,14 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findLinkPda, findNamespacePda } from '../accounts';
+import { findDomainPda, findLinkPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type ActivatePassportV0InstructionAccounts = {
-  namespaceAdmin: Signer;
-  namespaceAccount?: PublicKey | Pda;
-  passportAdmin: Signer;
+  domainAuthority: Signer;
+  domain?: PublicKey | Pda;
+  passportAuthority: Signer;
   passport?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
@@ -110,17 +110,17 @@ export function activatePassportV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    namespaceAdmin: [input.namespaceAdmin, true] as const,
-    passportAdmin: [input.passportAdmin, true] as const,
+    domainAuthority: [input.domainAuthority, true] as const,
+    passportAuthority: [input.passportAuthority, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
-    'namespaceAccount',
-    input.namespaceAccount
-      ? ([input.namespaceAccount, false] as const)
+    'domain',
+    input.domain
+      ? ([input.domain, false] as const)
       : ([
-          findNamespacePda(context, { namespace: input.namespace }),
+          findDomainPda(context, { namespace: input.namespace }),
           false,
         ] as const)
   );
@@ -162,9 +162,9 @@ export function activatePassportV0(
   );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
-  addAccountMeta(keys, signers, resolvedAccounts.namespaceAdmin, false);
-  addAccountMeta(keys, signers, resolvedAccounts.namespaceAccount, false);
-  addAccountMeta(keys, signers, resolvedAccounts.passportAdmin, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domainAuthority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domain, false);
+  addAccountMeta(keys, signers, resolvedAccounts.passportAuthority, false);
   addAccountMeta(keys, signers, resolvedAccounts.passport, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.rent, false);

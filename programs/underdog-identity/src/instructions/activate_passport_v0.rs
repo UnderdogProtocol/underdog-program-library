@@ -12,21 +12,21 @@ use crate::state::*;
 #[instruction(args: ActivatePassportV0Args)]
 pub struct ActivatePassportV0<'info> {
   #[account(mut)]
-  pub namespace_admin: Signer<'info>,
+  pub domain_authority: Signer<'info>,
 
   #[account(
-    constraint = namespace_account.address == namespace_admin.key(),
+    constraint = domain.authority == domain_authority.key(),
     seeds = [args.namespace.as_ref()],
-    bump=namespace_account.bump
+    bump=domain.bump
   )]
-  pub namespace_account: Box<Account<'info, Namespace>>,
+  pub domain: Box<Account<'info, Domain>>,
 
   #[account(mut)]
-  pub passport_admin: Signer<'info>,
+  pub passport_authority: Signer<'info>,
 
   #[account(
     init,
-    payer = passport_admin,
+    payer = passport_authority,
     space = LINK_SIZE,
     seeds = [args.namespace.as_ref(), args.identifier.as_ref()],
     bump,
@@ -43,7 +43,7 @@ pub fn handler<'info>(
 ) -> Result<()> {
   let passport = &mut ctx.accounts.passport;
 
-  passport.address = ctx.accounts.passport_admin.to_account_info().key();
+  passport.address = ctx.accounts.passport_authority.to_account_info().key();
   passport.bump = *ctx.bumps.get("passport").unwrap();
 
   Ok(())

@@ -7,5 +7,5 @@
  */
 
 export * from './admin';
+export * from './domain';
 export * from './link';
-export * from './namespace';

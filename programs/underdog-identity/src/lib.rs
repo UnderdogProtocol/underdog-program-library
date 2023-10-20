@@ -19,11 +19,11 @@ pub mod underdog_identity {
     update_admin::handler(ctx, args)
   }
 
-  pub fn initialize_namespace_v0<'info>(
-    ctx: Context<InitializeNamespaceV0>,
-    args: InitializeNamespaceV0Args,
+  pub fn initialize_domain_v0<'info>(
+    ctx: Context<InitializeDomainV0>,
+    args: InitializeDomainV0Args,
   ) -> Result<()> {
-    initialize_namespace_v0::handler(ctx, args)
+    initialize_domain_v0::handler(ctx, args)
   }
 
   pub fn activate_passport_v0<'info>(

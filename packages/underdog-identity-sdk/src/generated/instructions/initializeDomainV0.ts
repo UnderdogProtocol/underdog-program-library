@@ -24,72 +24,75 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAdminPda, findNamespacePda } from '../accounts';
+import { findAdminPda, findDomainPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type InitializeNamespaceV0InstructionAccounts = {
+export type InitializeDomainV0InstructionAccounts = {
   authority?: Signer;
   admin?: PublicKey | Pda;
-  namespaceAdmin: PublicKey | Pda;
-  namespaceAccount?: PublicKey | Pda;
+  domainAuthority: PublicKey | Pda;
+  domain?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
 };
 
 // Data.
-export type InitializeNamespaceV0InstructionData = {
+export type InitializeDomainV0InstructionData = {
   discriminator: Array<number>;
   namespace: string;
 };
 
-export type InitializeNamespaceV0InstructionDataArgs = { namespace: string };
+export type InitializeDomainV0InstructionDataArgs = { namespace: string };
 
-/** @deprecated Use `getInitializeNamespaceV0InstructionDataSerializer()` without any argument instead. */
-export function getInitializeNamespaceV0InstructionDataSerializer(
+/** @deprecated Use `getInitializeDomainV0InstructionDataSerializer()` without any argument instead. */
+export function getInitializeDomainV0InstructionDataSerializer(
   _context: object
 ): Serializer<
-  InitializeNamespaceV0InstructionDataArgs,
-  InitializeNamespaceV0InstructionData
+  InitializeDomainV0InstructionDataArgs,
+  InitializeDomainV0InstructionData
 >;
-export function getInitializeNamespaceV0InstructionDataSerializer(): Serializer<
-  InitializeNamespaceV0InstructionDataArgs,
-  InitializeNamespaceV0InstructionData
+export function getInitializeDomainV0InstructionDataSerializer(): Serializer<
+  InitializeDomainV0InstructionDataArgs,
+  InitializeDomainV0InstructionData
 >;
-export function getInitializeNamespaceV0InstructionDataSerializer(
+export function getInitializeDomainV0InstructionDataSerializer(
   _context: object = {}
 ): Serializer<
-  InitializeNamespaceV0InstructionDataArgs,
-  InitializeNamespaceV0InstructionData
+  InitializeDomainV0InstructionDataArgs,
+  InitializeDomainV0InstructionData
 > {
   return mapSerializer<
-    InitializeNamespaceV0InstructionDataArgs,
+    InitializeDomainV0InstructionDataArgs,
     any,
-    InitializeNamespaceV0InstructionData
+    InitializeDomainV0InstructionData
   >(
-    struct<InitializeNamespaceV0InstructionData>(
+    struct<InitializeDomainV0InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['namespace', string()],
       ],
-      { description: 'InitializeNamespaceV0InstructionData' }
+      { description: 'InitializeDomainV0InstructionData' }
     ),
-    (value) => ({ ...value, discriminator: [11, 143, 8, 169, 40, 77, 6, 129] })
+    (value) => ({
+      ...value,
+      discriminator: [62, 118, 17, 182, 235, 194, 146, 155],
+    })
   ) as Serializer<
-    InitializeNamespaceV0InstructionDataArgs,
-    InitializeNamespaceV0InstructionData
+    InitializeDomainV0InstructionDataArgs,
+    InitializeDomainV0InstructionData
   >;
 }
 
 // Args.
-export type InitializeNamespaceV0InstructionArgs =
-  InitializeNamespaceV0InstructionDataArgs;
+export type InitializeDomainV0InstructionArgs =
+  InitializeDomainV0InstructionDataArgs;
 
 // Instruction.
-export function initializeNamespaceV0(
+export function initializeDomainV0(
   context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: InitializeNamespaceV0InstructionAccounts &
-    InitializeNamespaceV0InstructionArgs
+  input: InitializeDomainV0InstructionAccounts &
+    InitializeDomainV0InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -102,15 +105,15 @@ export function initializeNamespaceV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    namespaceAdmin: [input.namespaceAdmin, true] as const,
+    domainAuthority: [input.domainAuthority, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
     'authority',
     input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
+      ? ([input.authority, true] as const)
+      : ([context.identity, true] as const)
   );
   addObjectProperty(
     resolvedAccounts,
@@ -121,11 +124,11 @@ export function initializeNamespaceV0(
   );
   addObjectProperty(
     resolvedAccounts,
-    'namespaceAccount',
-    input.namespaceAccount
-      ? ([input.namespaceAccount, true] as const)
+    'domain',
+    input.domain
+      ? ([input.domain, true] as const)
       : ([
-          findNamespacePda(context, { namespace: input.namespace }),
+          findDomainPda(context, { namespace: input.namespace }),
           true,
         ] as const)
   );
@@ -156,14 +159,14 @@ export function initializeNamespaceV0(
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
   addAccountMeta(keys, signers, resolvedAccounts.admin, false);
-  addAccountMeta(keys, signers, resolvedAccounts.namespaceAdmin, false);
-  addAccountMeta(keys, signers, resolvedAccounts.namespaceAccount, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domainAuthority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domain, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.rent, false);
 
   // Data.
   const data =
-    getInitializeNamespaceV0InstructionDataSerializer().serialize(resolvedArgs);
+    getInitializeDomainV0InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

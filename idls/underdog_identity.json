@@ -52,11 +52,11 @@
       ]
     },
     {
-      "name": "initializeNamespaceV0",
+      "name": "initializeDomainV0",
       "accounts": [
         {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -65,12 +65,12 @@
           "isSigner": false
         },
         {
-          "name": "namespaceAdmin",
+          "name": "domainAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "namespaceAccount",
+          "name": "domain",
           "isMut": true,
           "isSigner": false
         },
@@ -89,7 +89,7 @@
         {
           "name": "args",
           "type": {
-            "defined": "InitializeNamespaceV0Args"
+            "defined": "InitializeDomainV0Args"
           }
         }
       ]
@@ -98,17 +98,17 @@
       "name": "activatePassportV0",
       "accounts": [
         {
-          "name": "namespaceAdmin",
+          "name": "domainAuthority",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "namespaceAccount",
+          "name": "domain",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "passportAdmin",
+          "name": "passportAuthority",
           "isMut": true,
           "isSigner": true
         },
@@ -320,12 +320,12 @@
       }
     },
     {
-      "name": "Namespace",
+      "name": "Domain",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "address",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -421,6 +421,18 @@
       }
     },
     {
+      "name": "InitializeDomainV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "namespace",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeLinkV0Args",
       "type": {
         "kind": "struct",
@@ -431,18 +443,6 @@
           },
           {
             "name": "identifier",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "InitializeNamespaceV0Args",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "namespace",
             "type": "string"
           }
         ]

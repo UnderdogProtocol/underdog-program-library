@@ -13,7 +13,7 @@ kinobi.update(
     link: {
       seeds: [k.stringSeed("namespace"), k.stringSeed("identifier")],
     },
-    namespace: {
+    domain: {
       seeds: [k.stringSeed("namespace")],
     },
   })
@@ -47,9 +47,9 @@ kinobi.update(
       }),
     },
     {
-      account: "namespaceAccount",
+      account: "domain",
       ignoreIfOptional: true,
-      ...k.pdaDefault("namespace", {
+      ...k.pdaDefault("domain", {
         seeds: { namespace: k.argDefault("namespace") },
       }),
     },

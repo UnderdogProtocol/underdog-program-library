@@ -2,8 +2,8 @@ import { generateSigner, sol } from "@metaplex-foundation/umi";
 
 import {
   activatePassportV0,
-  fetchNamespaceFromSeeds,
-  initializeNamespaceV0,
+  fetchDomainFromSeeds,
+  initializeDomainV0,
 } from "../src/generated";
 import { createContext } from "./setup";
 
@@ -12,33 +12,31 @@ jest.setTimeout(60_000)
 describe("Initialize Namespace", () => {
   const context = createContext();
 
-  const namespaceSigner = generateSigner(context);
+  const domainSigner = generateSigner(context);
   const passportSigner = generateSigner(context);
 
   const namespace = "public";
   const identifier = "your@email.com";
 
   beforeAll(async () => {
-    await context.rpc.airdrop(namespaceSigner.publicKey, sol(5));
+    await context.rpc.airdrop(domainSigner.publicKey, sol(5));
     await context.rpc.airdrop(passportSigner.publicKey, sol(1));
   });
 
-  it("initializes namespace", async () => {
-    await initializeNamespaceV0(context, {
+  it("initializes domain", async () => {
+    await initializeDomainV0(context, {
       namespace,
-      namespaceAdmin: namespaceSigner.publicKey,
+      domainAuthority: domainSigner.publicKey,
     }).sendAndConfirm(context);
 
-    const namespaceAccount = await fetchNamespaceFromSeeds(context, {
-      namespace,
-    });
+    const domain = await fetchDomainFromSeeds(context, { namespace });
 
-    expect(namespaceAccount.address).toEqual(namespaceSigner.publicKey);
+    expect(domain.authority).toEqual(domainSigner.publicKey);
   });
 
   it("activates passport with namespace", async () => {
     await activatePassportV0(context, {
-      namespaceAdmin: namespaceSigner,
+      domainAuthority: domainSigner,
       passportAdmin: passportSigner,
       namespace,
       identifier,
