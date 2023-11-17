@@ -37,7 +37,7 @@ describe("Initialize Namespace", () => {
   it("activates passport with namespace", async () => {
     await activatePassportV0(context, {
       domainAuthority: domainSigner,
-      passportAdmin: passportSigner,
+      passportAuthority: passportSigner,
       namespace,
       identifier,
     }).sendAndConfirm(context);
