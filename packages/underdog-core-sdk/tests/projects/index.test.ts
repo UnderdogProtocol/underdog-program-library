@@ -17,18 +17,21 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 
-import { PROJECT_MINT_PREFIX, createTree } from "../../src";
+import { PROJECT_MINT_PREFIX, PROJECT_PREFIX, createTree } from "../../src";
 import {
   burnAssetV0,
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
+  getProjectSize,
   initializeOrg,
   initializeProjectV0,
+  initializeProjectV1,
   mintNftV2,
   mintSftV2,
   transferAssetV1,
   updateProjectV0,
+  withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
 import { createContext } from "../setup";
@@ -47,6 +50,11 @@ describe("Projects", () => {
   const orgControlAddress = orgControlSigner.publicKey;
 
   const projectId = 1;
+  const project = findProjectPda(context, {
+    prefix: PROJECT_PREFIX,
+    orgAccount: orgAccount,
+    projectId,
+  })[0];
   const projectMint = findProjectPda(context, {
     prefix: PROJECT_MINT_PREFIX,
     orgAccount,
@@ -86,10 +94,8 @@ describe("Projects", () => {
   });
 
   it("initializes a project", async () => {
-    await initializeProjectV0(context, {
-      authority: orgControlSigner,
+    await initializeProjectV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectId,
       name: "",
@@ -99,8 +105,8 @@ describe("Projects", () => {
     }).sendAndConfirm(context);
 
     const project = await fetchProjectFromSeeds(context, {
-      prefix: "project",
-      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
+      prefix: PROJECT_PREFIX,
+      orgAccount,
       projectId,
     });
 
@@ -139,6 +145,38 @@ describe("Projects", () => {
     expect(projectMetadata.symbol).toEqual(symbol);
     expect(projectMetadata.uri).toEqual(uri);
     expect(projectMetadata.sellerFeeBasisPoints).toEqual(sellerFeeBasisPoints);
+  });
+
+  describe("Project Royalties", () => {
+    beforeAll(async () => {
+      const projectBalance = await context.rpc.getBalance(project);
+
+      expect(projectBalance).toEqual(
+        await context.rpc.getRent(getProjectSize())
+      );
+
+      await context.rpc.airdrop(project, sol(1));
+    });
+
+    it("can withdraw royalties", async () => {
+      const destination = generateSigner(context).publicKey;
+
+      await withdrawProjectRoyaltiesV0(context, {
+        superAdminAddress,
+        orgId,
+        projectId,
+        destination,
+      }).sendAndConfirm(context);
+
+      const projectBalance = await context.rpc.getBalance(project);
+
+      expect(projectBalance).toEqual(
+        await context.rpc.getRent(getProjectSize())
+      );
+
+      const destinationBalance = await context.rpc.getBalance(destination);
+      expect(destinationBalance).toEqual(sol(1));
+    });
   });
 
   describe("Mint NFT", () => {

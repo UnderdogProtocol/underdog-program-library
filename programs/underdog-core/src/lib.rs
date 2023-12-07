@@ -46,6 +46,13 @@ pub mod underdog_core {
     initialize_project_v0::handler(ctx, args)
   }
 
+  pub fn initialize_project_v1(
+    ctx: Context<InitializeProjectV1>,
+    args: InitializeProjectV1Args,
+  ) -> Result<()> {
+    initialize_project_v1::handler(ctx, args)
+  }
+
   pub fn update_project_v0(ctx: Context<UpdateProjectV0>, args: UpdateProjectV0Args) -> Result<()> {
     update_project_v0::handler(ctx, args)
   }
@@ -140,5 +147,12 @@ pub mod underdog_core {
     args: UpdateNonTransferableNftArgs,
   ) -> Result<()> {
     update_non_transferable_nft::handler(ctx, args)
+  }
+
+  pub fn withdraw_project_royalties_v0(
+    ctx: Context<WithdrawProjectRoyaltiesV0>,
+    args: WithdrawProjectRoyaltiesV0Args,
+  ) -> Result<()> {
+    withdraw_project_royalties_v0::handler(ctx, args)
   }
 }
