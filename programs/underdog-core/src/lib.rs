@@ -20,26 +20,11 @@ pub mod underdog_core {
     update_owner::handler(ctx, _new_owner)
   }
 
-  pub fn initialize_org(ctx: Context<InitializeOrgContext>, args: InitializeOrgArgs) -> Result<()> {
-    initialize_org::handler(ctx, args)
-  }
-
   pub fn initialize_org_v1(
     ctx: Context<InitializeOrgV1Context>,
     args: InitializeOrgV1Args,
   ) -> Result<()> {
     initialize_org_v1::handler(ctx, args)
-  }
-
-  pub fn add_org_member(ctx: Context<AddOrgMemberContext>, args: AddOrgMemberArgs) -> Result<()> {
-    add_org_member::handler(ctx, args)
-  }
-
-  pub fn update_org_member(
-    ctx: Context<UpdateOrgMemberContext>,
-    args: UpdateOrgMemberArgs,
-  ) -> Result<()> {
-    update_org_member::handler(ctx, args)
   }
 
   pub fn initialize_tree(ctx: Context<InitializeTree>, args: InitializeTreeArgs) -> Result<()> {
@@ -55,10 +40,6 @@ pub mod underdog_core {
 
   pub fn update_project_v1(ctx: Context<UpdateProjectV1>, args: UpdateProjectV1Args) -> Result<()> {
     update_project_v1::handler(ctx, args)
-  }
-
-  pub fn mint_nft_v2(ctx: Context<MintNftV2>, args: MintNftV2Args) -> Result<()> {
-    mint_nft_v2::handler(ctx, args)
   }
 
   pub fn mint_nft_v3(ctx: Context<MintNftV3>, args: MintNftV3Args) -> Result<()> {
@@ -97,13 +78,6 @@ pub mod underdog_core {
     initialize_compressed_project_v1::handler(ctx, args)
   }
 
-  pub fn mint_compressed_nft(
-    ctx: Context<MintCompressedNft>,
-    args: MintCompressedNftArgs,
-  ) -> Result<()> {
-    mint_compressed_nft::handler(ctx, args)
-  }
-
   pub fn mint_compressed_nft_v1(
     ctx: Context<MintCompressedNftV1>,
     args: MintCompressedNftV1Args,
@@ -111,25 +85,11 @@ pub mod underdog_core {
     mint_compressed_nft_v1::handler(ctx, args)
   }
 
-  pub fn mint_transferable_nft(
-    ctx: Context<MintTransferableNft>,
-    args: MintTransferableNftArgs,
-  ) -> Result<()> {
-    mint_transferable_nft::handler(ctx, args)
-  }
-
   pub fn mint_transferable_nft_v1(
     ctx: Context<MintTransferableNftV1>,
     args: MintTransferableNftV1Args,
   ) -> Result<()> {
     mint_transferable_nft_v1::handler(ctx, args)
-  }
-
-  pub fn verify_legacy_nft_collection(
-    ctx: Context<VerifyLegacyNftCollection>,
-    args: VerifyLegacyNftCollectionArgs,
-  ) -> Result<()> {
-    verify_legacy_nft_collection::handler(ctx, args)
   }
 
   pub fn verify_legacy_nft_collection_v1(
@@ -179,13 +139,6 @@ pub mod underdog_core {
     args: BurnNonTransferableNftV1Args,
   ) -> Result<()> {
     burn_non_transferable_nft_v1::handler(ctx, args)
-  }
-
-  pub fn update_non_transferable_nft(
-    ctx: Context<UpdateNonTransferableNft>,
-    args: UpdateNonTransferableNftArgs,
-  ) -> Result<()> {
-    update_non_transferable_nft::handler(ctx, args)
   }
 
   pub fn withdraw_project_royalties_v0(

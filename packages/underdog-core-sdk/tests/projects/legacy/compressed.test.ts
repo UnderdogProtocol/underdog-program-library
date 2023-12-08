@@ -1,12 +1,9 @@
-import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
+import { createBigInt, generateSigner } from "@metaplex-foundation/umi";
 import {
   fetchCompressedProjectFromSeeds,
   findOrgAccountPda,
-  initializeCompressedProject,
   initializeCompressedProjectV1,
-  initializeOrg,
   initializeOrgV1,
-  mintCompressedNft,
   mintCompressedNftV1,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
