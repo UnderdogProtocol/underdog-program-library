@@ -590,7 +590,26 @@ kinobi.update(
         },
       },
     },
+    MintTransferableNftV1: {
+      accounts: {
+        receiverTokenAccount: {
+          defaultsTo: ataPdaDefault("transferableNftMint", "receiver"),
+        },
+      },
+      args: {
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("transferableProjectMint"),
+        },
+      },
+    },
     MintNonTransferableNft: {
+      args: {
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
+        },
+      },
+    },
+    MintNonTransferableNftV1: {
       args: {
         projectMintBump: {
           defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
@@ -606,11 +625,31 @@ kinobi.update(
         },
       },
     },
+    ClaimNonTransferableNftV1: {
+      accounts: nonTransferableNftDefaults.accounts,
+      args: {
+        ...nonTransferableNftDefaults.args,
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
+        },
+      },
+    },
     RevokeNonTransferableNft: nonTransferableNftDefaults,
+    RevokeNonTransferableNftV1: nonTransferableNftDefaults,
     BurnNonTransferableNft: {
       args: nonTransferableNftDefaults.args,
     },
+    BurnNonTransferableNftV1: {
+      args: nonTransferableNftDefaults.args,
+    },
     InitializeLegacyProject: {
+      args: {
+        ...defaultProjectPrefixArg,
+        ...defaultProjectMintPrefix,
+        ...defaultProjectVaultPrefix,
+      },
+    },
+    InitializeLegacyProjectV1: {
       args: {
         ...defaultProjectPrefixArg,
         ...defaultProjectMintPrefix,
@@ -640,10 +679,30 @@ kinobi.update(
         ...defaultNftMintPrefix,
       },
     },
+    VerifyLegacyNftCollectionV1: {
+      args: {
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("legacyProjectMint"),
+        },
+        nftMintBump: {
+          defaultsTo: k.accountBumpDefault("legacyNftMint"),
+        },
+        ...defaultProjectPrefixArg,
+        ...defaultProjectMintPrefix,
+        ...defaultNftMintPrefix,
+      },
+    },
     MintNftV2: projectDefaults,
     MintNftV3: projectDefaults,
     MintSftV3: projectDefaults,
     MintCompressedNft: {
+      args: {
+        projectMintBump: {
+          defaultsTo: k.accountBumpDefault("compressedProjectMint"),
+        },
+      },
+    },
+    MintCompressedNftV1: {
       args: {
         projectMintBump: {
           defaultsTo: k.accountBumpDefault("compressedProjectMint"),

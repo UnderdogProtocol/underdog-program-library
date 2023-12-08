@@ -16,19 +16,19 @@ import {
   TRANSFERABLE_PROJECT_VAULT_PREFIX,
 } from "./constants";
 import {
-  verifyLegacyNftCollection,
-  mintTransferableNft,
+  verifyLegacyNftCollectionV1,
+  mintTransferableNftV1,
   initializeTree,
   findOrgAccountPda,
   findProjectPda,
 } from "./generated";
 
 export const mintTransferableNftAndVerifyCollection = (
-  context: Parameters<typeof mintTransferableNft>[0] &
-    Parameters<typeof verifyLegacyNftCollection>[0] &
+  context: Parameters<typeof mintTransferableNftV1>[0] &
+    Parameters<typeof verifyLegacyNftCollectionV1>[0] &
     Pick<Context, "rpc">,
   input: Omit<
-    Parameters<typeof mintTransferableNft>[1] & Parameters<typeof verifyLegacyNftCollection>[1],
+    Parameters<typeof mintTransferableNftV1>[1] & Parameters<typeof verifyLegacyNftCollectionV1>[1],
     "projectType"
   >
 ) => {
@@ -36,11 +36,10 @@ export const mintTransferableNftAndVerifyCollection = (
 
   return transactionBuilder()
     .add(
-      mintTransferableNft(context, {
+      mintTransferableNftV1(context, {
         authority: input.authority,
         receiver: input.receiver,
         superAdminAddress: input.superAdminAddress,
-        memberAddress: input.memberAddress,
         orgId,
         projectIdStr,
         nftIdStr,
@@ -50,7 +49,7 @@ export const mintTransferableNftAndVerifyCollection = (
       })
     )
     .add(
-      verifyLegacyNftCollection(context, {
+      verifyLegacyNftCollectionV1(context, {
         authority: input.authority,
         superAdminAddress,
         orgId,

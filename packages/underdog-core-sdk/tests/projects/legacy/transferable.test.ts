@@ -4,8 +4,8 @@ import { mintTransferableNftAndVerifyCollection } from "../../../src";
 import {
   fetchLegacyProjectFromSeeds,
   findOrgAccountPda,
-  initializeLegacyProject,
-  initializeOrg,
+  initializeLegacyProjectV1,
+  initializeOrgV1,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 
@@ -19,24 +19,16 @@ describe("Transferable Projects", () => {
   const nftId = 1;
   const nftIdStr = nftId.toString();
 
-  const orgControlSigner = generateSigner(context);
-  const orgControlAddress = orgControlSigner.publicKey;
-
   beforeAll(async () => {
-    await initializeOrg(context, {
+    await initializeOrgV1(context, {
       superAdminAddress,
       orgId: orgId,
-      orgControlAddress: orgControlAddress,
     }).sendAndConfirm(context);
-
-    await context.rpc.airdrop(orgControlAddress, sol(1));
   });
 
   it("creates a transferable project", async () => {
-    await initializeLegacyProject(context, {
-      authority: orgControlSigner,
+    await initializeLegacyProjectV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       name: "Name",
@@ -56,10 +48,8 @@ describe("Transferable Projects", () => {
 
   it("mints an nft", async () => {
     await mintTransferableNftAndVerifyCollection(context, {
-      authority: orgControlSigner,
       receiver: superAdminAddress,
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       nftIdStr,

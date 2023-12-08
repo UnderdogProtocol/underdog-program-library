@@ -1070,6 +1070,79 @@
       ]
     },
     {
+      "name": "initializeLegacyProjectV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeLegacyProjectV1Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "initializeCompressedProject",
       "accounts": [
         {
@@ -1143,6 +1216,79 @@
           "name": "args",
           "type": {
             "defined": "InitializeCompressedProjectArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initializeCompressedProjectV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InitializeCompressedProjectV1Args"
           }
         }
       ]
@@ -1241,6 +1387,99 @@
           "name": "args",
           "type": {
             "defined": "MintCompressedNftArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mintCompressedNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "compressedProjectMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "recipient",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "treeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "merkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bubblegumSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "logWrapper",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bubblegumProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "compressionProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "MintCompressedNftV1Args"
           }
         }
       ]
@@ -1349,6 +1588,104 @@
       ]
     },
     {
+      "name": "mintTransferableNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "transferableProject",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "transferableProjectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "transferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "transferableProjectMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "transferableNftMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "transferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "transferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiverTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "MintTransferableNftV1Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "verifyLegacyNftCollection",
       "accounts": [
         {
@@ -1427,6 +1764,89 @@
           "name": "args",
           "type": {
             "defined": "VerifyLegacyNftCollectionArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifyLegacyNftCollectionV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "legacyProjectMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "legacyNftMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "legacyNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "VerifyLegacyNftCollectionV1Args"
           }
         }
       ]
@@ -1525,6 +1945,104 @@
           "name": "args",
           "type": {
             "defined": "MintNonTransferableNftArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mintNonTransferableNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftClaim",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "MintNonTransferableNftV1Args"
           }
         }
       ]
@@ -1638,6 +2156,114 @@
       ]
     },
     {
+      "name": "claimNonTransferableNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "claimer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftClaim",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "claimerTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "ClaimNonTransferableNftV1Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "revokeNonTransferableNft",
       "accounts": [
         {
@@ -1731,6 +2357,94 @@
       ]
     },
     {
+      "name": "revokeNonTransferableNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "claimer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "claimerTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "RevokeNonTransferableNftV1Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "burnNonTransferableNft",
       "accounts": [
         {
@@ -1819,6 +2533,94 @@
           "name": "args",
           "type": {
             "defined": "BurnNonTransferableNftArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "burnNonTransferableNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProject",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableProjectMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftMasterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonTransferableNftEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "BurnNonTransferableNftV1Args"
           }
         }
       ]
@@ -2319,6 +3121,38 @@
       }
     },
     {
+      "name": "BurnNonTransferableNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "nftEscrowBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "BurnNonTransferableNftArgs",
       "type": {
         "kind": "struct",
@@ -2342,6 +3176,42 @@
           {
             "name": "nftIdStr",
             "type": "string"
+          },
+          {
+            "name": "nftMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "nftEscrowBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimNonTransferableNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
           },
           {
             "name": "nftMintBump",
@@ -2391,6 +3261,38 @@
       }
     },
     {
+      "name": "InitializeCompressedProjectV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeCompressedProjectArgs",
       "type": {
         "kind": "struct",
@@ -2409,6 +3311,54 @@
           },
           {
             "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeLegacyProjectV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectType",
+            "type": "string"
+          },
+          {
+            "name": "projectPrefix",
+            "type": "string"
+          },
+          {
+            "name": "projectMintPrefix",
+            "type": "string"
+          },
+          {
+            "name": "projectVaultPrefix",
             "type": "string"
           },
           {
@@ -2567,6 +3517,42 @@
       }
     },
     {
+      "name": "MintCompressedNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "MintCompressedNftArgs",
       "type": {
         "kind": "struct",
@@ -2695,6 +3681,50 @@
       }
     },
     {
+      "name": "MintNonTransferableNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "claimerAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "MintNonTransferableNftArgs",
       "type": {
         "kind": "struct",
@@ -2769,6 +3799,46 @@
       }
     },
     {
+      "name": "MintTransferableNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "MintTransferableNftArgs",
       "type": {
         "kind": "struct",
@@ -2808,6 +3878,38 @@
           {
             "name": "uri",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevokeNonTransferableNftV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "nftEscrowBump",
+            "type": "u8"
           }
         ]
       }
@@ -3044,6 +4146,54 @@
             "type": {
               "defined": "UpdateMetadataArgs"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyLegacyNftCollectionV1Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectIdStr",
+            "type": "string"
+          },
+          {
+            "name": "nftIdStr",
+            "type": "string"
+          },
+          {
+            "name": "projectType",
+            "type": "string"
+          },
+          {
+            "name": "projectPrefix",
+            "type": "string"
+          },
+          {
+            "name": "projectMintPrefix",
+            "type": "string"
+          },
+          {
+            "name": "nftMintPrefix",
+            "type": "string"
+          },
+          {
+            "name": "projectMintBump",
+            "type": "u8"
+          },
+          {
+            "name": "nftMintBump",
+            "type": "u8"
           }
         ]
       }

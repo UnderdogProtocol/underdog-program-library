@@ -1,22 +1,17 @@
 import { fetchAllTokenByOwnerAndMint } from "@metaplex-foundation/mpl-toolbox";
-import {
-  createBigInt,
-  generateSigner,
-  sol,
-} from "@metaplex-foundation/umi";
+import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
 
 import {
-  burnNonTransferableNft,
-  claimNonTransferableNft,
+  burnNonTransferableNftV1,
+  claimNonTransferableNftV1,
   fetchClaimAccountFromSeeds,
   fetchLegacyProjectFromSeeds,
   findLegacyProjectPda,
   findOrgAccountPda,
-  initializeLegacyProject,
-  initializeOrg,
-  mintNonTransferableNft,
-  revokeNonTransferableNft,
-  updateNonTransferableNft,
+  initializeLegacyProjectV1,
+  initializeOrgV1,
+  mintNonTransferableNftV1,
+  revokeNonTransferableNftV1,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 import { findLegacyNftPda } from "../../../src";
@@ -31,8 +26,6 @@ describe("Non-Transferable Projects", () => {
   const projectIdStr = projectId.toString();
   const nftId = 1;
   const nftIdStr = nftId.toString();
-  const orgControlSigner = generateSigner(context);
-  const orgControlAddress = orgControlSigner.publicKey;
 
   const claimerSigner = generateSigner(context);
   const claimerAddress = claimerSigner.publicKey;
@@ -42,21 +35,17 @@ describe("Non-Transferable Projects", () => {
   const uri = "https://example.com";
 
   beforeAll(async () => {
-    await initializeOrg(context, {
+    await initializeOrgV1(context, {
       superAdminAddress,
       orgId: orgId,
-      orgControlAddress: orgControlAddress,
     }).sendAndConfirm(context);
 
-    await context.rpc.airdrop(orgControlAddress, sol(1));
     await context.rpc.airdrop(claimerAddress, sol(1));
   });
 
   it("creates a non-transferable project", async () => {
-    await initializeLegacyProject(context, {
-      authority: orgControlSigner,
+    await initializeLegacyProjectV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       name,
@@ -75,8 +64,7 @@ describe("Non-Transferable Projects", () => {
   });
 
   it("mints a non-transferable nft", async () => {
-    await mintNonTransferableNft(context, {
-      authority: orgControlSigner,
+    await mintNonTransferableNftV1(context, {
       superAdminAddress,
       orgId,
       claimerAddress,
@@ -110,8 +98,7 @@ describe("Non-Transferable Projects", () => {
   })[0];
 
   it("claims a non-transferable nft", async () => {
-    await claimNonTransferableNft(context, {
-      authority: orgControlSigner,
+    await claimNonTransferableNftV1(context, {
       claimer: claimerSigner,
       superAdminAddress,
       orgId,
@@ -126,7 +113,9 @@ describe("Non-Transferable Projects", () => {
     );
     expect(tokens.length).toEqual(1);
 
-    const metadata = await fetchMetadataFromSeeds(context, { mint: nftMintAddress });
+    const metadata = await fetchMetadataFromSeeds(context, {
+      mint: nftMintAddress,
+    });
 
     expect(metadata.creators.__option).toBe("Some");
 
@@ -144,10 +133,8 @@ describe("Non-Transferable Projects", () => {
   });
 
   it("revokes a non-transferable nft", async () => {
-    await revokeNonTransferableNft(context, {
-      authority: orgControlSigner,
+    await revokeNonTransferableNftV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       claimer: claimerSigner.publicKey,
       orgId,
       projectIdStr,
@@ -176,10 +163,8 @@ describe("Non-Transferable Projects", () => {
 
     expect(tokensBeforeBurn.length).toEqual(1);
 
-    await burnNonTransferableNft(context, {
-      authority: orgControlSigner,
+    await burnNonTransferableNftV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       nftIdStr,

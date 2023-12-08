@@ -24,7 +24,7 @@ import {
   findOrgAccountPda,
   findProjectPda,
   getProjectSize,
-  initializeOrg,
+  initializeOrgV1,
   initializeProjectV1,
   mintNftV3,
   mintSftV3,
@@ -44,9 +44,6 @@ describe("Projects", () => {
     superAdminAddress,
     orgId,
   })[0];
-
-  const orgControlSigner = generateSigner(context);
-  const orgControlAddress = orgControlSigner.publicKey;
 
   const projectId = 1;
   const project = findProjectPda(context, {
@@ -75,13 +72,10 @@ describe("Projects", () => {
   const leaves: PublicKey[] = [];
 
   beforeAll(async () => {
-    await initializeOrg(context, {
+    await initializeOrgV1(context, {
       superAdminAddress,
       orgId: orgId,
-      orgControlAddress: orgControlAddress,
     }).sendAndConfirm(context);
-
-    await context.rpc.airdrop(orgControlAddress, sol(10));
 
     await (
       await createTree(context, {

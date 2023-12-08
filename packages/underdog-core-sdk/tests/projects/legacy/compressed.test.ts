@@ -3,8 +3,11 @@ import {
   fetchCompressedProjectFromSeeds,
   findOrgAccountPda,
   initializeCompressedProject,
+  initializeCompressedProjectV1,
   initializeOrg,
+  initializeOrgV1,
   mintCompressedNft,
+  mintCompressedNftV1,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 import { createTree } from "../../../src";
@@ -17,8 +20,6 @@ describe("Compressed Projects", () => {
   const orgId = "1";
   const projectId = 1;
   const projectIdStr = projectId.toString();
-  const orgControlSigner = generateSigner(context);
-  const orgControlAddress = orgControlSigner.publicKey;
 
   const merkleTreeSigner = generateSigner(context);
   const merkleTree = merkleTreeSigner.publicKey;
@@ -32,13 +33,10 @@ describe("Compressed Projects", () => {
   const uri = "https://google.com";
 
   beforeAll(async () => {
-    await initializeOrg(context, {
+    await initializeOrgV1(context, {
       superAdminAddress,
       orgId: orgId,
-      orgControlAddress: orgControlAddress,
     }).sendAndConfirm(context);
-
-    await context.rpc.airdrop(orgControlAddress, sol(10));
 
     await (
       await createTree(context, {
@@ -50,10 +48,8 @@ describe("Compressed Projects", () => {
   });
 
   it("initializes a compressed project", async () => {
-    await initializeCompressedProject(context, {
-      authority: orgControlSigner,
+    await initializeCompressedProjectV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       name,
@@ -70,11 +66,10 @@ describe("Compressed Projects", () => {
   });
 
   it("mints a compressed nft", async () => {
-    await mintCompressedNft(context, {
+    await mintCompressedNftV1(context, {
       recipient: owner,
       merkleTree,
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectIdStr,
       name,

@@ -104,11 +104,25 @@ pub mod underdog_core {
     initialize_legacy_project::handler(ctx, args)
   }
 
+  pub fn initialize_legacy_project_v1(
+    ctx: Context<InitializeLegacyProjectV1>,
+    args: InitializeLegacyProjectV1Args,
+  ) -> Result<()> {
+    initialize_legacy_project_v1::handler(ctx, args)
+  }
+
   pub fn initialize_compressed_project(
     ctx: Context<InitializeCompressedProject>,
     args: InitializeCompressedProjectArgs,
   ) -> Result<()> {
     initialize_compressed_project::handler(ctx, args)
+  }
+
+  pub fn initialize_compressed_project_v1(
+    ctx: Context<InitializeCompressedProjectV1>,
+    args: InitializeCompressedProjectV1Args,
+  ) -> Result<()> {
+    initialize_compressed_project_v1::handler(ctx, args)
   }
 
   pub fn mint_compressed_nft(
@@ -118,11 +132,25 @@ pub mod underdog_core {
     mint_compressed_nft::handler(ctx, args)
   }
 
+  pub fn mint_compressed_nft_v1(
+    ctx: Context<MintCompressedNftV1>,
+    args: MintCompressedNftV1Args,
+  ) -> Result<()> {
+    mint_compressed_nft_v1::handler(ctx, args)
+  }
+
   pub fn mint_transferable_nft(
     ctx: Context<MintTransferableNft>,
     args: MintTransferableNftArgs,
   ) -> Result<()> {
     mint_transferable_nft::handler(ctx, args)
+  }
+
+  pub fn mint_transferable_nft_v1(
+    ctx: Context<MintTransferableNftV1>,
+    args: MintTransferableNftV1Args,
+  ) -> Result<()> {
+    mint_transferable_nft_v1::handler(ctx, args)
   }
 
   pub fn verify_legacy_nft_collection(
@@ -132,11 +160,25 @@ pub mod underdog_core {
     verify_legacy_nft_collection::handler(ctx, args)
   }
 
+  pub fn verify_legacy_nft_collection_v1(
+    ctx: Context<VerifyLegacyNftCollectionV1>,
+    args: VerifyLegacyNftCollectionV1Args,
+  ) -> Result<()> {
+    verify_legacy_nft_collection_v1::handler(ctx, args)
+  }
+
   pub fn mint_non_transferable_nft(
     ctx: Context<MintNonTransferableNft>,
     args: MintNonTransferableNftArgs,
   ) -> Result<()> {
     mint_non_transferable_nft::handler(ctx, args)
+  }
+
+  pub fn mint_non_transferable_nft_v1(
+    ctx: Context<MintNonTransferableNftV1>,
+    args: MintNonTransferableNftV1Args,
+  ) -> Result<()> {
+    mint_non_transferable_nft_v1::handler(ctx, args)
   }
 
   pub fn claim_non_transferable_nft(
@@ -146,6 +188,13 @@ pub mod underdog_core {
     claim_non_transferable_nft::handler(ctx, args)
   }
 
+  pub fn claim_non_transferable_nft_v1(
+    ctx: Context<ClaimNonTransferableNftV1>,
+    args: ClaimNonTransferableNftV1Args,
+  ) -> Result<()> {
+    claim_non_transferable_nft_v1::handler(ctx, args)
+  }
+
   pub fn revoke_non_transferable_nft(
     ctx: Context<RevokeNonTransferableNft>,
     args: RevokeNonTransferableNftArgs,
@@ -153,11 +202,25 @@ pub mod underdog_core {
     revoke_non_transferable_nft::handler(ctx, args)
   }
 
+  pub fn revoke_non_transferable_nft_v1(
+    ctx: Context<RevokeNonTransferableNftV1>,
+    args: RevokeNonTransferableNftV1Args,
+  ) -> Result<()> {
+    revoke_non_transferable_nft_v1::handler(ctx, args)
+  }
+
   pub fn burn_non_transferable_nft(
     ctx: Context<BurnNonTransferableNft>,
     args: BurnNonTransferableNftArgs,
   ) -> Result<()> {
     burn_non_transferable_nft::handler(ctx, args)
+  }
+
+  pub fn burn_non_transferable_nft_v1(
+    ctx: Context<BurnNonTransferableNftV1>,
+    args: BurnNonTransferableNftV1Args,
+  ) -> Result<()> {
+    burn_non_transferable_nft_v1::handler(ctx, args)
   }
 
   pub fn update_non_transferable_nft(
