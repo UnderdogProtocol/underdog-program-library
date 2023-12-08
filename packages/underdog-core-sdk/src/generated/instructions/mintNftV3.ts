@@ -36,17 +36,17 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  findInitialOwnerPda,
   findOrgAccountPda,
-  findOrgMemberAccountPda,
   findProjectPda,
 } from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type MintSftV2InstructionAccounts = {
+export type MintNftV3InstructionAccounts = {
   authority?: Signer;
+  ownerAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
-  memberAccount?: PublicKey | Pda;
   projectAccount?: PublicKey | Pda;
   projectMint?: Pda;
   projectMetadata?: PublicKey | Pda;
@@ -63,70 +63,76 @@ export type MintSftV2InstructionAccounts = {
 };
 
 // Data.
-export type MintSftV2InstructionData = {
+export type MintNftV3InstructionData = {
   discriminator: Array<number>;
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectId: bigint;
   projectMintBump: number;
+  name: string;
+  symbol: string;
+  uri: string;
   isDelegated: Option<boolean>;
 };
 
-export type MintSftV2InstructionDataArgs = {
+export type MintNftV3InstructionDataArgs = {
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectId: number | bigint;
   projectMintBump: number;
+  name: string;
+  symbol: string;
+  uri: string;
   isDelegated: OptionOrNullable<boolean>;
 };
 
-/** @deprecated Use `getMintSftV2InstructionDataSerializer()` without any argument instead. */
-export function getMintSftV2InstructionDataSerializer(
+/** @deprecated Use `getMintNftV3InstructionDataSerializer()` without any argument instead. */
+export function getMintNftV3InstructionDataSerializer(
   _context: object
-): Serializer<MintSftV2InstructionDataArgs, MintSftV2InstructionData>;
-export function getMintSftV2InstructionDataSerializer(): Serializer<
-  MintSftV2InstructionDataArgs,
-  MintSftV2InstructionData
+): Serializer<MintNftV3InstructionDataArgs, MintNftV3InstructionData>;
+export function getMintNftV3InstructionDataSerializer(): Serializer<
+  MintNftV3InstructionDataArgs,
+  MintNftV3InstructionData
 >;
-export function getMintSftV2InstructionDataSerializer(
+export function getMintNftV3InstructionDataSerializer(
   _context: object = {}
-): Serializer<MintSftV2InstructionDataArgs, MintSftV2InstructionData> {
+): Serializer<MintNftV3InstructionDataArgs, MintNftV3InstructionData> {
   return mapSerializer<
-    MintSftV2InstructionDataArgs,
+    MintNftV3InstructionDataArgs,
     any,
-    MintSftV2InstructionData
+    MintNftV3InstructionData
   >(
-    struct<MintSftV2InstructionData>(
+    struct<MintNftV3InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['superAdminAddress', publicKeySerializer()],
-        ['memberAddress', publicKeySerializer()],
         ['orgId', string()],
         ['projectId', u64()],
         ['projectMintBump', u8()],
+        ['name', string()],
+        ['symbol', string()],
+        ['uri', string()],
         ['isDelegated', option(bool())],
       ],
-      { description: 'MintSftV2InstructionData' }
+      { description: 'MintNftV3InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [213, 179, 196, 95, 228, 134, 225, 225],
+      discriminator: [30, 180, 131, 78, 83, 187, 86, 200],
     })
-  ) as Serializer<MintSftV2InstructionDataArgs, MintSftV2InstructionData>;
+  ) as Serializer<MintNftV3InstructionDataArgs, MintNftV3InstructionData>;
 }
 
 // Args.
-export type MintSftV2InstructionArgs = PickPartial<
-  MintSftV2InstructionDataArgs,
+export type MintNftV3InstructionArgs = PickPartial<
+  MintNftV3InstructionDataArgs,
   'projectMintBump'
 >;
 
 // Instruction.
-export function mintSftV2(
+export function mintNftV3(
   context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: MintSftV2InstructionAccounts & MintSftV2InstructionArgs
+  input: MintNftV3InstructionAccounts & MintNftV3InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -152,42 +158,36 @@ export function mintSftV2(
   );
   addObjectProperty(
     resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'orgAccount',
     input.orgAccount
-      ? ([input.orgAccount, true] as const)
+      ? ([input.orgAccount, false] as const)
       : ([
           findOrgAccountPda(context, {
             superAdminAddress: input.superAdminAddress,
             orgId: input.orgId,
           }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'memberAccount',
-    input.memberAccount
-      ? ([input.memberAccount, true] as const)
-      : ([
-          findOrgMemberAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            member: input.memberAddress,
-          }),
-          true,
+          false,
         ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
     'projectAccount',
     input.projectAccount
-      ? ([input.projectAccount, true] as const)
+      ? ([input.projectAccount, false] as const)
       : ([
           findProjectPda(context, {
             prefix: 'project',
             orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
             projectId: input.projectId,
           }),
-          true,
+          false,
         ] as const)
   );
   addObjectProperty(
@@ -323,8 +323,8 @@ export function mintSftV2(
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.ownerAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
-  addAccountMeta(keys, signers, resolvedAccounts.memberAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMint, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMetadata, false);
@@ -340,7 +340,7 @@ export function mintSftV2(
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
 
   // Data.
-  const data = getMintSftV2InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getMintNftV3InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

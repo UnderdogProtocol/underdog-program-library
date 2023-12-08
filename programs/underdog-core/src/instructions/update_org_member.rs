@@ -20,21 +20,21 @@ pub struct UpdateOrgMemberContext<'info> {
   #[account(
     mut,
     constraint = owner_account.owner == authority.key(),
-    seeds = [b"ownership".as_ref()], 
+    seeds = [b"ownership".as_ref()],
     bump=owner_account.bump
 )]
   pub owner_account: Box<Account<'info, InitialOwner>>,
 
   #[account(
         mut,
-        seeds = [b"org".as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()], 
+        seeds = [b"org".as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
         bump=org_account.bump
     )]
   pub org_account: Box<Account<'info, OrgAccount>>,
 
   #[account(
         mut,
-        seeds = [b"member".as_ref(),org_account.key().as_ref(),args.member_address.as_ref()], 
+        seeds = [b"member".as_ref(),org_account.key().as_ref(),args.member_address.as_ref()],
         bump=member_account.bump
     )]
   pub member_account: Box<Account<'info, OrgMemberAccount>>,

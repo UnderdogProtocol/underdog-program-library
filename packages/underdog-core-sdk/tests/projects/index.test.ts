@@ -19,17 +19,16 @@ import {
 
 import { PROJECT_MINT_PREFIX, PROJECT_PREFIX, createTree } from "../../src";
 import {
-  burnAssetV0,
+  burnAssetV1,
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
   getProjectSize,
   initializeOrg,
   initializeProjectV1,
-  mintNftV2,
-  mintSftV2,
+  mintNftV3,
   mintSftV3,
-  transferAssetV1,
+  transferAssetV2,
   updateProjectV1,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
@@ -194,12 +193,11 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV2(context, {
+      await mintNftV3(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         name,
         symbol,
@@ -246,12 +244,11 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV2(context, {
+      await mintNftV3(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         name,
         symbol,
@@ -280,13 +277,12 @@ describe("Projects", () => {
     });
 
     it("can transfer and verify nft", async () => {
-      await transferAssetV1(context, {
+      await transferAssetV2(context, {
         newLeafOwner: superAdminAddress,
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,
@@ -369,13 +365,12 @@ describe("Projects", () => {
     });
 
     it("can transfer and verify sft", async () => {
-      await transferAssetV1(context, {
+      await transferAssetV2(context, {
         newLeafOwner: superAdminAddress,
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,
@@ -428,12 +423,11 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintSftV2(context, {
+      await mintSftV3(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         isDelegated: true,
       }).sendAndConfirm(context);
@@ -442,12 +436,11 @@ describe("Projects", () => {
     });
 
     it("can burn sft", async () => {
-      await burnAssetV0(context, {
+      await burnAssetV1(context, {
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,

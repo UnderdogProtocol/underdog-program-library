@@ -24,6 +24,13 @@ pub mod underdog_core {
     initialize_org::handler(ctx, args)
   }
 
+  pub fn initialize_org_v1(
+    ctx: Context<InitializeOrgV1Context>,
+    args: InitializeOrgV1Args,
+  ) -> Result<()> {
+    initialize_org_v1::handler(ctx, args)
+  }
+
   pub fn add_org_member(ctx: Context<AddOrgMemberContext>, args: AddOrgMemberArgs) -> Result<()> {
     add_org_member::handler(ctx, args)
   }
@@ -54,8 +61,8 @@ pub mod underdog_core {
     mint_nft_v2::handler(ctx, args)
   }
 
-  pub fn mint_sft_v2(ctx: Context<MintSftV2>, args: MintSftV2Args) -> Result<()> {
-    mint_sft_v2::handler(ctx, args)
+  pub fn mint_nft_v3(ctx: Context<MintNftV3>, args: MintNftV3Args) -> Result<()> {
+    mint_nft_v3::handler(ctx, args)
   }
 
   pub fn mint_sft_v3(ctx: Context<MintSftV3>, args: MintSftV3Args) -> Result<()> {
@@ -69,11 +76,25 @@ pub mod underdog_core {
     transfer_asset_v1::handler(ctx, args)
   }
 
+  pub fn transfer_asset_v2<'info>(
+    ctx: Context<'_, '_, '_, 'info, TransferAssetV2<'info>>,
+    args: TransferAssetV2Args,
+  ) -> Result<()> {
+    transfer_asset_v2::handler(ctx, args)
+  }
+
   pub fn burn_asset_v0<'info>(
     ctx: Context<'_, '_, '_, 'info, BurnAssetV0<'info>>,
     args: BurnAssetV0Args,
   ) -> Result<()> {
     burn_asset_v0::handler(ctx, args)
+  }
+
+  pub fn burn_asset_v1<'info>(
+    ctx: Context<'_, '_, '_, 'info, BurnAssetV1<'info>>,
+    args: BurnAssetV1Args,
+  ) -> Result<()> {
+    burn_asset_v1::handler(ctx, args)
   }
 
   pub fn initialize_legacy_project(

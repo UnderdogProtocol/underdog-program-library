@@ -6,6 +6,7 @@ import {
   fetchOrgMemberAccountFromSeeds,
   findOrgAccountPda,
   initializeOrg,
+  initializeOrgV1,
   updateOrgMember,
 } from "../src/generated";
 import { createContext } from "./setup";
@@ -19,11 +20,9 @@ describe("Orgs", () => {
   const memberAddress = generateSigner(context).publicKey;
 
   it("should initialize org", async () => {
-    await initializeOrg(context, {
-      superAdminAddress,
-      orgId: orgId,
-      orgControlAddress: orgControlAddress,
-    }).sendAndConfirm(context);
+    await initializeOrgV1(context, { superAdminAddress, orgId }).sendAndConfirm(
+      context
+    );
 
     const orgAccount = await fetchOrgAccountFromSeeds(context, {
       superAdminAddress,
@@ -31,19 +30,6 @@ describe("Orgs", () => {
     });
     expect(orgAccount.owner).toEqual(superAdminAddress);
     expect(orgAccount.counter).toEqual(createBigInt(orgId));
-
-    const orgControlAccount = await fetchOrgControlAccountFromSeeds(context, {
-      superAdminAddress,
-      orgId,
-    });
-    expect(orgControlAccount.orgControl).toEqual(orgControlAddress);
-
-    const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(context, {
-      orgAccount: orgAccount.publicKey,
-      member: superAdminAddress,
-    });
-    expect(orgMemberAccount.member).toEqual(superAdminAddress);
-    expect(orgMemberAccount.active).toEqual(true);
   });
 
   it("should add org member", async () => {
@@ -66,7 +52,7 @@ describe("Orgs", () => {
       superAdminAddress,
       orgId,
       memberAddress,
-      active: false
+      active: false,
     }).sendAndConfirm(context);
 
     const orgMemberAccount = await fetchOrgMemberAccountFromSeeds(context, {

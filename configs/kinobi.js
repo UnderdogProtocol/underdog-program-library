@@ -641,7 +641,7 @@ kinobi.update(
       },
     },
     MintNftV2: projectDefaults,
-    MintSftV2: projectDefaults,
+    MintNftV3: projectDefaults,
     MintSftV3: projectDefaults,
     MintCompressedNft: {
       args: {
@@ -659,7 +659,7 @@ kinobi.update(
     {
       // Use extra "proof" arg as remaining accounts.
       selector: (node) =>
-        k.isInstructionNode(node) && ["transferAssetV1", "burnAssetV0"].includes(node.name),
+        k.isInstructionNode(node) && ["transferAssetV1", "burnAssetV0", "transferAssetV2", "burnAssetV1"].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({
