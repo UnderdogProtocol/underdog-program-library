@@ -3,7 +3,7 @@ let path = require("path");
 
 // Instanciate Kinobi.
 const kinobi = k.createFromIdls([
-  path.join(__dirname, "..", "idls", "underdog_core.json"),
+  path.join(__dirname, "..", "..", "idls", "underdog_core.json"),
 ]);
 
 // Update accounts.
@@ -659,7 +659,13 @@ kinobi.update(
     {
       // Use extra "proof" arg as remaining accounts.
       selector: (node) =>
-        k.isInstructionNode(node) && ["transferAssetV1", "burnAssetV0", "transferAssetV2", "burnAssetV1"].includes(node.name),
+        k.isInstructionNode(node) &&
+        [
+          "transferAssetV1",
+          "burnAssetV0",
+          "transferAssetV2",
+          "burnAssetV1",
+        ].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({
@@ -686,14 +692,7 @@ kinobi.update(
 );
 
 // Render JavaScript.
-const jsDir = path.join(
-  __dirname,
-  "..",
-  "packages",
-  "underdog-core-sdk",
-  "src",
-  "generated"
-);
+const jsDir = path.join(__dirname, "src", "generated");
 
 const visitor = new k.RenderJavaScriptVisitor(jsDir, {
   dependencyMap: {

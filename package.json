@@ -14,8 +14,7 @@
     "clippy": "cargo clippy --all-targets -- -D warnings -A clippy::result_large_err -A clippy::too_many_arguments",
     "underdog-core-sdk": "yarn workspace @underdog-protocol/underdog-core-sdk",
     "generate:id": "anchor build && yarn generate:idls && yarn workspace @underdog-protocol/underdog-identity-sdk generate",
-    "generate": "yarn generate:idls && yarn generate:clients",
-    "generate:clients": "node ./configs/kinobi.js",
+    "generate": "anchor build && yarn generate:idls && yarn workspace @underdog-protocol/underdog-core-sdk generate",
     "generate:idls": "node ./shank.js",
     "fix": "ts-node fix.ts"
   },

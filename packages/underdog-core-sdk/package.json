@@ -21,7 +21,8 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf node_modules .turbo dist tsconfig.tsbuildinfo",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "generate": "node ./kinobi.js"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-bubblegum": "2.0.0",

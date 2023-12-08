@@ -45,7 +45,7 @@ pub struct WithdrawProjectRoyaltiesV0<'info> {
 
 pub fn handler(
   ctx: Context<WithdrawProjectRoyaltiesV0>,
-  args: WithdrawProjectRoyaltiesV0Args,
+  _args: WithdrawProjectRoyaltiesV0Args,
 ) -> Result<()> {
   let amount_to_withdraw = ctx.accounts.project_account.to_account_info().lamports()
     - Rent::get()?.minimum_balance(PROJECT_SIZE);
