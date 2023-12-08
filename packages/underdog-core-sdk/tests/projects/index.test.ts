@@ -28,8 +28,8 @@ import {
   initializeProjectV1,
   mintNftV2,
   mintSftV2,
+  mintSftV3,
   transferAssetV1,
-  updateProjectV0,
   updateProjectV1,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
@@ -339,13 +339,12 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintSftV2(context, {
-        recipient: owner,
-        merkleTree,
+      await mintSftV3(context, {
         superAdminAddress,
         orgId,
-        memberAddress: superAdminAddress,
         projectId,
+        recipient: owner,
+        merkleTree,
         isDelegated: true,
       }).sendAndConfirm(context);
     });

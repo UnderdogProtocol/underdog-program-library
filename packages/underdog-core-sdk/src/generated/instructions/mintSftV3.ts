@@ -6,10 +6,16 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import { findTreeConfigPda } from '@metaplex-foundation/mpl-bubblegum';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
@@ -20,7 +26,9 @@ import {
 import {
   Serializer,
   array,
+  bool,
   mapSerializer,
+  option,
   publicKey as publicKeySerializer,
   string,
   struct,
@@ -28,105 +36,94 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 import {
+  findInitialOwnerPda,
   findOrgAccountPda,
-  findOrgControlAccountPda,
-  findOrgMemberAccountPda,
   findProjectPda,
 } from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
-import {
-  UpdateMetadataArgs,
-  UpdateMetadataArgsArgs,
-  getUpdateMetadataArgsSerializer,
-} from '../types';
 
 // Accounts.
-export type UpdateProjectV0InstructionAccounts = {
+export type MintSftV3InstructionAccounts = {
   authority?: Signer;
-  orgControlAccount?: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
-  memberAccount?: PublicKey | Pda;
   projectAccount?: PublicKey | Pda;
   projectMint?: Pda;
   projectMetadata?: PublicKey | Pda;
+  projectMasterEdition?: PublicKey | Pda;
+  recipient: PublicKey | Pda;
+  treeAuthority?: PublicKey | Pda;
+  merkleTree: PublicKey | Pda;
+  bubblegumSigner?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
+  logWrapper?: PublicKey | Pda;
+  bubblegumProgram?: PublicKey | Pda;
+  compressionProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type UpdateProjectV0InstructionData = {
+export type MintSftV3InstructionData = {
   discriminator: Array<number>;
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectId: bigint;
   projectMintBump: number;
-  metadata: UpdateMetadataArgs;
+  isDelegated: Option<boolean>;
 };
 
-export type UpdateProjectV0InstructionDataArgs = {
+export type MintSftV3InstructionDataArgs = {
   superAdminAddress: PublicKey;
-  memberAddress: PublicKey;
   orgId: string;
   projectId: number | bigint;
   projectMintBump: number;
-  metadata: UpdateMetadataArgsArgs;
+  isDelegated: OptionOrNullable<boolean>;
 };
 
-/** @deprecated Use `getUpdateProjectV0InstructionDataSerializer()` without any argument instead. */
-export function getUpdateProjectV0InstructionDataSerializer(
+/** @deprecated Use `getMintSftV3InstructionDataSerializer()` without any argument instead. */
+export function getMintSftV3InstructionDataSerializer(
   _context: object
-): Serializer<
-  UpdateProjectV0InstructionDataArgs,
-  UpdateProjectV0InstructionData
+): Serializer<MintSftV3InstructionDataArgs, MintSftV3InstructionData>;
+export function getMintSftV3InstructionDataSerializer(): Serializer<
+  MintSftV3InstructionDataArgs,
+  MintSftV3InstructionData
 >;
-export function getUpdateProjectV0InstructionDataSerializer(): Serializer<
-  UpdateProjectV0InstructionDataArgs,
-  UpdateProjectV0InstructionData
->;
-export function getUpdateProjectV0InstructionDataSerializer(
+export function getMintSftV3InstructionDataSerializer(
   _context: object = {}
-): Serializer<
-  UpdateProjectV0InstructionDataArgs,
-  UpdateProjectV0InstructionData
-> {
+): Serializer<MintSftV3InstructionDataArgs, MintSftV3InstructionData> {
   return mapSerializer<
-    UpdateProjectV0InstructionDataArgs,
+    MintSftV3InstructionDataArgs,
     any,
-    UpdateProjectV0InstructionData
+    MintSftV3InstructionData
   >(
-    struct<UpdateProjectV0InstructionData>(
+    struct<MintSftV3InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['superAdminAddress', publicKeySerializer()],
-        ['memberAddress', publicKeySerializer()],
         ['orgId', string()],
         ['projectId', u64()],
         ['projectMintBump', u8()],
-        ['metadata', getUpdateMetadataArgsSerializer()],
+        ['isDelegated', option(bool())],
       ],
-      { description: 'UpdateProjectV0InstructionData' }
+      { description: 'MintSftV3InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [74, 58, 168, 136, 110, 33, 220, 186],
+      discriminator: [70, 204, 118, 5, 41, 150, 30, 210],
     })
-  ) as Serializer<
-    UpdateProjectV0InstructionDataArgs,
-    UpdateProjectV0InstructionData
-  >;
+  ) as Serializer<MintSftV3InstructionDataArgs, MintSftV3InstructionData>;
 }
 
 // Args.
-export type UpdateProjectV0InstructionArgs = PickPartial<
-  UpdateProjectV0InstructionDataArgs,
+export type MintSftV3InstructionArgs = PickPartial<
+  MintSftV3InstructionDataArgs,
   'projectMintBump'
 >;
 
 // Instruction.
-export function updateProjectV0(
+export function mintSftV3(
   context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: UpdateProjectV0InstructionAccounts & UpdateProjectV0InstructionArgs
+  input: MintSftV3InstructionAccounts & MintSftV3InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -138,27 +135,24 @@ export function updateProjectV0(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    recipient: [input.recipient, false] as const,
+    merkleTree: [input.merkleTree, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
     'authority',
     input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
+      ? ([input.authority, true] as const)
+      : ([context.identity, true] as const)
   );
   addObjectProperty(
     resolvedAccounts,
-    'orgControlAccount',
-    input.orgControlAccount
-      ? ([input.orgControlAccount, true] as const)
-      : ([
-          findOrgControlAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          true,
-        ] as const)
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
   );
   addObjectProperty(
     resolvedAccounts,
@@ -175,43 +169,30 @@ export function updateProjectV0(
   );
   addObjectProperty(
     resolvedAccounts,
-    'memberAccount',
-    input.memberAccount
-      ? ([input.memberAccount, false] as const)
-      : ([
-          findOrgMemberAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            member: input.memberAddress,
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
     'projectAccount',
     input.projectAccount
-      ? ([input.projectAccount, false] as const)
+      ? ([input.projectAccount, true] as const)
       : ([
           findProjectPda(context, {
             prefix: 'project',
             orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
             projectId: input.projectId,
           }),
-          false,
+          true,
         ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
     'projectMint',
     input.projectMint
-      ? ([input.projectMint, false] as const)
+      ? ([input.projectMint, true] as const)
       : ([
           findProjectPda(context, {
             prefix: 'project-mint',
             orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
             projectId: input.projectId,
           }),
-          false,
+          true,
         ] as const)
   );
   addObjectProperty(
@@ -228,6 +209,40 @@ export function updateProjectV0(
   );
   addObjectProperty(
     resolvedAccounts,
+    'projectMasterEdition',
+    input.projectMasterEdition
+      ? ([input.projectMasterEdition, false] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(resolvedAccounts.projectMint[0], false),
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'treeAuthority',
+    input.treeAuthority
+      ? ([input.treeAuthority, true] as const)
+      : ([
+          findTreeConfigPda(context, {
+            merkleTree: publicKey(input.merkleTree, false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'bubblegumSigner',
+    input.bubblegumSigner
+      ? ([input.bubblegumSigner, false] as const)
+      : ([
+          publicKey('4ewWZC5gT6TGpm5LZNDs9wVonfUT2q5PP5sc9kVbwMAK'),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'tokenMetadataProgram',
     input.tokenMetadataProgram
       ? ([input.tokenMetadataProgram, false] as const)
@@ -235,6 +250,45 @@ export function updateProjectV0(
           context.programs.getPublicKey(
             'mplTokenMetadata',
             'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'logWrapper',
+    input.logWrapper
+      ? ([input.logWrapper, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splNoop',
+            'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'bubblegumProgram',
+    input.bubblegumProgram
+      ? ([input.bubblegumProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'bubblegumProgram',
+            'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'compressionProgram',
+    input.compressionProgram
+      ? ([input.compressionProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAccountCompression',
+            'cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK'
           ),
           false,
         ] as const)
@@ -260,18 +314,24 @@ export function updateProjectV0(
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.orgControlAccount, false);
+  addAccountMeta(keys, signers, resolvedAccounts.ownerAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
-  addAccountMeta(keys, signers, resolvedAccounts.memberAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMint, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMetadata, false);
+  addAccountMeta(keys, signers, resolvedAccounts.projectMasterEdition, false);
+  addAccountMeta(keys, signers, resolvedAccounts.recipient, false);
+  addAccountMeta(keys, signers, resolvedAccounts.treeAuthority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.merkleTree, false);
+  addAccountMeta(keys, signers, resolvedAccounts.bubblegumSigner, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
+  addAccountMeta(keys, signers, resolvedAccounts.logWrapper, false);
+  addAccountMeta(keys, signers, resolvedAccounts.bubblegumProgram, false);
+  addAccountMeta(keys, signers, resolvedAccounts.compressionProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
 
   // Data.
-  const data =
-    getUpdateProjectV0InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getMintSftV3InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

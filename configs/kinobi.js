@@ -577,7 +577,6 @@ kinobi.update(
         },
       },
     },
-    UpdateProjectV0: projectDefaults,
     UpdateProjectV1: projectDefaults,
     MintTransferableNft: {
       accounts: {
@@ -643,6 +642,7 @@ kinobi.update(
     },
     MintNftV2: projectDefaults,
     MintSftV2: projectDefaults,
+    MintSftV3: projectDefaults,
     MintCompressedNft: {
       args: {
         projectMintBump: {

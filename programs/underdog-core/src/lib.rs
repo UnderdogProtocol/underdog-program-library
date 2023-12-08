@@ -39,22 +39,11 @@ pub mod underdog_core {
     initialize_tree::handler(ctx, args)
   }
 
-  pub fn initialize_project_v0(
-    ctx: Context<InitializeProjectV0>,
-    args: InitializeProjectV0Args,
-  ) -> Result<()> {
-    initialize_project_v0::handler(ctx, args)
-  }
-
   pub fn initialize_project_v1(
     ctx: Context<InitializeProjectV1>,
     args: InitializeProjectV1Args,
   ) -> Result<()> {
     initialize_project_v1::handler(ctx, args)
-  }
-
-  pub fn update_project_v0(ctx: Context<UpdateProjectV0>, args: UpdateProjectV0Args) -> Result<()> {
-    update_project_v0::handler(ctx, args)
   }
 
   pub fn update_project_v1(ctx: Context<UpdateProjectV1>, args: UpdateProjectV1Args) -> Result<()> {
@@ -67,6 +56,10 @@ pub mod underdog_core {
 
   pub fn mint_sft_v2(ctx: Context<MintSftV2>, args: MintSftV2Args) -> Result<()> {
     mint_sft_v2::handler(ctx, args)
+  }
+
+  pub fn mint_sft_v3(ctx: Context<MintSftV3>, args: MintSftV3Args) -> Result<()> {
+    mint_sft_v3::handler(ctx, args)
   }
 
   pub fn transfer_asset_v1<'info>(

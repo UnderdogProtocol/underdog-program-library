@@ -1,4 +1,4 @@
-use anchor_lang::{prelude::*, system_program::transfer};
+use anchor_lang::prelude::*;
 
 use crate::state::*;
 
