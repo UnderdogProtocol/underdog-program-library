@@ -69,25 +69,11 @@ pub mod underdog_core {
     mint_sft_v3::handler(ctx, args)
   }
 
-  pub fn transfer_asset_v1<'info>(
-    ctx: Context<'_, '_, '_, 'info, TransferAssetV1<'info>>,
-    args: TransferAssetV1Args,
-  ) -> Result<()> {
-    transfer_asset_v1::handler(ctx, args)
-  }
-
   pub fn transfer_asset_v2<'info>(
     ctx: Context<'_, '_, '_, 'info, TransferAssetV2<'info>>,
     args: TransferAssetV2Args,
   ) -> Result<()> {
     transfer_asset_v2::handler(ctx, args)
-  }
-
-  pub fn burn_asset_v0<'info>(
-    ctx: Context<'_, '_, '_, 'info, BurnAssetV0<'info>>,
-    args: BurnAssetV0Args,
-  ) -> Result<()> {
-    burn_asset_v0::handler(ctx, args)
   }
 
   pub fn burn_asset_v1<'info>(
@@ -97,25 +83,11 @@ pub mod underdog_core {
     burn_asset_v1::handler(ctx, args)
   }
 
-  pub fn initialize_legacy_project(
-    ctx: Context<InitializeLegacyProject>,
-    args: InitializeLegacyProjectArgs,
-  ) -> Result<()> {
-    initialize_legacy_project::handler(ctx, args)
-  }
-
   pub fn initialize_legacy_project_v1(
     ctx: Context<InitializeLegacyProjectV1>,
     args: InitializeLegacyProjectV1Args,
   ) -> Result<()> {
     initialize_legacy_project_v1::handler(ctx, args)
-  }
-
-  pub fn initialize_compressed_project(
-    ctx: Context<InitializeCompressedProject>,
-    args: InitializeCompressedProjectArgs,
-  ) -> Result<()> {
-    initialize_compressed_project::handler(ctx, args)
   }
 
   pub fn initialize_compressed_project_v1(
@@ -195,25 +167,11 @@ pub mod underdog_core {
     claim_non_transferable_nft_v1::handler(ctx, args)
   }
 
-  pub fn revoke_non_transferable_nft(
-    ctx: Context<RevokeNonTransferableNft>,
-    args: RevokeNonTransferableNftArgs,
-  ) -> Result<()> {
-    revoke_non_transferable_nft::handler(ctx, args)
-  }
-
   pub fn revoke_non_transferable_nft_v1(
     ctx: Context<RevokeNonTransferableNftV1>,
     args: RevokeNonTransferableNftV1Args,
   ) -> Result<()> {
     revoke_non_transferable_nft_v1::handler(ctx, args)
-  }
-
-  pub fn burn_non_transferable_nft(
-    ctx: Context<BurnNonTransferableNft>,
-    args: BurnNonTransferableNftArgs,
-  ) -> Result<()> {
-    burn_non_transferable_nft::handler(ctx, args)
   }
 
   pub fn burn_non_transferable_nft_v1(
