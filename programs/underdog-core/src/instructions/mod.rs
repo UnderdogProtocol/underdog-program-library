@@ -20,6 +20,7 @@ pub mod update_non_transferable_nft;
 pub mod update_org_member;
 pub mod update_owner;
 pub mod update_project_v0;
+pub mod update_project_v1;
 pub mod verify_legacy_nft_collection;
 pub mod withdraw_project_royalties_v0;
 
@@ -45,5 +46,6 @@ pub use update_non_transferable_nft::*;
 pub use update_org_member::*;
 pub use update_owner::*;
 pub use update_project_v0::*;
+pub use update_project_v1::*;
 pub use verify_legacy_nft_collection::*;
 pub use withdraw_project_royalties_v0::*;

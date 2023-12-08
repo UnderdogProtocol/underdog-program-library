@@ -28,5 +28,6 @@ export * from './updateNonTransferableNft';
 export * from './updateOrgMember';
 export * from './updateOwner';
 export * from './updateProjectV0';
+export * from './updateProjectV1';
 export * from './verifyLegacyNftCollection';
 export * from './withdrawProjectRoyaltiesV0';

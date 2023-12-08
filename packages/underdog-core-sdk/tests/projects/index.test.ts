@@ -25,12 +25,12 @@ import {
   findProjectPda,
   getProjectSize,
   initializeOrg,
-  initializeProjectV0,
   initializeProjectV1,
   mintNftV2,
   mintSftV2,
   transferAssetV1,
   updateProjectV0,
+  updateProjectV1,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
@@ -123,10 +123,8 @@ describe("Projects", () => {
   });
 
   it("can update a project", async () => {
-    await updateProjectV0(context, {
-      authority: orgControlSigner,
+    await updateProjectV1(context, {
       superAdminAddress,
-      memberAddress: superAdminAddress,
       orgId,
       projectId,
       metadata: {
