@@ -188,6 +188,22 @@ kinobi.update(
       }),
     },
     {
+      account: "collectionMetadata",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("metadata", {
+        importFrom: "mplTokenMetadata",
+        seeds: { mint: k.accountDefault("collectionMint") },
+      }),
+    },
+    {
+      account: "collectionMasterEdition",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("masterEdition", {
+        importFrom: "mplTokenMetadata",
+        seeds: { mint: k.accountDefault("collectionMint") },
+      }),
+    },
+    {
       account: "projectMasterEdition",
       ignoreIfOptional: true,
       ...k.pdaDefault("masterEdition", {

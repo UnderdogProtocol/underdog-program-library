@@ -26,10 +26,11 @@ import {
   getProjectSize,
   initializeOrgV1,
   initializeProjectV1,
-  mintNftV3,
-  mintSftV3,
+  mintNftV4,
+  mintSftV4,
   transferAssetV2,
   updateProjectV1,
+  updateProjectV2,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
@@ -116,7 +117,7 @@ describe("Projects", () => {
   });
 
   it("can update a project", async () => {
-    await updateProjectV1(context, {
+    await updateProjectV2(context, {
       superAdminAddress,
       orgId,
       projectId,
@@ -126,6 +127,7 @@ describe("Projects", () => {
         uri,
         sellerFeeBasisPoints,
       },
+      collectionMint: projectMint,
     }).sendAndConfirm(context);
 
     const projectMetadata = await fetchMetadataFromSeeds(context, {
@@ -187,7 +189,7 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV3(context, {
+      await mintNftV4(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -197,6 +199,7 @@ describe("Projects", () => {
         symbol,
         uri,
         isDelegated: false,
+        collectionMint: projectMint,
       }).sendAndConfirm(context);
     });
 
@@ -238,7 +241,7 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV3(context, {
+      await mintNftV4(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -248,6 +251,7 @@ describe("Projects", () => {
         symbol,
         uri,
         isDelegated: true,
+        collectionMint: projectMint,
       }).sendAndConfirm(context);
     });
 
@@ -329,13 +333,14 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintSftV3(context, {
+      await mintSftV4(context, {
         superAdminAddress,
         orgId,
         projectId,
         recipient: owner,
         merkleTree,
         isDelegated: true,
+        collectionMint: projectMint,
       }).sendAndConfirm(context);
     });
 
@@ -417,13 +422,14 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintSftV3(context, {
+      await mintSftV4(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
         orgId,
         projectId,
         isDelegated: true,
+        collectionMint: projectMint,
       }).sendAndConfirm(context);
 
       leaves.push(publicKey(leafHash));

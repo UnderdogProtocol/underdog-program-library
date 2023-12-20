@@ -42,12 +42,24 @@ pub mod underdog_core {
     update_project_v1::handler(ctx, args)
   }
 
+  pub fn update_project_v2(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Result<()> {
+    update_project_v2::handler(ctx, args)
+  }
+
   pub fn mint_nft_v3(ctx: Context<MintNftV3>, args: MintNftV3Args) -> Result<()> {
     mint_nft_v3::handler(ctx, args)
   }
 
+  pub fn mint_nft_v4(ctx: Context<MintNftV4>, args: MintNftV4Args) -> Result<()> {
+    mint_nft_v4::handler(ctx, args)
+  }
+
   pub fn mint_sft_v3(ctx: Context<MintSftV3>, args: MintSftV3Args) -> Result<()> {
     mint_sft_v3::handler(ctx, args)
+  }
+
+  pub fn mint_sft_v4(ctx: Context<MintSftV4>, args: MintSftV4Args) -> Result<()> {
+    mint_sft_v4::handler(ctx, args)
   }
 
   pub fn transfer_asset_v2<'info>(
@@ -76,6 +88,13 @@ pub mod underdog_core {
     args: InitializeCompressedProjectV1Args,
   ) -> Result<()> {
     initialize_compressed_project_v1::handler(ctx, args)
+  }
+
+  pub fn convert_compressed_project(
+    ctx: Context<ConvertCompressedProject>,
+    args: ConvertCompressedProjectArgs,
+  ) -> Result<()> {
+    convert_compressed_project::handler(ctx, args)
   }
 
   pub fn mint_compressed_nft_v1(
