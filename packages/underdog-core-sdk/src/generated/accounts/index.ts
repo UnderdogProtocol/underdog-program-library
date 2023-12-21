@@ -7,7 +7,6 @@
  */
 
 export * from './claimAccount';
-export * from './compressedProject';
 export * from './initialOwner';
 export * from './initOrgAccount';
 export * from './legacyProject';

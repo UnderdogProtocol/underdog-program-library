@@ -122,23 +122,6 @@ pub struct ProjAccount {
 
 #[account]
 #[derive(Default)]
-pub struct CompressedProject {
-  pub super_admin_address: Pubkey,
-  pub org_address: Pubkey,
-  pub merkle_tree: Pubkey,
-  pub project_id: u64,
-  pub bump: u8,
-}
-
-pub const COMPRESSED_PROJECT_SIZE: usize = 8 +
-    32 + // superadmin
-    32 + // org
-    32 + // merkle_tree
-    8 + // project_id
-    1; // bump
-
-#[account]
-#[derive(Default)]
 pub struct Project {
   pub super_admin_address: Pubkey,
   pub org_address: Pubkey,

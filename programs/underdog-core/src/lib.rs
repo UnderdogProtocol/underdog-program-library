@@ -38,24 +38,12 @@ pub mod underdog_core {
     initialize_project_v1::handler(ctx, args)
   }
 
-  pub fn update_project_v1(ctx: Context<UpdateProjectV1>, args: UpdateProjectV1Args) -> Result<()> {
-    update_project_v1::handler(ctx, args)
-  }
-
   pub fn update_project_v2(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Result<()> {
     update_project_v2::handler(ctx, args)
   }
 
-  pub fn mint_nft_v3(ctx: Context<MintNftV3>, args: MintNftV3Args) -> Result<()> {
-    mint_nft_v3::handler(ctx, args)
-  }
-
   pub fn mint_nft_v4(ctx: Context<MintNftV4>, args: MintNftV4Args) -> Result<()> {
     mint_nft_v4::handler(ctx, args)
-  }
-
-  pub fn mint_sft_v3(ctx: Context<MintSftV3>, args: MintSftV3Args) -> Result<()> {
-    mint_sft_v3::handler(ctx, args)
   }
 
   pub fn mint_sft_v4(ctx: Context<MintSftV4>, args: MintSftV4Args) -> Result<()> {
@@ -83,27 +71,6 @@ pub mod underdog_core {
     initialize_legacy_project_v1::handler(ctx, args)
   }
 
-  pub fn initialize_compressed_project_v1(
-    ctx: Context<InitializeCompressedProjectV1>,
-    args: InitializeCompressedProjectV1Args,
-  ) -> Result<()> {
-    initialize_compressed_project_v1::handler(ctx, args)
-  }
-
-  pub fn convert_compressed_project(
-    ctx: Context<ConvertCompressedProject>,
-    args: ConvertCompressedProjectArgs,
-  ) -> Result<()> {
-    convert_compressed_project::handler(ctx, args)
-  }
-
-  pub fn mint_compressed_nft_v1(
-    ctx: Context<MintCompressedNftV1>,
-    args: MintCompressedNftV1Args,
-  ) -> Result<()> {
-    mint_compressed_nft_v1::handler(ctx, args)
-  }
-
   pub fn mint_transferable_nft_v1(
     ctx: Context<MintTransferableNftV1>,
     args: MintTransferableNftV1Args,
@@ -116,13 +83,6 @@ pub mod underdog_core {
     args: VerifyLegacyNftCollectionV1Args,
   ) -> Result<()> {
     verify_legacy_nft_collection_v1::handler(ctx, args)
-  }
-
-  pub fn mint_non_transferable_nft(
-    ctx: Context<MintNonTransferableNft>,
-    args: MintNonTransferableNftArgs,
-  ) -> Result<()> {
-    mint_non_transferable_nft::handler(ctx, args)
   }
 
   pub fn mint_non_transferable_nft_v1(

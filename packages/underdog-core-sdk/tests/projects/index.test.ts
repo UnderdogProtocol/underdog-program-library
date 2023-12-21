@@ -29,7 +29,6 @@ import {
   mintNftV4,
   mintSftV4,
   transferAssetV2,
-  updateProjectV1,
   updateProjectV2,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
