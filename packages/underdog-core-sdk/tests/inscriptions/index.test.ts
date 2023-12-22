@@ -56,9 +56,20 @@ describe("Projects", () => {
         ),
       }).sendAndConfirm(context);
 
-      // const shard = await fetchInscriptionShardFromSeeds(context, {
-      //   shardNumber: 0,
-      // });
+      await inscribeImageV0(context, {
+        inscriptionAccount,
+        inscriptionMetadataAccount: findInscriptionMetadataPda(context, {
+          inscriptionAccount: inscriptionAccount.publicKey,
+        })[0],
+        inscriptionShardAccount: findInscriptionShardPda(context, {
+          shardNumber: 0,
+        })[0],
+        superAdminAddress,
+        orgId,
+        value: Buffer.from(
+          '{"description": "A bread! But on-chain!", "external_url": "https://breadheads.io"}'
+        ),
+      }).sendAndConfirm(context);
 
       const data = await context.rpc.getAccount(inscriptionAccount.publicKey);
       if (data.exists) {

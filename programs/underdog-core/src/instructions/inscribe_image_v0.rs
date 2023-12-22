@@ -79,7 +79,10 @@ pub fn handler(ctx: Context<InscribeImageV0>, args: InscribeImageV0Args) -> Resu
     &[ctx.accounts.org_account.bump],
   ]];
 
-  initialize(ctx.accounts.initalize_ctx().with_signer(&[&org_seeds[0]]))?;
+  let inscription_account = ctx.accounts.inscription_account.to_account_info();
+  if inscription_account.data_is_empty() {
+    initialize(ctx.accounts.initalize_ctx().with_signer(&[&org_seeds[0]]))?;
+  }
 
   write_data(
     ctx.accounts.write_data_ctx().with_signer(&[&org_seeds[0]]),
