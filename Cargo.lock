@@ -1607,6 +1607,7 @@ dependencies = [
  "anchor-spl",
  "mpl-bubblegum",
  "mpl-token-metadata",
+ "solana-program",
 ]
 
 [[package]]

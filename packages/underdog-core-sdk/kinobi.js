@@ -69,6 +69,13 @@ kinobi.update(
         k.stringSeed("nftId"),
       ],
     },
+    inscriptionMetadataAccount: {
+      seeds: [
+        k.stringConstantSeed("Inscription"),
+        k.programSeed(),
+        k.publicKeySeed("inscriptionAccount", "The address of the Inscription Account"),
+      ],
+    }
   })
 );
 
@@ -105,6 +112,17 @@ kinobi.update(
         "bubblegumProgram",
         "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
       ),
+    },
+    {
+      account: "inscriptionProgram",
+      ignoreIfOptional: true,
+      ...k.programDefault(
+        "inscriptionProgram",
+        "1NSCRfGeyo7wPUazGbaPBUsTM49e1k2aXewHGARfzSo"
+      ),
+    },
+    {
+      account: "inscriptionMetadataAccount",
     },
     {
       account: "bubblegumSigner",
@@ -168,6 +186,7 @@ kinobi.update(
         },
       }),
     },
+
     {
       account: "projectVault",
       ignoreIfOptional: true,
@@ -201,6 +220,33 @@ kinobi.update(
       ...k.pdaDefault("masterEdition", {
         importFrom: "mplTokenMetadata",
         seeds: { mint: k.accountDefault("collectionMint") },
+      }),
+    },
+    {
+      account: "mint",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("mint", {
+        importFrom: "../../pdas",
+        seeds: {
+          projectAccount: k.accountDefault("projectAccount"),
+          nftId: k.argDefault("nftId"),
+        },
+      }),
+    },
+    {
+      account: "metadata",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("metadata", {
+        importFrom: "mplTokenMetadata",
+        seeds: { mint: k.accountDefault("mint") },
+      }),
+    },
+    {
+      account: "masterEdition",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("masterEdition", {
+        importFrom: "mplTokenMetadata",
+        seeds: { mint: k.accountDefault("mint") },
       }),
     },
     {
@@ -594,6 +640,13 @@ kinobi.update(
       },
     },
     UpdateProjectV1: projectDefaults,
+    DoStuffV0: {
+      accounts: {
+        receiverAta: {
+          defaultsTo: ataPdaDefault("mint", "receiver"),
+        },
+      },
+    },
     MintTransferableNft: {
       accounts: {
         receiverTokenAccount: {
@@ -766,6 +819,7 @@ const jsDir = path.join(__dirname, "src", "generated");
 
 const visitor = new k.RenderJavaScriptVisitor(jsDir, {
   dependencyMap: {
+    mplInscription: "@metaplex-foundation/mpl-inscription",
     mplTokenMetadata: "@metaplex-foundation/mpl-token-metadata",
     mplBubblegum: "@metaplex-foundation/mpl-bubblegum",
     mplToolbox: "@metaplex-foundation/mpl-toolbox",

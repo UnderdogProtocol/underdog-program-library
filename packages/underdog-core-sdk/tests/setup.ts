@@ -1,5 +1,8 @@
 import { createSplAccountCompressionProgram } from "@metaplex-foundation/mpl-bubblegum";
-import { createSplAssociatedTokenProgram, createSplTokenProgram } from "@metaplex-foundation/mpl-toolbox";
+import {
+  createSplAssociatedTokenProgram,
+  createSplTokenProgram,
+} from "@metaplex-foundation/mpl-toolbox";
 import {
   createUmi as baseCreateUmi,
   createSignerFromKeypair,
@@ -12,11 +15,16 @@ import { Keypair } from "@solana/web3.js";
 
 import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
+import { createMplInscriptionProgram, createShard, findInscriptionShardPda } from "@metaplex-foundation/mpl-inscription";
 
 export const createContext = () => {
-  const context = baseCreateUmi().use(defaultPlugins("http://localhost:8899", { commitment: "processed" }));
+  const context = baseCreateUmi().use(
+    defaultPlugins("http://localhost:8899", { commitment: "processed" })
+  );
 
-  const underdogKeypair = Keypair.fromSecretKey(Uint8Array.from(underdogSecretKey));
+  const underdogKeypair = Keypair.fromSecretKey(
+    Uint8Array.from(underdogSecretKey)
+  );
 
   context.use(
     keypairIdentity(
@@ -29,6 +37,7 @@ export const createContext = () => {
   context.programs.add(createSplTokenProgram());
   context.programs.add(createSplAssociatedTokenProgram());
   context.programs.add(createSplAccountCompressionProgram());
+  context.programs.add(createMplInscriptionProgram());
 
   return context;
 };
@@ -43,6 +52,12 @@ async function globalSetup() {
 
   console.log("Initializing program owner...");
   await initializeOwner(context, {}).sendAndConfirm(context);
+
+  const shardAccount = findInscriptionShardPda(context, { shardNumber: 0 });
+  await createShard(context, {
+    shardAccount,
+    shardNumber: 0,
+  }).sendAndConfirm(context);
 }
 
 export default globalSetup;

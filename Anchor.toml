@@ -35,3 +35,6 @@ address = "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" # noop
 
 [[test.validator.clone]]
 address = "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK" # account compression
+
+[[test.validator.clone]]
+address = "1NSCRfGeyo7wPUazGbaPBUsTM49e1k2aXewHGARfzSo" # mpl-inscription

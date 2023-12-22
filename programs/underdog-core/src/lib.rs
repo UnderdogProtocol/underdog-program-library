@@ -85,6 +85,21 @@ pub mod underdog_core {
     verify_legacy_nft_collection_v1::handler(ctx, args)
   }
 
+  pub fn verify_collection_v0(
+    ctx: Context<VerifyCollectionV0>,
+    args: VerifyCollectionV0Args,
+  ) -> Result<()> {
+    verify_collection_v0::handler(ctx, args)
+  }
+
+  pub fn inscribe_image_v0(ctx: Context<InscribeImageV0>, args: InscribeImageV0Args) -> Result<()> {
+    inscribe_image_v0::handler(ctx, args)
+  }
+
+  pub fn inscribe_v0(ctx: Context<InscribeV0>, args: InscribeV0Args) -> Result<()> {
+    inscribe_v0::handler(ctx, args)
+  }
+
   pub fn mint_non_transferable_nft_v1(
     ctx: Context<MintNonTransferableNftV1>,
     args: MintNonTransferableNftV1Args,
@@ -125,5 +140,9 @@ pub mod underdog_core {
     args: WithdrawProjectRoyaltiesV0Args,
   ) -> Result<()> {
     withdraw_project_royalties_v0::handler(ctx, args)
+  }
+
+  pub fn do_stuff_v0(ctx: Context<DoStuffV0>, args: DoStuffV0Args) -> Result<()> {
+    do_stuff_v0::handler(ctx, args)
   }
 }

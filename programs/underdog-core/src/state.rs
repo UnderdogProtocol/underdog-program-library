@@ -92,10 +92,6 @@ pub const NON_TRANSFERABLE_NFT_ESCROW: &str = "nt-nft-mint-esc";
 pub const NON_TRANSFERABLE_NFT_CLAIM: &str = "nt-nft-data";
 pub const NON_TRANSFERABLE_NFT_MINT_PREFIX: &str = "nt-nft-mint";
 
-pub const COMPRESSED_PROJECT_PREFIX: &str = "c-proj";
-pub const COMPRESSED_PROJECT_MINT_PREFIX: &str = "c-project-mint";
-pub const COMPRESSED_PROJECT_VAULT_PREFIX: &str = "c-project-vault";
-
 #[account]
 #[derive(Default)]
 pub struct NonTransferableProject {

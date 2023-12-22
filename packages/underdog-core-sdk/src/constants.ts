@@ -15,6 +15,3 @@ export const NON_TRANSFERABLE_NFT_ESCROW = "nt-nft-mint-esc";
 export const NON_TRANSFERABLE_NFT_CLAIM = "nt-nft-data";
 export const NON_TRANSFERABLE_NFT_MINT_PREFIX = "nt-nft-mint";
 
-export const COMPRESSED_PROJECT_PREFIX = "c-proj";
-export const COMPRESSED_PROJECT_MINT_PREFIX = "c-project-mint";
-export const COMPRESSED_PROJECT_VAULT_PREFIX = "c-project-vault";

@@ -863,6 +863,195 @@
       ]
     },
     {
+      "name": "verifyCollectionV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "VerifyCollectionV0Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "inscribeImageV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "inscriptionMetadataAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionShardAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InscribeImageV0Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "inscribeV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mintInscriptionAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionShardAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "inscriptionProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "InscribeV0Args"
+          }
+        }
+      ]
+    },
+    {
       "name": "mintNonTransferableNftV1",
       "accounts": [
         {
@@ -1394,6 +1583,94 @@
           }
         }
       ]
+    },
+    {
+      "name": "doStuffV0",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "ownerAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "orgAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "projectAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "masterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiverAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "DoStuffV0Args"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -1771,6 +2048,36 @@
       }
     },
     {
+      "name": "DoStuffV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "type": "u64"
+          },
+          {
+            "name": "nftId",
+            "type": "u64"
+          },
+          {
+            "name": "data",
+            "type": {
+              "defined": "UpdateMetadataArgs"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeLegacyProjectV1Args",
       "type": {
         "kind": "struct",
@@ -1882,6 +2189,50 @@
           {
             "name": "maxBufferSize",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InscribeImageV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InscribeV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "type": "u64"
+          },
+          {
+            "name": "nftId",
+            "type": "u64"
           }
         ]
       }
@@ -2139,6 +2490,30 @@
             "type": {
               "defined": "UpdateMetadataArgs"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyCollectionV0Args",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "superAdminAddress",
+            "type": "publicKey"
+          },
+          {
+            "name": "orgId",
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "type": "u64"
+          },
+          {
+            "name": "nftId",
+            "type": "u64"
           }
         ]
       }

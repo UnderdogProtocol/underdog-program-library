@@ -17,19 +17,36 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 
-import { PROJECT_MINT_PREFIX, PROJECT_PREFIX, createTree } from "../../src";
+import {
+  createShard,
+  fetchInscriptionMetadata,
+  fetchInscriptionShardFromSeeds,
+  findInscriptionMetadataPda,
+  findInscriptionShardPda,
+  findMintInscriptionPda,
+} from "@metaplex-foundation/mpl-inscription";
+
+import {
+  PROJECT_MINT_PREFIX,
+  PROJECT_PREFIX,
+  createTree,
+  findMintPda,
+} from "../../src";
 import {
   burnAssetV1,
+  doStuffV0,
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
   getProjectSize,
   initializeOrgV1,
   initializeProjectV1,
+  inscribeV0,
   mintNftV4,
   mintSftV4,
   transferAssetV2,
   updateProjectV2,
+  verifyCollectionV0,
   withdrawProjectRoyaltiesV0,
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
@@ -454,6 +471,75 @@ describe("Projects", () => {
       );
 
       leaves[leafIndex] = defaultPublicKey();
+    });
+  });
+
+  describe("Mint Normal NFT", () => {
+    it("works", async () => {
+      await doStuffV0(context, {
+        collectionMint: projectMint,
+        receiver: superAdminAddress,
+        superAdminAddress,
+        orgId: "1",
+        projectId: 1,
+        nftId: 1,
+        data: {
+          name,
+          symbol,
+          uri,
+          sellerFeeBasisPoints,
+        },
+      }).sendAndConfirm(context);
+
+      await verifyCollectionV0(context, {
+        collectionMint: projectMint,
+        superAdminAddress,
+        orgId: "1",
+        projectId: 1,
+        nftId: 1,
+      }).sendAndConfirm(context);
+
+      const mintAddress = findMintPda(context, {
+        projectAccount: project,
+        nftId: 1,
+      })[0];
+
+      const metadata = await fetchMetadataFromSeeds(context, {
+        mint: mintAddress,
+      });
+
+      console.log(metadata);
+      console.log(metadata.creators);
+
+      const inscriptionAccount = await findMintInscriptionPda(context, {
+        mint: mintAddress,
+      });
+      const metadataAccount = await findInscriptionMetadataPda(context, {
+        inscriptionAccount: inscriptionAccount[0],
+      });
+
+      await inscribeV0(context, {
+        mint: mintAddress,
+        inscriptionMetadata: metadataAccount[0],
+        mintInscriptionAccount: findMintInscriptionPda(context, {
+          mint: mintAddress,
+        }),
+        inscriptionShardAccount: findInscriptionShardPda(context, {
+          shardNumber: 0,
+        }),
+        superAdminAddress,
+        orgId: "1",
+        projectId: 1,
+        nftId: 1,
+      }).sendAndConfirm(context);
+
+      const inscription = await fetchInscriptionShardFromSeeds(context, {
+        shardNumber: 0,
+      });
+
+      const inscriptionMetadata = await fetchInscriptionMetadata(context, metadataAccount);
+      console.log(inscriptionMetadata);
+      console.log(inscription);
     });
   });
 });
