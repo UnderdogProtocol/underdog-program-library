@@ -196,5 +196,9 @@ pub fn handler(ctx: Context<MintNftV4>, args: MintNftV4Args) -> Result<()> {
     metadata,
   )?;
 
+  let tree_authority: &Box<Account<'_, TreeConfig>> = &ctx.accounts.tree_authority;
+
+  msg!("leafIndex: {}", tree_authority.num_minted);
+
   Ok(())
 }
