@@ -64,6 +64,13 @@ pub mod underdog_core {
     burn_asset_v1::handler(ctx, args)
   }
 
+  pub fn remove_from_collection_v1<'info>(
+    ctx: Context<'_, '_, '_, 'info, RemoveFromCollectionV1<'info>>,
+    args: RemoveFromCollectionV1Args,
+  ) -> Result<()> {
+    remove_from_collection_v1::handler(ctx, args)
+  }
+
   pub fn initialize_legacy_project_v1(
     ctx: Context<InitializeLegacyProjectV1>,
     args: InitializeLegacyProjectV1Args,

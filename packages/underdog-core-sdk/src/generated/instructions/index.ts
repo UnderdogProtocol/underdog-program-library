@@ -22,6 +22,7 @@ export * from './mintNftV4';
 export * from './mintNonTransferableNftV1';
 export * from './mintSftV4';
 export * from './mintTransferableNftV1';
+export * from './removeFromCollectionV1';
 export * from './revokeNonTransferableNftV1';
 export * from './transferAssetV2';
 export * from './updateOwner';

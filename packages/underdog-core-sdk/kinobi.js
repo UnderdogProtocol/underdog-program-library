@@ -73,9 +73,12 @@ kinobi.update(
       seeds: [
         k.stringConstantSeed("Inscription"),
         k.programSeed(),
-        k.publicKeySeed("inscriptionAccount", "The address of the Inscription Account"),
+        k.publicKeySeed(
+          "inscriptionAccount",
+          "The address of the Inscription Account"
+        ),
       ],
-    }
+    },
   })
 );
 
@@ -788,7 +791,9 @@ kinobi.update(
       // Use extra "proof" arg as remaining accounts.
       selector: (node) =>
         k.isInstructionNode(node) &&
-        ["transferAssetV2", "burnAssetV1"].includes(node.name),
+        ["transferAssetV2", "burnAssetV1", "removeFromCollectionV1"].includes(
+          node.name
+        ),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({

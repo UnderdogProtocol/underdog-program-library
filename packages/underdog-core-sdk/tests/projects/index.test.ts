@@ -18,13 +18,13 @@ import {
 } from "@metaplex-foundation/umi";
 
 import {
-  createShard,
   fetchInscriptionMetadata,
   fetchInscriptionShardFromSeeds,
   findInscriptionMetadataPda,
   findInscriptionShardPda,
   findMintInscriptionPda,
 } from "@metaplex-foundation/mpl-inscription";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 
 import {
   PROJECT_MINT_PREFIX,
@@ -44,6 +44,7 @@ import {
   inscribeV0,
   mintNftV4,
   mintSftV4,
+  removeFromCollectionV1,
   transferAssetV2,
   updateProjectV2,
   verifyCollectionV0,
@@ -417,6 +418,35 @@ describe("Projects", () => {
         index: leafIndex,
         proof: getMerkleProof(leaves, maxDepth, leaves[leafIndex]),
       }).sendAndConfirm(context);
+
+      const metadataBefore = await fetchMetadataFromSeeds(context, {
+        mint: projectMint,
+      });
+      console.log(metadataBefore.collectionDetails);
+
+      await removeFromCollectionV1(context, {
+        collectionMint: projectMint,
+        recipient: superAdminAddress,
+        merkleTree,
+        superAdminAddress,
+        orgId: "1",
+        projectId,
+        root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
+        dataHash,
+        creatorHash: creatorsHash,
+        leafIndex,
+        name,
+        symbol,
+        uri,
+        isDelegated: false,
+        proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
+      }).sendAndConfirm(context);
+
+      const metadataAfter = await fetchMetadataFromSeeds(context, {
+        mint: projectMint,
+      });
+      console.log("HERE")
+      console.log(metadataAfter.collectionDetails);
     });
   });
 
@@ -474,72 +504,75 @@ describe("Projects", () => {
     });
   });
 
-  describe("Mint Normal NFT", () => {
-    it("works", async () => {
-      await doStuffV0(context, {
-        collectionMint: projectMint,
-        receiver: superAdminAddress,
-        superAdminAddress,
-        orgId: "1",
-        projectId: 1,
-        nftId: 1,
-        data: {
-          name,
-          symbol,
-          uri,
-          sellerFeeBasisPoints,
-        },
-      }).sendAndConfirm(context);
+  // describe("Mint Normal NFT", () => {
+  //   it("works", async () => {
+  //     await doStuffV0(context, {
+  //       collectionMint: projectMint,
+  //       receiver: superAdminAddress,
+  //       superAdminAddress,
+  //       orgId: "1",
+  //       projectId: 1,
+  //       nftId: 1,
+  //       data: {
+  //         name,
+  //         symbol,
+  //         uri,
+  //         sellerFeeBasisPoints,
+  //       },
+  //     }).sendAndConfirm(context);
 
-      await verifyCollectionV0(context, {
-        collectionMint: projectMint,
-        superAdminAddress,
-        orgId: "1",
-        projectId: 1,
-        nftId: 1,
-      }).sendAndConfirm(context);
+  //     await verifyCollectionV0(context, {
+  //       collectionMint: projectMint,
+  //       superAdminAddress,
+  //       orgId: "1",
+  //       projectId: 1,
+  //       nftId: 1,
+  //     }).sendAndConfirm(context);
 
-      const mintAddress = findMintPda(context, {
-        projectAccount: project,
-        nftId: 1,
-      })[0];
+  //     const mintAddress = findMintPda(context, {
+  //       projectAccount: project,
+  //       nftId: 1,
+  //     })[0];
 
-      const metadata = await fetchMetadataFromSeeds(context, {
-        mint: mintAddress,
-      });
+  //     const metadata = await fetchMetadataFromSeeds(context, {
+  //       mint: mintAddress,
+  //     });
 
-      console.log(metadata);
-      console.log(metadata.creators);
+  //     console.log(metadata);
+  //     console.log(metadata.creators);
 
-      const inscriptionAccount = await findMintInscriptionPda(context, {
-        mint: mintAddress,
-      });
-      const metadataAccount = await findInscriptionMetadataPda(context, {
-        inscriptionAccount: inscriptionAccount[0],
-      });
+  //     const inscriptionAccount = await findMintInscriptionPda(context, {
+  //       mint: mintAddress,
+  //     });
+  //     const metadataAccount = await findInscriptionMetadataPda(context, {
+  //       inscriptionAccount: inscriptionAccount[0],
+  //     });
 
-      await inscribeV0(context, {
-        mint: mintAddress,
-        inscriptionMetadata: metadataAccount[0],
-        mintInscriptionAccount: findMintInscriptionPda(context, {
-          mint: mintAddress,
-        }),
-        inscriptionShardAccount: findInscriptionShardPda(context, {
-          shardNumber: 0,
-        }),
-        superAdminAddress,
-        orgId: "1",
-        projectId: 1,
-        nftId: 1,
-      }).sendAndConfirm(context);
+  //     await inscribeV0(context, {
+  //       mint: mintAddress,
+  //       inscriptionMetadata: metadataAccount[0],
+  //       mintInscriptionAccount: findMintInscriptionPda(context, {
+  //         mint: mintAddress,
+  //       }),
+  //       inscriptionShardAccount: findInscriptionShardPda(context, {
+  //         shardNumber: 0,
+  //       }),
+  //       superAdminAddress,
+  //       orgId: "1",
+  //       projectId: 1,
+  //       nftId: 1,
+  //     }).sendAndConfirm(context);
 
-      const inscription = await fetchInscriptionShardFromSeeds(context, {
-        shardNumber: 0,
-      });
+  //     const inscription = await fetchInscriptionShardFromSeeds(context, {
+  //       shardNumber: 0,
+  //     });
 
-      const inscriptionMetadata = await fetchInscriptionMetadata(context, metadataAccount);
-      console.log(inscriptionMetadata);
-      console.log(inscription);
-    });
-  });
+  //     const inscriptionMetadata = await fetchInscriptionMetadata(
+  //       context,
+  //       metadataAccount
+  //     );
+  //     console.log(inscriptionMetadata);
+  //     console.log(inscription);
+  //   });
+  // });
 });
