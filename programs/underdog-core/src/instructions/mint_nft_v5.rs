@@ -164,7 +164,7 @@ pub fn handler(ctx: Context<MintNftV5>, args: MintNftV5Args) -> Result<()> {
 
   if args.share > 0 {
     creators.push(Creator {
-      address: ctx.accounts.owner_account.key(),
+      address: ctx.accounts.authority.key(),
       verified: true,
       share: args.share,
     });
