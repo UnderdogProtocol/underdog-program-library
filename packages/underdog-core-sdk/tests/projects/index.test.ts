@@ -42,7 +42,7 @@ import {
   initializeOrgV1,
   initializeProjectV1,
   inscribeV0,
-  mintNftV4,
+  mintNftV5,
   mintSftV4,
   removeFromCollectionV1,
   transferAssetV2,
@@ -206,7 +206,7 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV4(context, {
+      await mintNftV5(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -217,6 +217,7 @@ describe("Projects", () => {
         uri,
         isDelegated: false,
         collectionMint: projectMint,
+        share: 0,
       }).sendAndConfirm(context);
     });
 
@@ -258,7 +259,7 @@ describe("Projects", () => {
     });
 
     beforeAll(async () => {
-      await mintNftV4(context, {
+      await mintNftV5(context, {
         recipient: owner,
         merkleTree,
         superAdminAddress,
@@ -269,6 +270,7 @@ describe("Projects", () => {
         uri,
         isDelegated: true,
         collectionMint: projectMint,
+        share: 0,
       }).sendAndConfirm(context);
     });
 
@@ -445,7 +447,7 @@ describe("Projects", () => {
       const metadataAfter = await fetchMetadataFromSeeds(context, {
         mint: projectMint,
       });
-      console.log("HERE")
+      console.log("HERE");
       console.log(metadataAfter.collectionDetails);
     });
   });

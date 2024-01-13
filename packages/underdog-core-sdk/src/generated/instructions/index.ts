@@ -19,6 +19,7 @@ export * from './initializeTree';
 export * from './inscribeImageV0';
 export * from './inscribeV0';
 export * from './mintNftV4';
+export * from './mintNftV5';
 export * from './mintNonTransferableNftV1';
 export * from './mintSftV4';
 export * from './mintTransferableNftV1';

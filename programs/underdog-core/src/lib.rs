@@ -46,6 +46,10 @@ pub mod underdog_core {
     mint_nft_v4::handler(ctx, args)
   }
 
+  pub fn mint_nft_v5(ctx: Context<MintNftV5>, args: MintNftV5Args) -> Result<()> {
+    mint_nft_v5::handler(ctx, args)
+  }
+
   pub fn mint_sft_v4(ctx: Context<MintSftV4>, args: MintSftV4Args) -> Result<()> {
     mint_sft_v4::handler(ctx, args)
   }
