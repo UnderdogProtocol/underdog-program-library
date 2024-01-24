@@ -1,7 +1,7 @@
 const k = require("@metaplex-foundation/kinobi");
 let path = require("path");
 
-// Instanciate Kinobi.
+// Instantiate Kinobi.
 const kinobi = k.createFromIdls([
   path.join(__dirname, "..", "..", "idls", "underdog_core.json"),
 ]);
@@ -642,7 +642,6 @@ kinobi.update(
         },
       },
     },
-    UpdateProjectV1: projectDefaults,
     DoStuffV0: {
       accounts: {
         receiverAta: {
@@ -764,23 +763,6 @@ kinobi.update(
         ...defaultNftMintPrefix,
       },
     },
-    MintNftV2: projectDefaults,
-    MintNftV3: projectDefaults,
-    MintSftV3: projectDefaults,
-    MintCompressedNft: {
-      args: {
-        projectMintBump: {
-          defaultsTo: k.accountBumpDefault("compressedProjectMint"),
-        },
-      },
-    },
-    MintCompressedNftV1: {
-      args: {
-        projectMintBump: {
-          defaultsTo: k.accountBumpDefault("compressedProjectMint"),
-        },
-      },
-    },
   })
 );
 
@@ -791,9 +773,12 @@ kinobi.update(
       // Use extra "proof" arg as remaining accounts.
       selector: (node) =>
         k.isInstructionNode(node) &&
-        ["transferAssetV2", "burnAssetV1", "removeFromCollectionV1"].includes(
-          node.name
-        ),
+        [
+          "transferAssetV2",
+          "burnAssetV1",
+          "removeFromCollectionV1",
+          "updateAssetV0",
+        ].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({

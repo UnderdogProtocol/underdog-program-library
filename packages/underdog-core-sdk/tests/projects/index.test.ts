@@ -18,23 +18,18 @@ import {
 } from "@metaplex-foundation/umi";
 
 import {
-  fetchInscriptionMetadata,
-  fetchInscriptionShardFromSeeds,
-  findInscriptionMetadataPda,
-  findInscriptionShardPda,
-  findMintInscriptionPda,
-} from "@metaplex-foundation/mpl-inscription";
-import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
-
-import {
   PROJECT_MINT_PREFIX,
   PROJECT_PREFIX,
   createTree,
   findMintPda,
+  findOrgAddress,
+  findProjectAddress,
+  findProjectMintAddress,
 } from "../../src";
 import {
   burnAssetV1,
   doStuffV0,
+  fetchProject,
   fetchProjectFromSeeds,
   findOrgAccountPda,
   findProjectPda,
@@ -52,28 +47,27 @@ import {
 } from "../../src/generated";
 import { hashProjectNft } from "../../src/verify";
 import { createContext } from "../setup";
+import {
+  fetchInscriptionMetadata,
+  fetchInscriptionShardFromSeeds,
+  findInscriptionMetadataPda,
+  findInscriptionShardPda,
+  findMintInscriptionPda,
+} from "@metaplex-foundation/mpl-inscription";
 
 describe("Projects", () => {
   const context = createContext();
 
   const superAdminAddress = generateSigner(context).publicKey;
-  const orgId = "1";
-  const orgAccount = findOrgAccountPda(context, {
-    superAdminAddress,
-    orgId,
-  })[0];
-
+  const orgId = 1;
   const projectId = 1;
-  const project = findProjectPda(context, {
-    prefix: PROJECT_PREFIX,
-    orgAccount: orgAccount,
-    projectId,
-  })[0];
-  const projectMint = findProjectPda(context, {
-    prefix: PROJECT_MINT_PREFIX,
-    orgAccount,
-    projectId,
-  })[0];
+
+  const orgInput = { superAdminAddress, orgId };
+  const projectInput = { ...orgInput, projectId };
+
+  const orgAddress = findOrgAddress(context, orgInput);
+  const projectAddress = findProjectAddress(context, projectInput);
+  const projectMintAddress = findProjectMintAddress(context, projectInput);
 
   const owner = generateSigner(context).publicKey;
 
@@ -92,7 +86,7 @@ describe("Projects", () => {
   beforeAll(async () => {
     await initializeOrgV1(context, {
       superAdminAddress,
-      orgId: orgId,
+      orgId: orgId.toString(),
     }).sendAndConfirm(context);
 
     await (
@@ -107,7 +101,7 @@ describe("Projects", () => {
   it("initializes a project", async () => {
     await initializeProjectV1(context, {
       superAdminAddress,
-      orgId,
+      orgId: orgId.toString(),
       projectId,
       name: "",
       symbol: "",
@@ -115,16 +109,12 @@ describe("Projects", () => {
       sellerFeeBasisPoints: 0,
     }).sendAndConfirm(context);
 
-    const project = await fetchProjectFromSeeds(context, {
-      prefix: PROJECT_PREFIX,
-      orgAccount,
-      projectId,
-    });
+    const project = await fetchProject(context, projectAddress);
 
     expect(project.projectId).toEqual(createBigInt(projectId));
 
     const projectMetadata = await fetchMetadataFromSeeds(context, {
-      mint: projectMint,
+      mint: projectMintAddress,
     });
 
     expect(projectMetadata.name).toEqual("");
@@ -136,7 +126,7 @@ describe("Projects", () => {
   it("can update a project", async () => {
     await updateProjectV2(context, {
       superAdminAddress,
-      orgId,
+      orgId: orgId.toString(),
       projectId,
       metadata: {
         name,
@@ -144,11 +134,11 @@ describe("Projects", () => {
         uri,
         sellerFeeBasisPoints,
       },
-      collectionMint: projectMint,
+      collectionMint: projectMintAddress,
     }).sendAndConfirm(context);
 
     const projectMetadata = await fetchMetadataFromSeeds(context, {
-      mint: projectMint,
+      mint: projectMintAddress,
     });
 
     expect(projectMetadata.name).toEqual(name);
@@ -159,13 +149,13 @@ describe("Projects", () => {
 
   describe("Project Royalties", () => {
     beforeAll(async () => {
-      const projectBalance = await context.rpc.getBalance(project);
+      const projectBalance = await context.rpc.getBalance(projectAddress);
 
       expect(projectBalance).toEqual(
         await context.rpc.getRent(getProjectSize())
       );
 
-      await context.rpc.airdrop(project, sol(1));
+      await context.rpc.airdrop(projectAddress, sol(1));
     });
 
     it("can withdraw royalties", async () => {
@@ -173,12 +163,12 @@ describe("Projects", () => {
 
       await withdrawProjectRoyaltiesV0(context, {
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         destination,
       }).sendAndConfirm(context);
 
-      const projectBalance = await context.rpc.getBalance(project);
+      const projectBalance = await context.rpc.getBalance(projectAddress);
 
       expect(projectBalance).toEqual(
         await context.rpc.getRent(getProjectSize())
@@ -210,13 +200,13 @@ describe("Projects", () => {
         recipient: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         name,
         symbol,
         uri,
         isDelegated: false,
-        collectionMint: projectMint,
+        collectionMint: projectMintAddress,
         share: 0,
       }).sendAndConfirm(context);
     });
@@ -263,13 +253,13 @@ describe("Projects", () => {
         recipient: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         name,
         symbol,
         uri,
         isDelegated: true,
-        collectionMint: projectMint,
+        collectionMint: projectMintAddress,
         share: 0,
       }).sendAndConfirm(context);
     });
@@ -299,7 +289,7 @@ describe("Projects", () => {
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,
@@ -354,12 +344,12 @@ describe("Projects", () => {
     beforeAll(async () => {
       await mintSftV4(context, {
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         recipient: owner,
         merkleTree,
         isDelegated: true,
-        collectionMint: projectMint,
+        collectionMint: projectMintAddress,
       }).sendAndConfirm(context);
     });
 
@@ -388,7 +378,7 @@ describe("Projects", () => {
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,
@@ -422,12 +412,12 @@ describe("Projects", () => {
       }).sendAndConfirm(context);
 
       const metadataBefore = await fetchMetadataFromSeeds(context, {
-        mint: projectMint,
+        mint: projectMintAddress,
       });
       console.log(metadataBefore.collectionDetails);
 
       await removeFromCollectionV1(context, {
-        collectionMint: projectMint,
+        collectionMint: projectMintAddress,
         recipient: superAdminAddress,
         merkleTree,
         superAdminAddress,
@@ -445,7 +435,7 @@ describe("Projects", () => {
       }).sendAndConfirm(context);
 
       const metadataAfter = await fetchMetadataFromSeeds(context, {
-        mint: projectMint,
+        mint: projectMintAddress,
       });
       console.log("HERE");
       console.log(metadataAfter.collectionDetails);
@@ -474,10 +464,10 @@ describe("Projects", () => {
         recipient: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         isDelegated: true,
-        collectionMint: projectMint,
+        collectionMint: projectMintAddress,
       }).sendAndConfirm(context);
 
       leaves.push(publicKey(leafHash));
@@ -488,7 +478,7 @@ describe("Projects", () => {
         leafOwner: owner,
         merkleTree,
         superAdminAddress,
-        orgId,
+        orgId: orgId.toString(),
         projectId,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
         dataHash,
@@ -509,7 +499,7 @@ describe("Projects", () => {
   // describe("Mint Normal NFT", () => {
   //   it("works", async () => {
   //     await doStuffV0(context, {
-  //       collectionMint: projectMint,
+  //       collectionMint: projectMintAddress,
   //       receiver: superAdminAddress,
   //       superAdminAddress,
   //       orgId: "1",
@@ -524,7 +514,7 @@ describe("Projects", () => {
   //     }).sendAndConfirm(context);
 
   //     await verifyCollectionV0(context, {
-  //       collectionMint: projectMint,
+  //       collectionMint: projectMintAddress,
   //       superAdminAddress,
   //       orgId: "1",
   //       projectId: 1,
@@ -532,7 +522,7 @@ describe("Projects", () => {
   //     }).sendAndConfirm(context);
 
   //     const mintAddress = findMintPda(context, {
-  //       projectAccount: project,
+  //       projectAccount: projectAddress,
   //       nftId: 1,
   //     })[0];
 

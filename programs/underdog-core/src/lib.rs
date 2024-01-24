@@ -156,4 +156,11 @@ pub mod underdog_core {
   pub fn do_stuff_v0(ctx: Context<DoStuffV0>, args: DoStuffV0Args) -> Result<()> {
     do_stuff_v0::handler(ctx, args)
   }
+
+  pub fn update_asset_v0<'info>(
+    ctx: Context<'_, '_, '_, 'info, UpdateAssetV0<'info>>,
+    args: UpdateAssetV0Args,
+  ) -> Result<()> {
+    update_asset_v0::handler(ctx, args)
+  }
 }

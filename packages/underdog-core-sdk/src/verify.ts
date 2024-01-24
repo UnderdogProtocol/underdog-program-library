@@ -5,16 +5,16 @@ import {
   hashMetadataCreators,
   hashMetadataData,
 } from "@metaplex-foundation/mpl-bubblegum";
-import { Context, PublicKey } from "@metaplex-foundation/umi";
+import { PublicKey, Umi } from "@metaplex-foundation/umi";
 
-import { PROJECT_MINT_PREFIX, PROJECT_PREFIX } from "./constants";
-import { findOrgAccountPda, findProjectPda } from "./generated";
+import { findOrgAddress } from "./orgs";
+import { findProjectAddress, findProjectMintAddress } from "./projects";
 
 export const hashProjectNft = (
-  context: Pick<Context, "eddsa" | "programs">,
+  context: Umi,
   input: {
     superAdminAddress: PublicKey;
-    orgId: string;
+    orgId: number;
     projectId: number;
     merkleTree: PublicKey;
     leafIndex: number;
@@ -26,29 +26,29 @@ export const hashProjectNft = (
     sellerFeeBasisPoints: number;
   }
 ) => {
-  const { superAdminAddress, orgId, projectId, name, symbol, uri, owner, merkleTree, leafIndex, delegated } =
-    input;
-
-  const orgAccountPda = findOrgAccountPda(context, {
+  const {
     superAdminAddress,
     orgId,
-  });
-
-  const projectAccountPda = findProjectPda(context, {
-    prefix: PROJECT_PREFIX,
-    orgAccount: orgAccountPda[0],
     projectId,
-  });
+    name,
+    symbol,
+    uri,
+    owner,
+    merkleTree,
+    leafIndex,
+    delegated,
+  } = input;
 
-  const projectMintPda = findProjectPda(context, {
-    prefix: PROJECT_MINT_PREFIX,
-    orgAccount: orgAccountPda[0],
-    projectId,
-  });
+  const orgInput = { superAdminAddress, orgId };
+  const projectInput = { ...orgInput, projectId };
+
+  const orgAddress = findOrgAddress(context, orgInput);
+  const projectAddress = findProjectAddress(context, projectInput);
+  const projectMintAddress = findProjectMintAddress(context, projectInput);
 
   const creators = [
-    { address: projectAccountPda[0], verified: true, share: 100 },
-    { address: orgAccountPda[0], verified: true, share: 0 },
+    { address: projectAddress, verified: true, share: 100 },
+    { address: orgAddress, verified: true, share: 0 },
   ];
 
   const metadata = {
@@ -61,7 +61,7 @@ export const hashProjectNft = (
     editionNonce: 0,
     tokenStandard: TokenStandard.NonFungible,
     collection: {
-      key: projectMintPda[0],
+      key: projectMintAddress,
       verified: true,
     },
     uses: undefined,
@@ -73,7 +73,7 @@ export const hashProjectNft = (
     leafHash: hashLeaf(context, {
       merkleTree,
       owner,
-      delegate: delegated ? projectAccountPda[0] : owner,
+      delegate: delegated ? projectAddress : owner,
       leafIndex,
       metadata,
     }),

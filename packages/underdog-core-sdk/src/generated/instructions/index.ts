@@ -26,6 +26,7 @@ export * from './mintTransferableNftV1';
 export * from './removeFromCollectionV1';
 export * from './revokeNonTransferableNftV1';
 export * from './transferAssetV2';
+export * from './updateAssetV0';
 export * from './updateOwner';
 export * from './updateProjectV2';
 export * from './verifyCollectionV0';

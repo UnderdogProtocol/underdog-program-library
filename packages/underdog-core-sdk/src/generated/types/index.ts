@@ -6,4 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from './creatorInput';
+export * from './currentMetadata';
+export * from './updatedMetadata';
 export * from './updateMetadataArgs';

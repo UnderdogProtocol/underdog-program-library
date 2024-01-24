@@ -6,7 +6,7 @@ use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
 
 use mpl_token_metadata::state::{Collection, Creator, DataV2};
 use shared_utils::{
-  create_master_edition_v3, create_metadata_accounts_v3, sign_metadata, CreateMasterEditionV3,
+  create_master_edition_v3, create_metadata_accounts_v3, CreateMasterEditionV3,
   CreateMetadataAccountsV3, SignMetadata,
 };
 
