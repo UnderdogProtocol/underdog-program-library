@@ -6,8 +6,8 @@ import {
   setupNft,
   setupProject,
   setupTree,
-  verifyAsset,
 } from "../mocks";
+import { verifyAsset } from "../../src";
 
 const context = createContext();
 

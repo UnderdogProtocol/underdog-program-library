@@ -7,8 +7,8 @@ import {
   setupProject,
   setupSft,
   setupTree,
-  verifyAsset,
 } from "../mocks";
+import { verifyAsset } from "../../src";
 
 const context = createContext();
 

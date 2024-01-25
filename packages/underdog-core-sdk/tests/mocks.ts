@@ -190,27 +190,3 @@ export const setupSft = async (
 
   return [...assets, assetHash];
 };
-
-export const verifyAsset = async (
-  context: Umi,
-  input: { treeAddress: PublicKey; assets: AssetHash[]; leafIndex?: number }
-) => {
-  const { treeAddress, assets } = input;
-  const leafIndex = input.leafIndex || assets.length - 1;
-
-  const treeConfig = await fetchTreeConfigFromSeeds(context, {
-    merkleTree: treeAddress,
-  });
-
-  const maxDepth = Math.log2(Number(treeConfig.totalMintCapacity));
-
-  const leaves = toLeafHashes(assets);
-
-  await verifyLeaf(context, {
-    merkleTree: treeAddress,
-    root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
-    leaf: publicKeyBytes(leaves[leafIndex]),
-    index: leafIndex,
-    proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
-  }).sendAndConfirm(context);
-};

@@ -1,11 +1,20 @@
 import {
   TokenProgramVersion,
   TokenStandard,
+  fetchTreeConfigFromSeeds,
+  getMerkleProofAtIndex,
+  getMerkleRoot,
   hashLeaf,
   hashMetadataCreators,
   hashMetadataData,
+  verifyLeaf,
 } from "@metaplex-foundation/mpl-bubblegum";
-import { PublicKey, Umi, publicKey } from "@metaplex-foundation/umi";
+import {
+  PublicKey,
+  Umi,
+  publicKey,
+  publicKeyBytes,
+} from "@metaplex-foundation/umi";
 
 import {
   ProjectInput,
@@ -32,9 +41,7 @@ export type AssetHash = {
 
 export const toLeafHashes = (hashes: AssetHash[]) => hashes.map((h) => h.leaf);
 
-export const defaultMetadata = {
-
-}
+export const defaultMetadata = {};
 
 export const hashProjectAsset = (
   context: Umi,
@@ -90,4 +97,28 @@ export const hashProjectAsset = (
     creator: hashMetadataCreators(creators),
     data: hashMetadataData(metadata),
   };
+};
+
+export const verifyAsset = async (
+  context: Umi,
+  input: { treeAddress: PublicKey; assets: AssetHash[]; leafIndex?: number }
+) => {
+  const { treeAddress, assets } = input;
+  const leafIndex = input.leafIndex || assets.length - 1;
+
+  const treeConfig = await fetchTreeConfigFromSeeds(context, {
+    merkleTree: treeAddress,
+  });
+
+  const maxDepth = Math.log2(Number(treeConfig.totalMintCapacity));
+
+  const leaves = toLeafHashes(assets);
+
+  await verifyLeaf(context, {
+    merkleTree: treeAddress,
+    root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),
+    leaf: publicKeyBytes(leaves[leafIndex]),
+    index: leafIndex,
+    proof: getMerkleProofAtIndex(leaves, maxDepth, leafIndex),
+  }).sendAndConfirm(context);
 };

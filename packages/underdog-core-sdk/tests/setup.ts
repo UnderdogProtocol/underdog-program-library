@@ -3,18 +3,8 @@ import {
   createSplAssociatedTokenProgram,
   createSplTokenProgram,
 } from "@metaplex-foundation/mpl-toolbox";
-import {
-  createUmi as baseCreateUmi,
-  createSignerFromKeypair,
-  keypairIdentity,
-  publicKey,
-  sol,
-} from "@metaplex-foundation/umi";
-import {
-  createUmi,
-  defaultPlugins,
-} from "@metaplex-foundation/umi-bundle-defaults";
-import { Keypair } from "@solana/web3.js";
+import { keypairIdentity, sol } from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";

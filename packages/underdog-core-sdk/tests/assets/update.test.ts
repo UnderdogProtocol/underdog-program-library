@@ -10,6 +10,7 @@ import {
   hashProjectAsset,
   toLeafHashes,
   updateAssetV0,
+  verifyAsset,
 } from "../../src";
 import {
   getMerkleProofAtIndex,
@@ -21,7 +22,6 @@ import {
   setupNft,
   setupProject,
   setupTree,
-  verifyAsset,
 } from "../mocks";
 
 const context = createContext();

@@ -1,5 +1,10 @@
 import { PublicKey, publicKeyBytes } from "@metaplex-foundation/umi";
-import { hashProjectAsset, toLeafHashes, transferAssetV2 } from "../../src";
+import {
+  hashProjectAsset,
+  toLeafHashes,
+  transferAssetV2,
+  verifyAsset,
+} from "../../src";
 import {
   generateMetadataMock,
   generateProjectMock,
@@ -7,7 +12,6 @@ import {
   setupNft,
   setupProject,
   setupTree,
-  verifyAsset,
 } from "../mocks";
 import { createContext } from "../setup";
 import {
