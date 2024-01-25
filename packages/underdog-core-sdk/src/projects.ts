@@ -25,3 +25,35 @@ export const findProjectMintAddress = (
   context: Umi,
   projectInput: ProjectInput
 ) => findProjectAddressByPrefix(context, projectInput, PROJECT_MINT_PREFIX);
+
+export const findProjectAddresses = (
+  context: Umi,
+  projectInput: ProjectInput
+) => ({
+  orgAddress: findOrgAddress(context, projectInput),
+  projectAddress: findProjectAddress(context, projectInput),
+  projectMintAddress: findProjectMintAddress(context, projectInput),
+});
+
+export const getProjectCreators = (
+  context: Umi,
+  projectInput: ProjectInput
+) => {
+  const { orgAddress, projectAddress } = findProjectAddresses(
+    context,
+    projectInput
+  );
+
+  return [
+    {
+      address: projectAddress,
+      verified: true,
+      share: 100,
+    },
+    {
+      address: orgAddress,
+      verified: true,
+      share: 0,
+    },
+  ];
+};

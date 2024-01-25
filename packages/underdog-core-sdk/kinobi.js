@@ -83,6 +83,9 @@ kinobi.update(
 );
 
 kinobi.update(
+  new k.SetStructDefaultValuesVisitor([
+
+  ]),
   new k.SetInstructionAccountDefaultValuesVisitor([
     {
       account: "associatedTokenProgram",
@@ -616,14 +619,6 @@ const nonTransferableNftDefaults = {
     },
     nftEscrowBump: {
       defaultsTo: k.accountBumpDefault("nonTransferableNftEscrow"),
-    },
-  },
-};
-
-const projectDefaults = {
-  args: {
-    projectMintBump: {
-      defaultsTo: k.accountBumpDefault("projectMint"),
     },
   },
 };

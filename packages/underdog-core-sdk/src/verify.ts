@@ -5,27 +5,41 @@ import {
   hashMetadataCreators,
   hashMetadataData,
 } from "@metaplex-foundation/mpl-bubblegum";
-import { PublicKey, Umi } from "@metaplex-foundation/umi";
+import { PublicKey, Umi, publicKey } from "@metaplex-foundation/umi";
 
-import { findOrgAddress } from "./orgs";
-import { findProjectAddress, findProjectMintAddress } from "./projects";
+import {
+  ProjectInput,
+  findProjectAddresses,
+  getProjectCreators,
+} from "./projects";
 
-export const hashProjectNft = (
+export type HashAssetInput = ProjectInput & {
+  treeAddress: PublicKey;
+  leafIndex: number;
+  ownerAddress: PublicKey;
+  name: string;
+  symbol: string;
+  uri: string;
+  sellerFeeBasisPoints: number;
+  delegated?: boolean;
+};
+
+export type AssetHash = {
+  leaf: PublicKey;
+  creator: Uint8Array;
+  data: Uint8Array;
+};
+
+export const toLeafHashes = (hashes: AssetHash[]) => hashes.map((h) => h.leaf);
+
+export const defaultMetadata = {
+
+}
+
+export const hashProjectAsset = (
   context: Umi,
-  input: {
-    superAdminAddress: PublicKey;
-    orgId: number;
-    projectId: number;
-    merkleTree: PublicKey;
-    leafIndex: number;
-    owner: PublicKey;
-    name: string;
-    symbol?: string;
-    uri: string;
-    delegated?: boolean;
-    sellerFeeBasisPoints: number;
-  }
-) => {
+  input: HashAssetInput
+): AssetHash => {
   const {
     superAdminAddress,
     orgId,
@@ -33,23 +47,20 @@ export const hashProjectNft = (
     name,
     symbol,
     uri,
-    owner,
-    merkleTree,
+    ownerAddress,
+    treeAddress,
     leafIndex,
     delegated,
   } = input;
 
-  const orgInput = { superAdminAddress, orgId };
-  const projectInput = { ...orgInput, projectId };
+  const projectInput = { superAdminAddress, orgId, projectId };
 
-  const orgAddress = findOrgAddress(context, orgInput);
-  const projectAddress = findProjectAddress(context, projectInput);
-  const projectMintAddress = findProjectMintAddress(context, projectInput);
+  const { projectAddress, projectMintAddress } = findProjectAddresses(
+    context,
+    projectInput
+  );
 
-  const creators = [
-    { address: projectAddress, verified: true, share: 100 },
-    { address: orgAddress, verified: true, share: 0 },
-  ];
+  const creators = getProjectCreators(context, projectInput);
 
   const metadata = {
     name,
@@ -60,24 +71,23 @@ export const hashProjectNft = (
     isMutable: true,
     editionNonce: 0,
     tokenStandard: TokenStandard.NonFungible,
-    collection: {
-      key: projectMintAddress,
-      verified: true,
-    },
+    collection: { key: projectMintAddress, verified: true },
     uses: undefined,
     tokenProgramVersion: TokenProgramVersion.Original,
     creators,
   };
 
   return {
-    leafHash: hashLeaf(context, {
-      merkleTree,
-      owner,
-      delegate: delegated ? projectAddress : owner,
-      leafIndex,
-      metadata,
-    }),
-    creatorsHash: hashMetadataCreators(creators),
-    dataHash: hashMetadataData(metadata),
+    leaf: publicKey(
+      hashLeaf(context, {
+        merkleTree: treeAddress,
+        owner: ownerAddress,
+        delegate: delegated ? projectAddress : ownerAddress,
+        leafIndex,
+        metadata,
+      })
+    ),
+    creator: hashMetadataCreators(creators),
+    data: hashMetadataData(metadata),
   };
 };

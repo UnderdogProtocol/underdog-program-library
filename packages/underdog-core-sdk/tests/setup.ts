@@ -10,30 +10,31 @@ import {
   publicKey,
   sol,
 } from "@metaplex-foundation/umi";
-import { defaultPlugins } from "@metaplex-foundation/umi-bundle-defaults";
+import {
+  createUmi,
+  defaultPlugins,
+} from "@metaplex-foundation/umi-bundle-defaults";
 import { Keypair } from "@solana/web3.js";
 
 import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
-import { createMplInscriptionProgram, createShard, findInscriptionShardPda } from "@metaplex-foundation/mpl-inscription";
+import {
+  createMplInscriptionProgram,
+  createShard,
+  findInscriptionShardPda,
+} from "@metaplex-foundation/mpl-inscription";
 
 export const createContext = () => {
-  const context = baseCreateUmi().use(
-    defaultPlugins("http://localhost:8899", { commitment: "processed" })
-  );
-
-  const underdogKeypair = Keypair.fromSecretKey(
-    Uint8Array.from(underdogSecretKey)
-  );
+  const context = createUmi("http://localhost:8899", "processed");
 
   context.use(
     keypairIdentity(
-      createSignerFromKeypair(context, {
-        publicKey: publicKey(underdogKeypair.publicKey.toBase58()),
-        secretKey: underdogKeypair.secretKey,
-      })
+      context.eddsa.createKeypairFromSecretKey(
+        Uint8Array.from(underdogSecretKey)
+      )
     )
   );
+
   context.programs.add(createSplTokenProgram());
   context.programs.add(createSplAssociatedTokenProgram());
   context.programs.add(createSplAccountCompressionProgram());
@@ -45,7 +46,7 @@ export const createContext = () => {
 async function globalSetup() {
   console.log("\nGlobal setup...");
 
-  const context = await createContext();
+  const context = createContext();
 
   console.log("Requesting airdrop...");
   await context.rpc.airdrop(context.identity.publicKey, sol(10));

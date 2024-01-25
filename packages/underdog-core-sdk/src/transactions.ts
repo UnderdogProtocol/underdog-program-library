@@ -1,8 +1,16 @@
 import { getMerkleTreeSize } from "@metaplex-foundation/mpl-bubblegum";
-import { findMetadataPda, findMasterEditionPda } from "@metaplex-foundation/mpl-token-metadata";
+import {
+  findMetadataPda,
+  findMasterEditionPda,
+} from "@metaplex-foundation/mpl-token-metadata";
 import { createAccount, createLut } from "@metaplex-foundation/mpl-toolbox";
-import { Context, PublicKey, Signer, transactionBuilder } from "@metaplex-foundation/umi";
-
+import {
+  Context,
+  PublicKey,
+  Signer,
+  Umi,
+  transactionBuilder,
+} from "@metaplex-foundation/umi";
 
 import {
   NON_TRANSFERABLE_PROJECT_MINT_PREFIX,
@@ -28,11 +36,20 @@ export const mintTransferableNftAndVerifyCollection = (
     Parameters<typeof verifyLegacyNftCollectionV1>[0] &
     Pick<Context, "rpc">,
   input: Omit<
-    Parameters<typeof mintTransferableNftV1>[1] & Parameters<typeof verifyLegacyNftCollectionV1>[1],
+    Parameters<typeof mintTransferableNftV1>[1] &
+      Parameters<typeof verifyLegacyNftCollectionV1>[1],
     "projectType"
   >
 ) => {
-  const { superAdminAddress, orgId, projectIdStr, nftIdStr, name, symbol, uri } = input;
+  const {
+    superAdminAddress,
+    orgId,
+    projectIdStr,
+    nftIdStr,
+    name,
+    symbol,
+    uri,
+  } = input;
 
   return transactionBuilder()
     .add(
@@ -61,13 +78,19 @@ export const mintTransferableNftAndVerifyCollection = (
 };
 
 export const createTree = async (
-  context: Parameters<typeof createAccount>[0] & Parameters<typeof initializeTree>[0] & Pick<Context, "rpc">,
+  context: Parameters<typeof createAccount>[0] &
+    Parameters<typeof initializeTree>[0] &
+    Pick<Context, "rpc">,
   input: Omit<Parameters<typeof initializeTree>[1], "merkleTree"> & {
     merkleTree: Signer;
     canopyDepth?: number;
   }
 ) => {
-  const space = getMerkleTreeSize(input.maxDepth, input.maxBufferSize, input.canopyDepth);
+  const space = getMerkleTreeSize(
+    input.maxDepth,
+    input.maxBufferSize,
+    input.canopyDepth
+  );
   const lamports = await context.rpc.getRent(space);
 
   return transactionBuilder()
@@ -91,7 +114,12 @@ export const createTree = async (
 
 export const createProjectLut = (
   context: Pick<Context, "programs" | "eddsa" | "identity" | "payer">,
-  input: { slot: number | bigint; superAdminAddress: PublicKey; orgId: string; projectId: number }
+  input: {
+    slot: number | bigint;
+    superAdminAddress: PublicKey;
+    orgId: string;
+    projectId: number;
+  }
 ) => {
   const orgAccount = findOrgAccountPda(context, {
     superAdminAddress: input.superAdminAddress,
@@ -140,7 +168,9 @@ export const createLegacyProjectLut = (
   });
 
   const projectMintPda = findProjectPda(context, {
-    prefix: input.transferable ? TRANSFERABLE_PROJECT_MINT_PREFIX : NON_TRANSFERABLE_PROJECT_MINT_PREFIX,
+    prefix: input.transferable
+      ? TRANSFERABLE_PROJECT_MINT_PREFIX
+      : NON_TRANSFERABLE_PROJECT_MINT_PREFIX,
     orgAccount: orgAccount[0],
     projectId: input.projectId,
   })[0];
@@ -149,7 +179,9 @@ export const createLegacyProjectLut = (
     recentSlot: input.slot,
     addresses: [
       findProjectPda(context, {
-        prefix: input.transferable ? TRANSFERABLE_PROJECT_PREFIX : NON_TRANSFERABLE_PROJECT_PREFIX,
+        prefix: input.transferable
+          ? TRANSFERABLE_PROJECT_PREFIX
+          : NON_TRANSFERABLE_PROJECT_PREFIX,
         orgAccount: orgAccount[0],
         projectId: input.projectId,
       })[0],
