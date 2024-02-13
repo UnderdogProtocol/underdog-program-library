@@ -7,10 +7,6 @@
  */
 
 import {
-  findMasterEditionPda,
-  findMetadataPda,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   AccountMeta,
   Context,
   Pda,
@@ -31,23 +27,18 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findInitialOwnerPda,
-  findOrgAccountPda,
-  findProjectPda,
-} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeProjectV1InstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
-  orgAccount?: PublicKey | Pda;
-  projectAccount?: PublicKey | Pda;
-  projectMint?: PublicKey | Pda;
-  projectVault?: PublicKey | Pda;
-  projectMetadata?: PublicKey | Pda;
-  projectMasterEdition?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
+  orgAccount: PublicKey | Pda;
+  projectAccount: PublicKey | Pda;
+  projectMint: PublicKey | Pda;
+  projectVault: PublicKey | Pda;
+  projectMetadata: PublicKey | Pda;
+  projectMasterEdition: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
@@ -124,7 +115,7 @@ export type InitializeProjectV1InstructionArgs =
 
 // Instruction.
 export function initializeProjectV1(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: InitializeProjectV1InstructionAccounts &
     InitializeProjectV1InstructionArgs
 ): TransactionBuilder {
@@ -138,7 +129,15 @@ export function initializeProjectV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, true] as const,
+    orgAccount: [input.orgAccount, true] as const,
+    projectAccount: [input.projectAccount, true] as const,
+    projectMint: [input.projectMint, true] as const,
+    projectVault: [input.projectVault, true] as const,
+    projectMetadata: [input.projectMetadata, true] as const,
+    projectMasterEdition: [input.projectMasterEdition, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -146,92 +145,6 @@ export function initializeProjectV1(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, true] as const)
-      : ([findInitialOwnerPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'orgAccount',
-    input.orgAccount
-      ? ([input.orgAccount, true] as const)
-      : ([
-          findOrgAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectAccount',
-    input.projectAccount
-      ? ([input.projectAccount, true] as const)
-      : ([
-          findProjectPda(context, {
-            prefix: 'project',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectMint',
-    input.projectMint
-      ? ([input.projectMint, true] as const)
-      : ([
-          findProjectPda(context, {
-            prefix: 'project-mint',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectVault',
-    input.projectVault
-      ? ([input.projectVault, true] as const)
-      : ([
-          findProjectPda(context, {
-            prefix: 'project-vault',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectMetadata',
-    input.projectMetadata
-      ? ([input.projectMetadata, true] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(resolvedAccounts.projectMint[0], false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectMasterEdition',
-    input.projectMasterEdition
-      ? ([input.projectMasterEdition, true] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(resolvedAccounts.projectMint[0], false),
-          }),
-          true,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

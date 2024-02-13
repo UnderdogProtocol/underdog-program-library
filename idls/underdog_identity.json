@@ -95,8 +95,13 @@
       ]
     },
     {
-      "name": "activatePassportV0",
+      "name": "activatePassportV1",
       "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
         {
           "name": "domainAuthority",
           "isMut": true,
@@ -132,7 +137,7 @@
         {
           "name": "args",
           "type": {
-            "defined": "ActivatePassportV0Args"
+            "defined": "ActivatePassportV1Args"
           }
         }
       ]
@@ -358,7 +363,7 @@
   ],
   "types": [
     {
-      "name": "ActivatePassportV0Args",
+      "name": "ActivatePassportV1Args",
       "type": {
         "kind": "struct",
         "fields": [

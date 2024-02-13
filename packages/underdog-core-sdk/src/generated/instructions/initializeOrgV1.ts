@@ -25,14 +25,13 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findInitialOwnerPda, findOrgAccountPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeOrgV1InstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
-  orgAccount?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
+  orgAccount: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
 };
@@ -94,7 +93,7 @@ export type InitializeOrgV1InstructionArgs = InitializeOrgV1InstructionDataArgs;
 
 // Instruction.
 export function initializeOrgV1(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: InitializeOrgV1InstructionAccounts & InitializeOrgV1InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -107,7 +106,10 @@ export function initializeOrgV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, false] as const,
+    orgAccount: [input.orgAccount, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -115,26 +117,6 @@ export function initializeOrgV1(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, false] as const)
-      : ([findInitialOwnerPda(context), false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'orgAccount',
-    input.orgAccount
-      ? ([input.orgAccount, true] as const)
-      : ([
-          findOrgAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          true,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

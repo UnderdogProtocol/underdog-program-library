@@ -6,7 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from './activatePassportV0';
+export * from './activatePassportV1';
 export * from './burnAssetV0';
 export * from './initializeAdmin';
 export * from './initializeDomainV0';

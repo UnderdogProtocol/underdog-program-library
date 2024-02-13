@@ -6,7 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-import { findTreeConfigPda } from '@metaplex-foundation/mpl-bubblegum';
 import {
   AccountMeta,
   Context,
@@ -14,7 +13,6 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -29,27 +27,22 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findInitialOwnerPda,
-  findOrgAccountPda,
-  findProjectPda,
-} from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type TransferAssetV2InstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
-  orgAccount?: PublicKey | Pda;
-  projectAccount?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
+  orgAccount: PublicKey | Pda;
+  projectAccount: PublicKey | Pda;
   leafOwner: PublicKey | Pda;
   newLeafOwner: PublicKey | Pda;
-  treeAuthority?: PublicKey | Pda;
+  treeAuthority: PublicKey | Pda;
   merkleTree: PublicKey | Pda;
-  bubblegumSigner?: PublicKey | Pda;
-  bubblegumProgram?: PublicKey | Pda;
-  logWrapper?: PublicKey | Pda;
-  compressionProgram?: PublicKey | Pda;
+  bubblegumSigner: PublicKey | Pda;
+  bubblegumProgram: PublicKey | Pda;
+  logWrapper: PublicKey | Pda;
+  compressionProgram: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
@@ -131,7 +124,7 @@ export type TransferAssetV2InstructionArgs = PickPartial<
 
 // Instruction.
 export function transferAssetV2(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: TransferAssetV2InstructionAccounts & TransferAssetV2InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -145,9 +138,17 @@ export function transferAssetV2(
 
   // Resolved inputs.
   const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, true] as const,
+    orgAccount: [input.orgAccount, true] as const,
+    projectAccount: [input.projectAccount, true] as const,
     leafOwner: [input.leafOwner, false] as const,
     newLeafOwner: [input.newLeafOwner, false] as const,
+    treeAuthority: [input.treeAuthority, true] as const,
     merkleTree: [input.merkleTree, true] as const,
+    bubblegumSigner: [input.bubblegumSigner, false] as const,
+    bubblegumProgram: [input.bubblegumProgram, false] as const,
+    logWrapper: [input.logWrapper, false] as const,
+    compressionProgram: [input.compressionProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -156,101 +157,6 @@ export function transferAssetV2(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, true] as const)
-      : ([findInitialOwnerPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'orgAccount',
-    input.orgAccount
-      ? ([input.orgAccount, true] as const)
-      : ([
-          findOrgAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectAccount',
-    input.projectAccount
-      ? ([input.projectAccount, true] as const)
-      : ([
-          findProjectPda(context, {
-            prefix: 'project',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'treeAuthority',
-    input.treeAuthority
-      ? ([input.treeAuthority, true] as const)
-      : ([
-          findTreeConfigPda(context, {
-            merkleTree: publicKey(input.merkleTree, false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'bubblegumSigner',
-    input.bubblegumSigner
-      ? ([input.bubblegumSigner, false] as const)
-      : ([
-          publicKey('4ewWZC5gT6TGpm5LZNDs9wVonfUT2q5PP5sc9kVbwMAK'),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'bubblegumProgram',
-    input.bubblegumProgram
-      ? ([input.bubblegumProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'bubblegumProgram',
-            'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'logWrapper',
-    input.logWrapper
-      ? ([input.logWrapper, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splNoop',
-            'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'compressionProgram',
-    input.compressionProgram
-      ? ([input.compressionProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splAccountCompression',
-            'cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK'
-          ),
-          false,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

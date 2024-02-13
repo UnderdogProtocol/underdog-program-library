@@ -26,11 +26,11 @@ pub mod underdog_identity {
     initialize_domain_v0::handler(ctx, args)
   }
 
-  pub fn activate_passport_v0<'info>(
-    ctx: Context<ActivatePassportV0>,
-    args: ActivatePassportV0Args,
+  pub fn activate_passport_v1<'info>(
+    ctx: Context<ActivatePassportV1>,
+    args: ActivatePassportV1Args,
   ) -> Result<()> {
-    activate_passport_v0::handler(ctx, args)
+    activate_passport_v1::handler(ctx, args)
   }
 
   pub fn initialize_link_v0<'info>(

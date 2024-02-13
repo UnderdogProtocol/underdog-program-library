@@ -54,6 +54,11 @@ kinobi.update(
       }),
     },
     {
+      account: "payer",
+      ignoreIfOptional: true,
+      ...k.accountDefault("passportAuthority"),
+    },
+    {
       account: "logWrapper",
       ignoreIfOptional: true,
       ...k.programDefault("splNoop", "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"),

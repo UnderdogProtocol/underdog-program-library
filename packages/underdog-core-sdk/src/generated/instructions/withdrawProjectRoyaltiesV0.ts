@@ -13,7 +13,6 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
-  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -26,19 +25,14 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import {
-  findInitialOwnerPda,
-  findOrgAccountPda,
-  findProjectPda,
-} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type WithdrawProjectRoyaltiesV0InstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
-  orgAccount?: PublicKey | Pda;
-  projectAccount?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
+  orgAccount: PublicKey | Pda;
+  projectAccount: PublicKey | Pda;
   destination: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
@@ -104,7 +98,7 @@ export type WithdrawProjectRoyaltiesV0InstructionArgs =
 
 // Instruction.
 export function withdrawProjectRoyaltiesV0(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: WithdrawProjectRoyaltiesV0InstructionAccounts &
     WithdrawProjectRoyaltiesV0InstructionArgs
 ): TransactionBuilder {
@@ -119,6 +113,9 @@ export function withdrawProjectRoyaltiesV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, true] as const,
+    orgAccount: [input.orgAccount, false] as const,
+    projectAccount: [input.projectAccount, true] as const,
     destination: [input.destination, true] as const,
   };
   const resolvingArgs = {};
@@ -128,40 +125,6 @@ export function withdrawProjectRoyaltiesV0(
     input.authority
       ? ([input.authority, false] as const)
       : ([context.identity, false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, true] as const)
-      : ([findInitialOwnerPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'orgAccount',
-    input.orgAccount
-      ? ([input.orgAccount, false] as const)
-      : ([
-          findOrgAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'projectAccount',
-    input.projectAccount
-      ? ([input.projectAccount, true] as const)
-      : ([
-          findProjectPda(context, {
-            prefix: 'project',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
-          }),
-          true,
-        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

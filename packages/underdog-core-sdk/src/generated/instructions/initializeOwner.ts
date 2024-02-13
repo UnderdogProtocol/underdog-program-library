@@ -22,13 +22,12 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findInitialOwnerPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeOwnerInstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
@@ -75,7 +74,7 @@ export function getInitializeOwnerInstructionDataSerializer(
 
 // Instruction.
 export function initializeOwner(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: InitializeOwnerInstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -88,20 +87,15 @@ export function initializeOwner(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, true] as const,
+  };
   addObjectProperty(
     resolvedAccounts,
     'authority',
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, true] as const)
-      : ([findInitialOwnerPda(context), true] as const)
   );
   addObjectProperty(
     resolvedAccounts,

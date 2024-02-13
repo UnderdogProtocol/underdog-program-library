@@ -28,7 +28,8 @@ import { findDomainPda, findLinkPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type ActivatePassportV0InstructionAccounts = {
+export type ActivatePassportV1InstructionAccounts = {
+  payer?: Signer;
   domainAuthority: Signer;
   domain?: PublicKey | Pda;
   passportAuthority: Signer;
@@ -38,66 +39,66 @@ export type ActivatePassportV0InstructionAccounts = {
 };
 
 // Data.
-export type ActivatePassportV0InstructionData = {
+export type ActivatePassportV1InstructionData = {
   discriminator: Array<number>;
   namespace: string;
   identifier: string;
 };
 
-export type ActivatePassportV0InstructionDataArgs = {
+export type ActivatePassportV1InstructionDataArgs = {
   namespace: string;
   identifier: string;
 };
 
-/** @deprecated Use `getActivatePassportV0InstructionDataSerializer()` without any argument instead. */
-export function getActivatePassportV0InstructionDataSerializer(
+/** @deprecated Use `getActivatePassportV1InstructionDataSerializer()` without any argument instead. */
+export function getActivatePassportV1InstructionDataSerializer(
   _context: object
 ): Serializer<
-  ActivatePassportV0InstructionDataArgs,
-  ActivatePassportV0InstructionData
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 >;
-export function getActivatePassportV0InstructionDataSerializer(): Serializer<
-  ActivatePassportV0InstructionDataArgs,
-  ActivatePassportV0InstructionData
+export function getActivatePassportV1InstructionDataSerializer(): Serializer<
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 >;
-export function getActivatePassportV0InstructionDataSerializer(
+export function getActivatePassportV1InstructionDataSerializer(
   _context: object = {}
 ): Serializer<
-  ActivatePassportV0InstructionDataArgs,
-  ActivatePassportV0InstructionData
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 > {
   return mapSerializer<
-    ActivatePassportV0InstructionDataArgs,
+    ActivatePassportV1InstructionDataArgs,
     any,
-    ActivatePassportV0InstructionData
+    ActivatePassportV1InstructionData
   >(
-    struct<ActivatePassportV0InstructionData>(
+    struct<ActivatePassportV1InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['namespace', string()],
         ['identifier', string()],
       ],
-      { description: 'ActivatePassportV0InstructionData' }
+      { description: 'ActivatePassportV1InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [8, 207, 186, 160, 188, 53, 213, 164],
+      discriminator: [231, 205, 193, 38, 207, 50, 162, 253],
     })
   ) as Serializer<
-    ActivatePassportV0InstructionDataArgs,
-    ActivatePassportV0InstructionData
+    ActivatePassportV1InstructionDataArgs,
+    ActivatePassportV1InstructionData
   >;
 }
 
 // Args.
-export type ActivatePassportV0InstructionArgs =
-  ActivatePassportV0InstructionDataArgs;
+export type ActivatePassportV1InstructionArgs =
+  ActivatePassportV1InstructionDataArgs;
 
 // Instruction.
-export function activatePassportV0(
+export function activatePassportV1(
   context: Pick<Context, 'programs' | 'eddsa'>,
-  input: ActivatePassportV0InstructionAccounts &
-    ActivatePassportV0InstructionArgs
+  input: ActivatePassportV1InstructionAccounts &
+    ActivatePassportV1InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
@@ -114,6 +115,13 @@ export function activatePassportV0(
     passportAuthority: [input.passportAuthority, true] as const,
   };
   const resolvingArgs = {};
+  addObjectProperty(
+    resolvedAccounts,
+    'payer',
+    input.payer
+      ? ([input.payer, true] as const)
+      : ([input.passportAuthority, true] as const)
+  );
   addObjectProperty(
     resolvedAccounts,
     'domain',
@@ -162,6 +170,7 @@ export function activatePassportV0(
   );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
+  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
   addAccountMeta(keys, signers, resolvedAccounts.domainAuthority, false);
   addAccountMeta(keys, signers, resolvedAccounts.domain, false);
   addAccountMeta(keys, signers, resolvedAccounts.passportAuthority, false);
@@ -171,7 +180,7 @@ export function activatePassportV0(
 
   // Data.
   const data =
-    getActivatePassportV0InstructionDataSerializer().serialize(resolvedArgs);
+    getActivatePassportV1InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

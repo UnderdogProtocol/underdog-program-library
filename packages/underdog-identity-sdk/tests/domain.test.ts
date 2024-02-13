@@ -1,13 +1,13 @@
 import { generateSigner, sol } from "@metaplex-foundation/umi";
 
 import {
-  activatePassportV0,
+  activatePassportV1,
   fetchDomainFromSeeds,
   initializeDomainV0,
 } from "../src/generated";
 import { createContext } from "./setup";
 
-jest.setTimeout(60_000)
+jest.setTimeout(60_000);
 
 describe("Initialize Namespace", () => {
   const context = createContext();
@@ -35,11 +35,21 @@ describe("Initialize Namespace", () => {
   });
 
   it("activates passport with namespace", async () => {
-    await activatePassportV0(context, {
+    await activatePassportV1(context, {
       domainAuthority: domainSigner,
       passportAuthority: passportSigner,
       namespace,
       identifier,
+    }).sendAndConfirm(context);
+  });
+
+  it("activates passport with namespace", async () => {
+    await activatePassportV1(context, {
+      domainAuthority: domainSigner,
+      passportAuthority: passportSigner,
+      payer: domainSigner,
+      namespace,
+      identifier: "payer@email.com",
     }).sendAndConfirm(context);
   });
 });

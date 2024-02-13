@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
-pub struct ActivatePassportV0Args {
+pub struct ActivatePassportV1Args {
   namespace: String,
   identifier: String,
 }
@@ -9,8 +9,11 @@ pub struct ActivatePassportV0Args {
 use crate::state::*;
 
 #[derive(Accounts)]
-#[instruction(args: ActivatePassportV0Args)]
-pub struct ActivatePassportV0<'info> {
+#[instruction(args: ActivatePassportV1Args)]
+pub struct ActivatePassportV1<'info> {
+  #[account(mut)]
+  pub payer: Signer<'info>,
+
   #[account(mut)]
   pub domain_authority: Signer<'info>,
 
@@ -26,7 +29,7 @@ pub struct ActivatePassportV0<'info> {
 
   #[account(
     init,
-    payer = passport_authority,
+    payer = payer,
     space = LINK_SIZE,
     seeds = [args.namespace.as_ref(), args.identifier.as_ref()],
     bump,
@@ -38,8 +41,8 @@ pub struct ActivatePassportV0<'info> {
 }
 
 pub fn handler<'info>(
-  ctx: Context<ActivatePassportV0>,
-  _args: ActivatePassportV0Args,
+  ctx: Context<ActivatePassportV1>,
+  _args: ActivatePassportV1Args,
 ) -> Result<()> {
   let passport = &mut ctx.accounts.passport;
 

@@ -7,10 +7,6 @@
  */
 
 import {
-  findMasterEditionPda,
-  findMetadataPda,
-} from '@metaplex-foundation/mpl-token-metadata';
-import {
   AccountMeta,
   Context,
   Pda,
@@ -29,32 +25,24 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findLegacyNftPda } from '../../pdas';
-import {
-  findClaimAccountPda,
-  findInitialOwnerPda,
-  findLegacyProjectPda,
-  findOrgAccountPda,
-  findProjAccountPda,
-} from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintNonTransferableNftV1InstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
-  orgAccount?: PublicKey | Pda;
-  nonTransferableProject?: PublicKey | Pda;
-  nonTransferableProjectMint?: Pda;
-  nonTransferableProjectMetadata?: PublicKey | Pda;
-  nonTransferableProjectMasterEdition?: PublicKey | Pda;
-  nonTransferableNftMint?: PublicKey | Pda;
-  nonTransferableNftEscrow?: PublicKey | Pda;
-  nonTransferableNftClaim?: PublicKey | Pda;
-  nonTransferableNftMetadata?: PublicKey | Pda;
-  nonTransferableNftMasterEdition?: PublicKey | Pda;
+  ownerAccount: PublicKey | Pda;
+  orgAccount: PublicKey | Pda;
+  nonTransferableProject: PublicKey | Pda;
+  nonTransferableProjectMint: Pda;
+  nonTransferableProjectMetadata: PublicKey | Pda;
+  nonTransferableProjectMasterEdition: PublicKey | Pda;
+  nonTransferableNftMint: PublicKey | Pda;
+  nonTransferableNftEscrow: PublicKey | Pda;
+  nonTransferableNftClaim: PublicKey | Pda;
+  nonTransferableNftMetadata: PublicKey | Pda;
+  nonTransferableNftMasterEdition: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
-  associatedTokenProgram?: PublicKey | Pda;
+  associatedTokenProgram: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
@@ -141,7 +129,7 @@ export type MintNonTransferableNftV1InstructionArgs = PickPartial<
 
 // Instruction.
 export function mintNonTransferableNftV1(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
+  context: Pick<Context, 'programs' | 'identity'>,
   input: MintNonTransferableNftV1InstructionAccounts &
     MintNonTransferableNftV1InstructionArgs
 ): TransactionBuilder {
@@ -155,7 +143,35 @@ export function mintNonTransferableNftV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    ownerAccount: [input.ownerAccount, false] as const,
+    orgAccount: [input.orgAccount, false] as const,
+    nonTransferableProject: [input.nonTransferableProject, true] as const,
+    nonTransferableProjectMint: [
+      input.nonTransferableProjectMint,
+      true,
+    ] as const,
+    nonTransferableProjectMetadata: [
+      input.nonTransferableProjectMetadata,
+      true,
+    ] as const,
+    nonTransferableProjectMasterEdition: [
+      input.nonTransferableProjectMasterEdition,
+      true,
+    ] as const,
+    nonTransferableNftMint: [input.nonTransferableNftMint, true] as const,
+    nonTransferableNftEscrow: [input.nonTransferableNftEscrow, true] as const,
+    nonTransferableNftClaim: [input.nonTransferableNftClaim, true] as const,
+    nonTransferableNftMetadata: [
+      input.nonTransferableNftMetadata,
+      true,
+    ] as const,
+    nonTransferableNftMasterEdition: [
+      input.nonTransferableNftMasterEdition,
+      true,
+    ] as const,
+    associatedTokenProgram: [input.associatedTokenProgram, false] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -166,152 +182,6 @@ export function mintNonTransferableNftV1(
   );
   addObjectProperty(
     resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, false] as const)
-      : ([findInitialOwnerPda(context), false] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'orgAccount',
-    input.orgAccount
-      ? ([input.orgAccount, false] as const)
-      : ([
-          findOrgAccountPda(context, {
-            superAdminAddress: input.superAdminAddress,
-            orgId: input.orgId,
-          }),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableProject',
-    input.nonTransferableProject
-      ? ([input.nonTransferableProject, true] as const)
-      : ([
-          findProjAccountPda(context, {
-            type: 'nt-proj',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableProjectMint',
-    input.nonTransferableProjectMint
-      ? ([input.nonTransferableProjectMint, true] as const)
-      : ([
-          findLegacyProjectPda(context, {
-            type: 'nt-project-mint',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableProjectMetadata',
-    input.nonTransferableProjectMetadata
-      ? ([input.nonTransferableProjectMetadata, true] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(
-              resolvedAccounts.nonTransferableProjectMint[0],
-              false
-            ),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableProjectMasterEdition',
-    input.nonTransferableProjectMasterEdition
-      ? ([input.nonTransferableProjectMasterEdition, true] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(
-              resolvedAccounts.nonTransferableProjectMint[0],
-              false
-            ),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftMint',
-    input.nonTransferableNftMint
-      ? ([input.nonTransferableNftMint, true] as const)
-      : ([
-          findLegacyNftPda(context, {
-            prefix: 'nt-nft-mint',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftEscrow',
-    input.nonTransferableNftEscrow
-      ? ([input.nonTransferableNftEscrow, true] as const)
-      : ([
-          findLegacyNftPda(context, {
-            prefix: 'nt-nft-mint-esc',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftClaim',
-    input.nonTransferableNftClaim
-      ? ([input.nonTransferableNftClaim, true] as const)
-      : ([
-          findClaimAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftMetadata',
-    input.nonTransferableNftMetadata
-      ? ([input.nonTransferableNftMetadata, true] as const)
-      : ([
-          findMetadataPda(context, {
-            mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftMasterEdition',
-    input.nonTransferableNftMasterEdition
-      ? ([input.nonTransferableNftMasterEdition, true] as const)
-      : ([
-          findMasterEditionPda(context, {
-            mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
     'tokenMetadataProgram',
     input.tokenMetadataProgram
       ? ([input.tokenMetadataProgram, false] as const)
@@ -319,19 +189,6 @@ export function mintNonTransferableNftV1(
           context.programs.getPublicKey(
             'mplTokenMetadata',
             'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
-          ),
-          false,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'associatedTokenProgram',
-    input.associatedTokenProgram
-      ? ([input.associatedTokenProgram, false] as const)
-      : ([
-          context.programs.getPublicKey(
-            'splAssociatedToken',
-            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
           ),
           false,
         ] as const)
@@ -375,7 +232,7 @@ export function mintNonTransferableNftV1(
   addObjectProperty(
     resolvingArgs,
     'projectMintBump',
-    input.projectMintBump ?? resolvedAccounts.nonTransferableProjectMint[0][1]
+    input.projectMintBump ?? input.nonTransferableProjectMint[1]
   );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
