@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -13,6 +14,7 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -25,20 +27,26 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findMintPda } from '../../pdas';
+import {
+  findInitialOwnerPda,
+  findOrgAccountPda,
+  findProjectPda,
+} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InscribeV0InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  projectAccount: PublicKey | Pda;
-  mint: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  projectAccount?: PublicKey | Pda;
+  mint?: PublicKey | Pda;
   mintInscriptionAccount: PublicKey | Pda;
   inscriptionShardAccount: PublicKey | Pda;
   inscriptionMetadata: PublicKey | Pda;
-  metadata: PublicKey | Pda;
-  inscriptionProgram: PublicKey | Pda;
+  metadata?: PublicKey | Pda;
+  inscriptionProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
@@ -96,7 +104,7 @@ export type InscribeV0InstructionArgs = InscribeV0InstructionDataArgs;
 
 // Instruction.
 export function inscribeV0(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: InscribeV0InstructionAccounts & InscribeV0InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -110,15 +118,9 @@ export function inscribeV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
-    projectAccount: [input.projectAccount, false] as const,
-    mint: [input.mint, false] as const,
     mintInscriptionAccount: [input.mintInscriptionAccount, true] as const,
     inscriptionShardAccount: [input.inscriptionShardAccount, true] as const,
     inscriptionMetadata: [input.inscriptionMetadata, true] as const,
-    metadata: [input.metadata, false] as const,
-    inscriptionProgram: [input.inscriptionProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -127,6 +129,81 @@ export function inscribeV0(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'projectAccount',
+    input.projectAccount
+      ? ([input.projectAccount, false] as const)
+      : ([
+          findProjectPda(context, {
+            prefix: 'project',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'mint',
+    input.mint
+      ? ([input.mint, false] as const)
+      : ([
+          findMintPda(context, {
+            projectAccount: publicKey(
+              resolvedAccounts.projectAccount[0],
+              false
+            ),
+            nftId: input.nftId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'metadata',
+    input.metadata
+      ? ([input.metadata, false] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(resolvedAccounts.mint[0], false),
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'inscriptionProgram',
+    input.inscriptionProgram
+      ? ([input.inscriptionProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'inscriptionProgram',
+            '1NSCRfGeyo7wPUazGbaPBUsTM49e1k2aXewHGARfzSo'
+          ),
+          false,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

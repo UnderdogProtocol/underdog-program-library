@@ -26,17 +26,18 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findInitialOwnerPda, findOrgAccountPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InscribeImageV0InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
   inscriptionAccount: Signer;
   inscriptionMetadataAccount: PublicKey | Pda;
   inscriptionShardAccount: PublicKey | Pda;
-  inscriptionProgram: PublicKey | Pda;
+  inscriptionProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
@@ -100,7 +101,7 @@ export type InscribeImageV0InstructionArgs = InscribeImageV0InstructionDataArgs;
 
 // Instruction.
 export function inscribeImageV0(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: InscribeImageV0InstructionAccounts & InscribeImageV0InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -114,15 +115,12 @@ export function inscribeImageV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
     inscriptionAccount: [input.inscriptionAccount, true] as const,
     inscriptionMetadataAccount: [
       input.inscriptionMetadataAccount,
       true,
     ] as const,
     inscriptionShardAccount: [input.inscriptionShardAccount, true] as const,
-    inscriptionProgram: [input.inscriptionProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -131,6 +129,39 @@ export function inscribeImageV0(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'inscriptionProgram',
+    input.inscriptionProgram
+      ? ([input.inscriptionProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'inscriptionProgram',
+            '1NSCRfGeyo7wPUazGbaPBUsTM49e1k2aXewHGARfzSo'
+          ),
+          false,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

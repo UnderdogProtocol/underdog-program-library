@@ -7,6 +7,10 @@
  */
 
 import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   AccountMeta,
   Context,
   Pda,
@@ -30,18 +34,23 @@ import {
   resolveProjectPrefix,
   resolveProjectVaultPrefix,
 } from '../../resolvers';
+import {
+  findInitialOwnerPda,
+  findLegacyProjectPda,
+  findOrgAccountPda,
+} from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeLegacyProjectV1InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  legacyProject: PublicKey | Pda;
-  legacyProjectMint: PublicKey | Pda;
-  legacyProjectVault: PublicKey | Pda;
-  legacyProjectMetadata: PublicKey | Pda;
-  legacyProjectMasterEdition: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  legacyProject?: PublicKey | Pda;
+  legacyProjectMint?: PublicKey | Pda;
+  legacyProjectVault?: PublicKey | Pda;
+  legacyProjectMetadata?: PublicKey | Pda;
+  legacyProjectMasterEdition?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
@@ -146,18 +155,7 @@ export function initializeLegacyProjectV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, true] as const,
-    legacyProject: [input.legacyProject, true] as const,
-    legacyProjectMint: [input.legacyProjectMint, true] as const,
-    legacyProjectVault: [input.legacyProjectVault, true] as const,
-    legacyProjectMetadata: [input.legacyProjectMetadata, true] as const,
-    legacyProjectMasterEdition: [
-      input.legacyProjectMasterEdition,
-      true,
-    ] as const,
-  };
+  const resolvedAccounts = {};
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -165,6 +163,128 @@ export function initializeLegacyProjectV1(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, true] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvingArgs,
+    'projectPrefix',
+    input.projectPrefix ??
+      resolveProjectPrefix(
+        context,
+        { ...input, ...resolvedAccounts },
+        { ...input, ...resolvingArgs },
+        programId,
+        false
+      )
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProject',
+    input.legacyProject
+      ? ([input.legacyProject, true] as const)
+      : ([
+          findLegacyProjectPda(context, {
+            type: resolvingArgs.projectPrefix,
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectIdStr,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvingArgs,
+    'projectMintPrefix',
+    input.projectMintPrefix ??
+      resolveProjectMintPrefix(
+        context,
+        { ...input, ...resolvedAccounts },
+        { ...input, ...resolvingArgs },
+        programId,
+        false
+      )
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProjectMint',
+    input.legacyProjectMint
+      ? ([input.legacyProjectMint, true] as const)
+      : ([
+          findLegacyProjectPda(context, {
+            type: resolvingArgs.projectMintPrefix,
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectIdStr,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvingArgs,
+    'projectVaultPrefix',
+    input.projectVaultPrefix ??
+      resolveProjectVaultPrefix(
+        context,
+        { ...input, ...resolvedAccounts },
+        { ...input, ...resolvingArgs },
+        programId,
+        false
+      )
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProjectVault',
+    input.legacyProjectVault
+      ? ([input.legacyProjectVault, true] as const)
+      : ([
+          findLegacyProjectPda(context, {
+            type: resolvingArgs.projectVaultPrefix,
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectIdStr,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProjectMetadata',
+    input.legacyProjectMetadata
+      ? ([input.legacyProjectMetadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(resolvedAccounts.legacyProjectMint[0], false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProjectMasterEdition',
+    input.legacyProjectMasterEdition
+      ? ([input.legacyProjectMasterEdition, true] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(resolvedAccounts.legacyProjectMint[0], false),
+          }),
+          true,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
@@ -214,42 +334,6 @@ export function initializeLegacyProjectV1(
           publicKey('SysvarRent111111111111111111111111111111111'),
           false,
         ] as const)
-  );
-  addObjectProperty(
-    resolvingArgs,
-    'projectPrefix',
-    input.projectPrefix ??
-      resolveProjectPrefix(
-        context,
-        { ...input, ...resolvedAccounts },
-        { ...input, ...resolvingArgs },
-        programId,
-        false
-      )
-  );
-  addObjectProperty(
-    resolvingArgs,
-    'projectMintPrefix',
-    input.projectMintPrefix ??
-      resolveProjectMintPrefix(
-        context,
-        { ...input, ...resolvedAccounts },
-        { ...input, ...resolvingArgs },
-        programId,
-        false
-      )
-  );
-  addObjectProperty(
-    resolvingArgs,
-    'projectVaultPrefix',
-    input.projectVaultPrefix ??
-      resolveProjectVaultPrefix(
-        context,
-        { ...input, ...resolvedAccounts },
-        { ...input, ...resolvingArgs },
-        programId,
-        false
-      )
   );
   const resolvedArgs = { ...input, ...resolvingArgs };
 

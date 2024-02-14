@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findTreeConfigPda } from '@metaplex-foundation/mpl-bubblegum';
 import {
   AccountMeta,
   Context,
@@ -24,18 +25,19 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findInitialOwnerPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeTreeInstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  treeAuthority: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  treeAuthority?: PublicKey | Pda;
   merkleTree: Signer;
-  logWrapper: PublicKey | Pda;
+  logWrapper?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
-  bubblegumProgram: PublicKey | Pda;
-  compressionProgram: PublicKey | Pda;
+  bubblegumProgram?: PublicKey | Pda;
+  compressionProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
 };
 
@@ -93,7 +95,7 @@ export type InitializeTreeInstructionArgs = InitializeTreeInstructionDataArgs;
 
 // Instruction.
 export function initializeTree(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: InitializeTreeInstructionAccounts & InitializeTreeInstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -107,12 +109,7 @@ export function initializeTree(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, true] as const,
-    treeAuthority: [input.treeAuthority, true] as const,
     merkleTree: [input.merkleTree, true] as const,
-    logWrapper: [input.logWrapper, false] as const,
-    bubblegumProgram: [input.bubblegumProgram, false] as const,
-    compressionProgram: [input.compressionProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -124,6 +121,38 @@ export function initializeTree(
   );
   addObjectProperty(
     resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, true] as const)
+      : ([findInitialOwnerPda(context), true] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'treeAuthority',
+    input.treeAuthority
+      ? ([input.treeAuthority, true] as const)
+      : ([
+          findTreeConfigPda(context, {
+            merkleTree: publicKey(input.merkleTree, false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'logWrapper',
+    input.logWrapper
+      ? ([input.logWrapper, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splNoop',
+            'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'systemProgram',
     input.systemProgram
       ? ([input.systemProgram, false] as const)
@@ -131,6 +160,32 @@ export function initializeTree(
           context.programs.getPublicKey(
             'splSystem',
             '11111111111111111111111111111111'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'bubblegumProgram',
+    input.bubblegumProgram
+      ? ([input.bubblegumProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'bubblegumProgram',
+            'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'compressionProgram',
+    input.compressionProgram
+      ? ([input.compressionProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAccountCompression',
+            'cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK'
           ),
           false,
         ] as const)

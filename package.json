@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
-    "@metaplex-foundation/kinobi": "^0.12.3",
+    "@metaplex-foundation/kinobi": "0.12.3",
     "@metaplex-foundation/shank-js": "^0.1.5",
     "@types/bn.js": "^5.1.0",
     "@types/jest": "^29.5.3",

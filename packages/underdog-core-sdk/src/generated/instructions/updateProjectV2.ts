@@ -6,6 +6,7 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -13,6 +14,7 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -25,6 +27,11 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  findInitialOwnerPda,
+  findOrgAccountPda,
+  findProjectPda,
+} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 import {
   UpdateMetadataArgs,
@@ -35,11 +42,11 @@ import {
 // Accounts.
 export type UpdateProjectV2InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  projectAccount: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  projectAccount?: PublicKey | Pda;
   collectionMint: PublicKey | Pda;
-  collectionMetadata: PublicKey | Pda;
+  collectionMetadata?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
@@ -107,7 +114,7 @@ export type UpdateProjectV2InstructionArgs = UpdateProjectV2InstructionDataArgs;
 
 // Instruction.
 export function updateProjectV2(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: UpdateProjectV2InstructionAccounts & UpdateProjectV2InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -121,11 +128,7 @@ export function updateProjectV2(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
-    projectAccount: [input.projectAccount, false] as const,
     collectionMint: [input.collectionMint, false] as const,
-    collectionMetadata: [input.collectionMetadata, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -134,6 +137,52 @@ export function updateProjectV2(
     input.authority
       ? ([input.authority, false] as const)
       : ([context.identity, false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'projectAccount',
+    input.projectAccount
+      ? ([input.projectAccount, false] as const)
+      : ([
+          findProjectPda(context, {
+            prefix: 'project',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'collectionMetadata',
+    input.collectionMetadata
+      ? ([input.collectionMetadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(input.collectionMint, false),
+          }),
+          true,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,

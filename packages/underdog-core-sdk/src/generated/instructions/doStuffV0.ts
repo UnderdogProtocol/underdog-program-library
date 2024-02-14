@@ -6,6 +6,10 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
@@ -27,6 +31,12 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findMintPda } from '../../pdas';
+import {
+  findInitialOwnerPda,
+  findOrgAccountPda,
+  findProjectPda,
+} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 import {
   UpdateMetadataArgs,
@@ -37,17 +47,17 @@ import {
 // Accounts.
 export type DoStuffV0InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  projectAccount: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  projectAccount?: PublicKey | Pda;
   collectionMint: PublicKey | Pda;
-  mint: PublicKey | Pda;
-  metadata: PublicKey | Pda;
-  masterEdition: PublicKey | Pda;
+  mint?: PublicKey | Pda;
+  metadata?: PublicKey | Pda;
+  masterEdition?: PublicKey | Pda;
   receiver: PublicKey | Pda;
   receiverAta?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
-  associatedTokenProgram: PublicKey | Pda;
+  associatedTokenProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
@@ -124,15 +134,8 @@ export function doStuffV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
-    projectAccount: [input.projectAccount, false] as const,
     collectionMint: [input.collectionMint, true] as const,
-    mint: [input.mint, true] as const,
-    metadata: [input.metadata, true] as const,
-    masterEdition: [input.masterEdition, true] as const,
     receiver: [input.receiver, false] as const,
-    associatedTokenProgram: [input.associatedTokenProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -144,12 +147,86 @@ export function doStuffV0(
   );
   addObjectProperty(
     resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'projectAccount',
+    input.projectAccount
+      ? ([input.projectAccount, false] as const)
+      : ([
+          findProjectPda(context, {
+            prefix: 'project',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'mint',
+    input.mint
+      ? ([input.mint, true] as const)
+      : ([
+          findMintPda(context, {
+            projectAccount: publicKey(
+              resolvedAccounts.projectAccount[0],
+              false
+            ),
+            nftId: input.nftId,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'metadata',
+    input.metadata
+      ? ([input.metadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(resolvedAccounts.mint[0], false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'masterEdition',
+    input.masterEdition
+      ? ([input.masterEdition, true] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(resolvedAccounts.mint[0], false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'receiverAta',
     input.receiverAta
       ? ([input.receiverAta, true] as const)
       : ([
           findAssociatedTokenPda(context, {
-            mint: publicKey(input.mint, false),
+            mint: publicKey(resolvedAccounts.mint[0], false),
             owner: publicKey(input.receiver, false),
           }),
           true,
@@ -164,6 +241,19 @@ export function doStuffV0(
           context.programs.getPublicKey(
             'mplTokenMetadata',
             'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'associatedTokenProgram',
+    input.associatedTokenProgram
+      ? ([input.associatedTokenProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAssociatedToken',
+            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
           ),
           false,
         ] as const)

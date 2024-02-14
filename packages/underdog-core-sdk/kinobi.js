@@ -83,9 +83,6 @@ kinobi.update(
 );
 
 kinobi.update(
-  new k.SetStructDefaultValuesVisitor([
-
-  ]),
   new k.SetInstructionAccountDefaultValuesVisitor([
     {
       account: "associatedTokenProgram",
@@ -128,16 +125,12 @@ kinobi.update(
       ),
     },
     {
-      account: "inscriptionMetadataAccount",
-    },
-    {
       account: "bubblegumSigner",
       ignoreIfOptional: true,
       ...k.publicKeyDefault("4ewWZC5gT6TGpm5LZNDs9wVonfUT2q5PP5sc9kVbwMAK"),
     },
     {
       account: "ownerAccount",
-      ignoreIfOptional: true,
       ...k.pdaDefault("initialOwner"),
     },
     {
@@ -192,7 +185,6 @@ kinobi.update(
         },
       }),
     },
-
     {
       account: "projectVault",
       ignoreIfOptional: true,
@@ -270,7 +262,6 @@ kinobi.update(
         seeds: { merkleTree: k.accountDefault("merkleTree") },
       }),
     },
-    // legacy
     {
       account: "legacyProject",
       ...k.pdaDefault("legacyProject", {
@@ -340,7 +331,6 @@ kinobi.update(
         seeds: { mint: k.accountDefault("legacyNftMint") },
       }),
     },
-    // compressed
     {
       account: "compressedProject",
       ignoreIfOptional: true,

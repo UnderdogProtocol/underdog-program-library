@@ -6,6 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findTreeConfigPda } from '@metaplex-foundation/mpl-bubblegum';
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
 import {
   AccountMeta,
   Context,
@@ -15,6 +20,7 @@ import {
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -29,25 +35,30 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import {
+  findInitialOwnerPda,
+  findOrgAccountPda,
+  findProjectPda,
+} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type MintNftV4InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  projectAccount: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  projectAccount?: PublicKey | Pda;
   collectionMint: PublicKey | Pda;
-  collectionMetadata: PublicKey | Pda;
-  collectionMasterEdition: PublicKey | Pda;
+  collectionMetadata?: PublicKey | Pda;
+  collectionMasterEdition?: PublicKey | Pda;
   recipient: PublicKey | Pda;
-  treeAuthority: PublicKey | Pda;
+  treeAuthority?: PublicKey | Pda;
   merkleTree: PublicKey | Pda;
-  bubblegumSigner: PublicKey | Pda;
+  bubblegumSigner?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
-  logWrapper: PublicKey | Pda;
-  bubblegumProgram: PublicKey | Pda;
-  compressionProgram: PublicKey | Pda;
+  logWrapper?: PublicKey | Pda;
+  bubblegumProgram?: PublicKey | Pda;
+  compressionProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
@@ -114,7 +125,7 @@ export type MintNftV4InstructionArgs = MintNftV4InstructionDataArgs;
 
 // Instruction.
 export function mintNftV4(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: MintNftV4InstructionAccounts & MintNftV4InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
@@ -128,19 +139,9 @@ export function mintNftV4(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
-    projectAccount: [input.projectAccount, false] as const,
     collectionMint: [input.collectionMint, true] as const,
-    collectionMetadata: [input.collectionMetadata, true] as const,
-    collectionMasterEdition: [input.collectionMasterEdition, false] as const,
     recipient: [input.recipient, false] as const,
-    treeAuthority: [input.treeAuthority, true] as const,
     merkleTree: [input.merkleTree, true] as const,
-    bubblegumSigner: [input.bubblegumSigner, false] as const,
-    logWrapper: [input.logWrapper, false] as const,
-    bubblegumProgram: [input.bubblegumProgram, false] as const,
-    compressionProgram: [input.compressionProgram, false] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -152,6 +153,86 @@ export function mintNftV4(
   );
   addObjectProperty(
     resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'projectAccount',
+    input.projectAccount
+      ? ([input.projectAccount, false] as const)
+      : ([
+          findProjectPda(context, {
+            prefix: 'project',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'collectionMetadata',
+    input.collectionMetadata
+      ? ([input.collectionMetadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(input.collectionMint, false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'collectionMasterEdition',
+    input.collectionMasterEdition
+      ? ([input.collectionMasterEdition, false] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(input.collectionMint, false),
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'treeAuthority',
+    input.treeAuthority
+      ? ([input.treeAuthority, true] as const)
+      : ([
+          findTreeConfigPda(context, {
+            merkleTree: publicKey(input.merkleTree, false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'bubblegumSigner',
+    input.bubblegumSigner
+      ? ([input.bubblegumSigner, false] as const)
+      : ([
+          publicKey('4ewWZC5gT6TGpm5LZNDs9wVonfUT2q5PP5sc9kVbwMAK'),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'tokenMetadataProgram',
     input.tokenMetadataProgram
       ? ([input.tokenMetadataProgram, false] as const)
@@ -159,6 +240,45 @@ export function mintNftV4(
           context.programs.getPublicKey(
             'mplTokenMetadata',
             'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'logWrapper',
+    input.logWrapper
+      ? ([input.logWrapper, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splNoop',
+            'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'bubblegumProgram',
+    input.bubblegumProgram
+      ? ([input.bubblegumProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'bubblegumProgram',
+            'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'compressionProgram',
+    input.compressionProgram
+      ? ([input.compressionProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAccountCompression',
+            'cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK'
           ),
           false,
         ] as const)

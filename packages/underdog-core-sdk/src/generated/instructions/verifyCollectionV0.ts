@@ -7,12 +7,17 @@
  */
 
 import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
   AccountMeta,
   Context,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -25,19 +30,25 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findMintPda } from '../../pdas';
+import {
+  findInitialOwnerPda,
+  findOrgAccountPda,
+  findProjectPda,
+} from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type VerifyCollectionV0InstructionAccounts = {
   authority?: Signer;
-  ownerAccount: PublicKey | Pda;
-  orgAccount: PublicKey | Pda;
-  projectAccount: PublicKey | Pda;
+  ownerAccount?: PublicKey | Pda;
+  orgAccount?: PublicKey | Pda;
+  projectAccount?: PublicKey | Pda;
   collectionMint: PublicKey | Pda;
-  collectionMetadata: PublicKey | Pda;
-  collectionMasterEdition: PublicKey | Pda;
-  mint: PublicKey | Pda;
-  metadata: PublicKey | Pda;
+  collectionMetadata?: PublicKey | Pda;
+  collectionMasterEdition?: PublicKey | Pda;
+  mint?: PublicKey | Pda;
+  metadata?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
@@ -106,7 +117,7 @@ export type VerifyCollectionV0InstructionArgs =
 
 // Instruction.
 export function verifyCollectionV0(
-  context: Pick<Context, 'programs' | 'identity'>,
+  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
   input: VerifyCollectionV0InstructionAccounts &
     VerifyCollectionV0InstructionArgs
 ): TransactionBuilder {
@@ -121,14 +132,7 @@ export function verifyCollectionV0(
 
   // Resolved inputs.
   const resolvedAccounts = {
-    ownerAccount: [input.ownerAccount, false] as const,
-    orgAccount: [input.orgAccount, false] as const,
-    projectAccount: [input.projectAccount, false] as const,
     collectionMint: [input.collectionMint, false] as const,
-    collectionMetadata: [input.collectionMetadata, true] as const,
-    collectionMasterEdition: [input.collectionMasterEdition, false] as const,
-    mint: [input.mint, false] as const,
-    metadata: [input.metadata, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
@@ -137,6 +141,92 @@ export function verifyCollectionV0(
     input.authority
       ? ([input.authority, true] as const)
       : ([context.identity, true] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'ownerAccount',
+    input.ownerAccount
+      ? ([input.ownerAccount, false] as const)
+      : ([findInitialOwnerPda(context), false] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'orgAccount',
+    input.orgAccount
+      ? ([input.orgAccount, false] as const)
+      : ([
+          findOrgAccountPda(context, {
+            superAdminAddress: input.superAdminAddress,
+            orgId: input.orgId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'projectAccount',
+    input.projectAccount
+      ? ([input.projectAccount, false] as const)
+      : ([
+          findProjectPda(context, {
+            prefix: 'project',
+            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
+            projectId: input.projectId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'collectionMetadata',
+    input.collectionMetadata
+      ? ([input.collectionMetadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(input.collectionMint, false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'collectionMasterEdition',
+    input.collectionMasterEdition
+      ? ([input.collectionMasterEdition, false] as const)
+      : ([
+          findMasterEditionPda(context, {
+            mint: publicKey(input.collectionMint, false),
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'mint',
+    input.mint
+      ? ([input.mint, false] as const)
+      : ([
+          findMintPda(context, {
+            projectAccount: publicKey(
+              resolvedAccounts.projectAccount[0],
+              false
+            ),
+            nftId: input.nftId,
+          }),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'metadata',
+    input.metadata
+      ? ([input.metadata, true] as const)
+      : ([
+          findMetadataPda(context, {
+            mint: publicKey(resolvedAccounts.mint[0], false),
+          }),
+          true,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
