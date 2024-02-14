@@ -1192,6 +1192,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "passport"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "mpl-bubblegum",
+ "mpl-token-auth-rules",
+ "proc-macro-crate 1.2.1",
+ "shared-utils",
+ "solana-program",
+ "spl-account-compression",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2038,20 +2052,6 @@ dependencies = [
  "mpl-bubblegum",
  "mpl-token-auth-rules",
  "mpl-token-metadata",
- "proc-macro-crate 1.2.1",
- "shared-utils",
- "solana-program",
- "spl-account-compression",
-]
-
-[[package]]
-name = "underdog-identity"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "mpl-bubblegum",
- "mpl-token-auth-rules",
  "proc-macro-crate 1.2.1",
  "shared-utils",
  "solana-program",

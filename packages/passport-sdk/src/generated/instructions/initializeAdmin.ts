@@ -19,7 +19,6 @@ import {
   Serializer,
   array,
   mapSerializer,
-  publicKey as publicKeySerializer,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -27,70 +26,69 @@ import { findAdminPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type UpdateAdminInstructionAccounts = {
+export type InitializeAdminInstructionAccounts = {
   authority?: Signer;
   admin?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type UpdateAdminInstructionData = {
-  discriminator: Array<number>;
-  newAdmin: PublicKey;
-};
+export type InitializeAdminInstructionData = { discriminator: Array<number> };
 
-export type UpdateAdminInstructionDataArgs = { newAdmin: PublicKey };
+export type InitializeAdminInstructionDataArgs = {};
 
-/** @deprecated Use `getUpdateAdminInstructionDataSerializer()` without any argument instead. */
-export function getUpdateAdminInstructionDataSerializer(
+/** @deprecated Use `getInitializeAdminInstructionDataSerializer()` without any argument instead. */
+export function getInitializeAdminInstructionDataSerializer(
   _context: object
-): Serializer<UpdateAdminInstructionDataArgs, UpdateAdminInstructionData>;
-export function getUpdateAdminInstructionDataSerializer(): Serializer<
-  UpdateAdminInstructionDataArgs,
-  UpdateAdminInstructionData
+): Serializer<
+  InitializeAdminInstructionDataArgs,
+  InitializeAdminInstructionData
 >;
-export function getUpdateAdminInstructionDataSerializer(
+export function getInitializeAdminInstructionDataSerializer(): Serializer<
+  InitializeAdminInstructionDataArgs,
+  InitializeAdminInstructionData
+>;
+export function getInitializeAdminInstructionDataSerializer(
   _context: object = {}
-): Serializer<UpdateAdminInstructionDataArgs, UpdateAdminInstructionData> {
+): Serializer<
+  InitializeAdminInstructionDataArgs,
+  InitializeAdminInstructionData
+> {
   return mapSerializer<
-    UpdateAdminInstructionDataArgs,
+    InitializeAdminInstructionDataArgs,
     any,
-    UpdateAdminInstructionData
+    InitializeAdminInstructionData
   >(
-    struct<UpdateAdminInstructionData>(
-      [
-        ['discriminator', array(u8(), { size: 8 })],
-        ['newAdmin', publicKeySerializer()],
-      ],
-      { description: 'UpdateAdminInstructionData' }
+    struct<InitializeAdminInstructionData>(
+      [['discriminator', array(u8(), { size: 8 })]],
+      { description: 'InitializeAdminInstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [161, 176, 40, 213, 60, 184, 179, 228],
+      discriminator: [35, 176, 8, 143, 42, 160, 61, 158],
     })
-  ) as Serializer<UpdateAdminInstructionDataArgs, UpdateAdminInstructionData>;
+  ) as Serializer<
+    InitializeAdminInstructionDataArgs,
+    InitializeAdminInstructionData
+  >;
 }
 
-// Args.
-export type UpdateAdminInstructionArgs = UpdateAdminInstructionDataArgs;
-
 // Instruction.
-export function updateAdmin(
+export function initializeAdmin(
   context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: UpdateAdminInstructionAccounts & UpdateAdminInstructionArgs
+  input: InitializeAdminInstructionAccounts
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
 
   // Resolved inputs.
   const resolvedAccounts = {};
-  const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
     'authority',
@@ -118,15 +116,13 @@ export function updateAdmin(
           false,
         ] as const)
   );
-  const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
   addAccountMeta(keys, signers, resolvedAccounts.admin, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
 
   // Data.
-  const data =
-    getUpdateAdminInstructionDataSerializer().serialize(resolvedArgs);
+  const data = getInitializeAdminInstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

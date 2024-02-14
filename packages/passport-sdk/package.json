@@ -1,7 +1,7 @@
 {
-  "name": "@underdog-protocol/underdog-identity-sdk",
+  "name": "@underdog-protocol/passport-sdk",
   "version": "0.10.0",
-  "description": "Interface to the underdog-identity smart contract",
+  "description": "Interface to the Passport Solana Program",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -29,7 +29,10 @@
     "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.24",
     "@metaplex-foundation/mpl-toolbox": "^0.8.1",
     "@metaplex-foundation/umi": "^0.8.9",
-    "@metaplex-foundation/umi-bundle-defaults": "^0.8.9"
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.9",
+    "@metaplex-foundation/umi-eddsa-web3js": "^0.9.1",
+    "@metaplex-foundation/umi-program-repository": "^0.9.1",
+    "@metaplex-foundation/umi-web3js-adapters": "^0.9.1"
   },
   "devDependencies": {
     "@metaplex-foundation/kinobi": "^0.12.3",

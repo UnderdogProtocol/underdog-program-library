@@ -2,7 +2,7 @@ const k = require("@metaplex-foundation/kinobi");
 let path = require("path");
 
 // Instanciate Kinobi.
-const kinobi = k.createFromIdls([path.join(__dirname, "..", "..", "idls", "underdog_identity.json")]);
+const kinobi = k.createFromIdls([path.join(__dirname, "..", "..", "idls", "passport.json")]);
 
 // Update accounts.
 kinobi.update(

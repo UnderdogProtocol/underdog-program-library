@@ -16,9 +16,9 @@ generateIdl({
 
 generateIdl({
   generator: "anchor",
-  programName: "underdog_identity",
+  programName: "passport",
   programId: "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd",
   idlDir,
   binaryInstallDir,
-  programDir: path.join(programDir, "underdog-identity"),
+  programDir: path.join(programDir, "passport"),
 });

@@ -99,7 +99,7 @@ export function initializeDomainV0(
 
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
 

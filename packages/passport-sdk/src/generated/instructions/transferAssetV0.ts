@@ -31,9 +31,10 @@ import { findLinkPda } from '../accounts';
 import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type BurnAssetV0InstructionAccounts = {
+export type TransferAssetV0InstructionAccounts = {
   authority?: Signer;
   link?: PublicKey | Pda;
+  receiverAddress: PublicKey | Pda;
   treeAuthority?: PublicKey | Pda;
   merkleTree: PublicKey | Pda;
   bubblegumSigner?: PublicKey | Pda;
@@ -44,7 +45,7 @@ export type BurnAssetV0InstructionAccounts = {
 };
 
 // Data.
-export type BurnAssetV0InstructionData = {
+export type TransferAssetV0InstructionData = {
   discriminator: Array<number>;
   root: Uint8Array;
   dataHash: Uint8Array;
@@ -54,7 +55,7 @@ export type BurnAssetV0InstructionData = {
   identifier: string;
 };
 
-export type BurnAssetV0InstructionDataArgs = {
+export type TransferAssetV0InstructionDataArgs = {
   root: Uint8Array;
   dataHash: Uint8Array;
   creatorHash: Uint8Array;
@@ -63,23 +64,29 @@ export type BurnAssetV0InstructionDataArgs = {
   identifier: string;
 };
 
-/** @deprecated Use `getBurnAssetV0InstructionDataSerializer()` without any argument instead. */
-export function getBurnAssetV0InstructionDataSerializer(
+/** @deprecated Use `getTransferAssetV0InstructionDataSerializer()` without any argument instead. */
+export function getTransferAssetV0InstructionDataSerializer(
   _context: object
-): Serializer<BurnAssetV0InstructionDataArgs, BurnAssetV0InstructionData>;
-export function getBurnAssetV0InstructionDataSerializer(): Serializer<
-  BurnAssetV0InstructionDataArgs,
-  BurnAssetV0InstructionData
+): Serializer<
+  TransferAssetV0InstructionDataArgs,
+  TransferAssetV0InstructionData
 >;
-export function getBurnAssetV0InstructionDataSerializer(
+export function getTransferAssetV0InstructionDataSerializer(): Serializer<
+  TransferAssetV0InstructionDataArgs,
+  TransferAssetV0InstructionData
+>;
+export function getTransferAssetV0InstructionDataSerializer(
   _context: object = {}
-): Serializer<BurnAssetV0InstructionDataArgs, BurnAssetV0InstructionData> {
+): Serializer<
+  TransferAssetV0InstructionDataArgs,
+  TransferAssetV0InstructionData
+> {
   return mapSerializer<
-    BurnAssetV0InstructionDataArgs,
+    TransferAssetV0InstructionDataArgs,
     any,
-    BurnAssetV0InstructionData
+    TransferAssetV0InstructionData
   >(
-    struct<BurnAssetV0InstructionData>(
+    struct<TransferAssetV0InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['root', bytes({ size: 32 })],
@@ -89,40 +96,44 @@ export function getBurnAssetV0InstructionDataSerializer(
         ['namespace', string()],
         ['identifier', string()],
       ],
-      { description: 'BurnAssetV0InstructionData' }
+      { description: 'TransferAssetV0InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [86, 246, 51, 219, 1, 37, 165, 154],
+      discriminator: [55, 196, 88, 135, 49, 247, 120, 226],
     })
-  ) as Serializer<BurnAssetV0InstructionDataArgs, BurnAssetV0InstructionData>;
+  ) as Serializer<
+    TransferAssetV0InstructionDataArgs,
+    TransferAssetV0InstructionData
+  >;
 }
 
 // Extra Args.
-export type BurnAssetV0InstructionExtraArgs = { proof: Array<PublicKey> };
+export type TransferAssetV0InstructionExtraArgs = { proof: Array<PublicKey> };
 
 // Args.
-export type BurnAssetV0InstructionArgs = PickPartial<
-  BurnAssetV0InstructionDataArgs & BurnAssetV0InstructionExtraArgs,
+export type TransferAssetV0InstructionArgs = PickPartial<
+  TransferAssetV0InstructionDataArgs & TransferAssetV0InstructionExtraArgs,
   'proof'
 >;
 
 // Instruction.
-export function burnAssetV0(
+export function transferAssetV0(
   context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: BurnAssetV0InstructionAccounts & BurnAssetV0InstructionArgs
+  input: TransferAssetV0InstructionAccounts & TransferAssetV0InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
 
   // Resolved inputs.
   const resolvedAccounts = {
+    receiverAddress: [input.receiverAddress, false] as const,
     merkleTree: [input.merkleTree, true] as const,
   };
   const resolvingArgs = {};
@@ -225,6 +236,7 @@ export function burnAssetV0(
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
   addAccountMeta(keys, signers, resolvedAccounts.link, false);
+  addAccountMeta(keys, signers, resolvedAccounts.receiverAddress, false);
   addAccountMeta(keys, signers, resolvedAccounts.treeAuthority, false);
   addAccountMeta(keys, signers, resolvedAccounts.merkleTree, false);
   addAccountMeta(keys, signers, resolvedAccounts.bubblegumSigner, false);
@@ -243,7 +255,7 @@ export function burnAssetV0(
 
   // Data.
   const data =
-    getBurnAssetV0InstructionDataSerializer().serialize(resolvedArgs);
+    getTransferAssetV0InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

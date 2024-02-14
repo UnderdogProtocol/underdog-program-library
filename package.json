@@ -13,7 +13,7 @@
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "clippy": "cargo clippy --all-targets -- -D warnings -A clippy::result_large_err -A clippy::too_many_arguments",
     "underdog-core-sdk": "yarn workspace @underdog-protocol/underdog-core-sdk",
-    "generate:id": "anchor build && yarn generate:idls && yarn workspace @underdog-protocol/underdog-identity-sdk generate",
+    "generate:passport": "anchor build && yarn generate:idls && yarn workspace @underdog-protocol/passport-sdk generate",
     "generate": "anchor build && yarn generate:idls && yarn workspace @underdog-protocol/underdog-core-sdk generate",
     "generate:idls": "node ./shank.js",
     "fix": "ts-node fix.ts"

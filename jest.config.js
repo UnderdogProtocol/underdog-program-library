@@ -13,12 +13,12 @@ module.exports = {
       },
     },
     {
-      displayName: "@underdog-protocol/underdog-identity-sdk",
-      roots: ["<rootDir>/packages/underdog-identity-sdk"],
-      testMatch: ["<rootDir>/packages/underdog-identity-sdk/tests/**/*.test.ts"],
-      globalSetup: "<rootDir>/packages/underdog-identity-sdk/tests/setup.ts",
+      displayName: "@underdog-protocol/passport-sdk",
+      roots: ["<rootDir>/packages/passport-sdk"],
+      testMatch: ["<rootDir>/packages/passport-sdk/tests/**/*.test.ts"],
+      globalSetup: "<rootDir>/packages/passport-sdk/tests/setup.ts",
       transform: {
-        "^.+\\.ts?$": ["ts-jest", { tsconfig: "<rootDir>/packages/underdog-identity-sdk/tsconfig.json" }],
+        "^.+\\.ts?$": ["ts-jest", { tsconfig: "<rootDir>/packages/passport-sdk/tsconfig.json" }],
       },
     }
   ]

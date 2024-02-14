@@ -12,23 +12,20 @@ import {
   Program,
   PublicKey,
 } from '@metaplex-foundation/umi';
-import {
-  getUnderdogIdentityErrorFromCode,
-  getUnderdogIdentityErrorFromName,
-} from '../errors';
+import { getPassportErrorFromCode, getPassportErrorFromName } from '../errors';
 
-export const UNDERDOG_IDENTITY_PROGRAM_ID =
+export const PASSPORT_PROGRAM_ID =
   'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd' as PublicKey<'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'>;
 
-export function createUnderdogIdentityProgram(): Program {
+export function createPassportProgram(): Program {
   return {
-    name: 'underdogIdentity',
-    publicKey: UNDERDOG_IDENTITY_PROGRAM_ID,
+    name: 'passport',
+    publicKey: PASSPORT_PROGRAM_ID,
     getErrorFromCode(code: number, cause?: Error) {
-      return getUnderdogIdentityErrorFromCode(code, this, cause);
+      return getPassportErrorFromCode(code, this, cause);
     },
     getErrorFromName(name: string, cause?: Error) {
-      return getUnderdogIdentityErrorFromName(name, this, cause);
+      return getPassportErrorFromName(name, this, cause);
     },
     isOnCluster() {
       return true;
@@ -36,20 +33,20 @@ export function createUnderdogIdentityProgram(): Program {
   };
 }
 
-export function getUnderdogIdentityProgram<T extends Program = Program>(
+export function getPassportProgram<T extends Program = Program>(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): T {
-  return context.programs.get<T>('underdogIdentity', clusterFilter);
+  return context.programs.get<T>('passport', clusterFilter);
 }
 
-export function getUnderdogIdentityProgramId(
+export function getPassportProgramId(
   context: Pick<Context, 'programs'>,
   clusterFilter?: ClusterFilter
 ): PublicKey {
   return context.programs.getPublicKey(
-    'underdogIdentity',
-    UNDERDOG_IDENTITY_PROGRAM_ID,
+    'passport',
+    PASSPORT_PROGRAM_ID,
     clusterFilter
   );
 }

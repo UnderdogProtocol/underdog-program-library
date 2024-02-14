@@ -147,7 +147,7 @@ export function getDomainGpaBuilder(
   context: Pick<Context, 'rpc' | 'programs'>
 ) {
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return gpaBuilder(context, programId)
@@ -177,7 +177,7 @@ export function findDomainPda(
   }
 ): Pda {
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return context.eddsa.findPda(programId, [

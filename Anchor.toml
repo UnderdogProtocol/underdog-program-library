@@ -3,7 +3,7 @@ skip-lint = false
 
 [programs.localnet]
 underdog_core = "updg8JyjrmFE2h3d71p71zRXDR8q4C6Up8dDoeq3LTM"
-underdog_identity = "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd"
+passport = "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd"
 
 [registry]
 url = "https://api.apr.dev"

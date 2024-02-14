@@ -24,113 +24,119 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findAdminPda, findLinkPda } from '../accounts';
+import { findDomainPda, findLinkPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
-export type InitializeLinkV0InstructionAccounts = {
-  authority?: Signer;
-  admin?: PublicKey | Pda;
-  linker: Signer;
-  link?: PublicKey | Pda;
+export type ActivatePassportV1InstructionAccounts = {
+  payer?: Signer;
+  domainAuthority: Signer;
+  domain?: PublicKey | Pda;
+  passportAuthority: Signer;
+  passport?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
 };
 
 // Data.
-export type InitializeLinkV0InstructionData = {
+export type ActivatePassportV1InstructionData = {
   discriminator: Array<number>;
   namespace: string;
   identifier: string;
 };
 
-export type InitializeLinkV0InstructionDataArgs = {
+export type ActivatePassportV1InstructionDataArgs = {
   namespace: string;
   identifier: string;
 };
 
-/** @deprecated Use `getInitializeLinkV0InstructionDataSerializer()` without any argument instead. */
-export function getInitializeLinkV0InstructionDataSerializer(
+/** @deprecated Use `getActivatePassportV1InstructionDataSerializer()` without any argument instead. */
+export function getActivatePassportV1InstructionDataSerializer(
   _context: object
 ): Serializer<
-  InitializeLinkV0InstructionDataArgs,
-  InitializeLinkV0InstructionData
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 >;
-export function getInitializeLinkV0InstructionDataSerializer(): Serializer<
-  InitializeLinkV0InstructionDataArgs,
-  InitializeLinkV0InstructionData
+export function getActivatePassportV1InstructionDataSerializer(): Serializer<
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 >;
-export function getInitializeLinkV0InstructionDataSerializer(
+export function getActivatePassportV1InstructionDataSerializer(
   _context: object = {}
 ): Serializer<
-  InitializeLinkV0InstructionDataArgs,
-  InitializeLinkV0InstructionData
+  ActivatePassportV1InstructionDataArgs,
+  ActivatePassportV1InstructionData
 > {
   return mapSerializer<
-    InitializeLinkV0InstructionDataArgs,
+    ActivatePassportV1InstructionDataArgs,
     any,
-    InitializeLinkV0InstructionData
+    ActivatePassportV1InstructionData
   >(
-    struct<InitializeLinkV0InstructionData>(
+    struct<ActivatePassportV1InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['namespace', string()],
         ['identifier', string()],
       ],
-      { description: 'InitializeLinkV0InstructionData' }
+      { description: 'ActivatePassportV1InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [80, 62, 236, 98, 132, 216, 235, 101],
+      discriminator: [231, 205, 193, 38, 207, 50, 162, 253],
     })
   ) as Serializer<
-    InitializeLinkV0InstructionDataArgs,
-    InitializeLinkV0InstructionData
+    ActivatePassportV1InstructionDataArgs,
+    ActivatePassportV1InstructionData
   >;
 }
 
 // Args.
-export type InitializeLinkV0InstructionArgs =
-  InitializeLinkV0InstructionDataArgs;
+export type ActivatePassportV1InstructionArgs =
+  ActivatePassportV1InstructionDataArgs;
 
 // Instruction.
-export function initializeLinkV0(
-  context: Pick<Context, 'programs' | 'eddsa' | 'identity'>,
-  input: InitializeLinkV0InstructionAccounts & InitializeLinkV0InstructionArgs
+export function activatePassportV1(
+  context: Pick<Context, 'programs' | 'eddsa'>,
+  input: ActivatePassportV1InstructionAccounts &
+    ActivatePassportV1InstructionArgs
 ): TransactionBuilder {
   const signers: Signer[] = [];
   const keys: AccountMeta[] = [];
 
   // Program ID.
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
 
   // Resolved inputs.
   const resolvedAccounts = {
-    linker: [input.linker, true] as const,
+    domainAuthority: [input.domainAuthority, true] as const,
+    passportAuthority: [input.passportAuthority, true] as const,
   };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
-    'authority',
-    input.authority
-      ? ([input.authority, false] as const)
-      : ([context.identity, false] as const)
+    'payer',
+    input.payer
+      ? ([input.payer, true] as const)
+      : ([input.passportAuthority, true] as const)
   );
   addObjectProperty(
     resolvedAccounts,
-    'admin',
-    input.admin
-      ? ([input.admin, true] as const)
-      : ([findAdminPda(context), true] as const)
+    'domain',
+    input.domain
+      ? ([input.domain, false] as const)
+      : ([
+          findDomainPda(context, { namespace: input.namespace }),
+          false,
+        ] as const)
   );
   addObjectProperty(
     resolvedAccounts,
-    'link',
-    input.link
-      ? ([input.link, true] as const)
+    'passport',
+    input.passport
+      ? ([input.passport, true] as const)
       : ([
           findLinkPda(context, {
             namespace: input.namespace,
@@ -164,16 +170,17 @@ export function initializeLinkV0(
   );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
-  addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.admin, false);
-  addAccountMeta(keys, signers, resolvedAccounts.linker, false);
-  addAccountMeta(keys, signers, resolvedAccounts.link, false);
+  addAccountMeta(keys, signers, resolvedAccounts.payer, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domainAuthority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.domain, false);
+  addAccountMeta(keys, signers, resolvedAccounts.passportAuthority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.passport, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.rent, false);
 
   // Data.
   const data =
-    getInitializeLinkV0InstructionDataSerializer().serialize(resolvedArgs);
+    getActivatePassportV1InstructionDataSerializer().serialize(resolvedArgs);
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

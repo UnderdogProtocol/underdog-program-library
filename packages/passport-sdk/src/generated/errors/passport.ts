@@ -19,7 +19,7 @@ const nameToErrorMap: Map<string, ProgramErrorConstructor> = new Map();
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  */
-export function getUnderdogIdentityErrorFromCode(
+export function getPassportErrorFromCode(
   code: number,
   program: Program,
   cause?: Error
@@ -32,7 +32,7 @@ export function getUnderdogIdentityErrorFromCode(
  * Attempts to resolve a custom program error from the provided error name, i.e. 'Unauthorized'.
  * @category Errors
  */
-export function getUnderdogIdentityErrorFromName(
+export function getPassportErrorFromName(
   name: string,
   program: Program,
   cause?: Error

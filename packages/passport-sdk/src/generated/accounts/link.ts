@@ -29,113 +29,113 @@ import {
   u8,
 } from '@metaplex-foundation/umi/serializers';
 
-export type Admin = Account<AdminAccountData>;
+export type Link = Account<LinkAccountData>;
 
-export type AdminAccountData = {
+export type LinkAccountData = {
   discriminator: Array<number>;
   bump: number;
   address: PublicKey;
 };
 
-export type AdminAccountDataArgs = { bump: number; address: PublicKey };
+export type LinkAccountDataArgs = { bump: number; address: PublicKey };
 
-/** @deprecated Use `getAdminAccountDataSerializer()` without any argument instead. */
-export function getAdminAccountDataSerializer(
+/** @deprecated Use `getLinkAccountDataSerializer()` without any argument instead. */
+export function getLinkAccountDataSerializer(
   _context: object
-): Serializer<AdminAccountDataArgs, AdminAccountData>;
-export function getAdminAccountDataSerializer(): Serializer<
-  AdminAccountDataArgs,
-  AdminAccountData
+): Serializer<LinkAccountDataArgs, LinkAccountData>;
+export function getLinkAccountDataSerializer(): Serializer<
+  LinkAccountDataArgs,
+  LinkAccountData
 >;
-export function getAdminAccountDataSerializer(
+export function getLinkAccountDataSerializer(
   _context: object = {}
-): Serializer<AdminAccountDataArgs, AdminAccountData> {
-  return mapSerializer<AdminAccountDataArgs, any, AdminAccountData>(
-    struct<AdminAccountData>(
+): Serializer<LinkAccountDataArgs, LinkAccountData> {
+  return mapSerializer<LinkAccountDataArgs, any, LinkAccountData>(
+    struct<LinkAccountData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['bump', u8()],
         ['address', publicKeySerializer()],
       ],
-      { description: 'AdminAccountData' }
+      { description: 'LinkAccountData' }
     ),
-    (value) => ({ ...value, discriminator: [244, 158, 220, 65, 8, 73, 4, 65] })
-  ) as Serializer<AdminAccountDataArgs, AdminAccountData>;
+    (value) => ({
+      ...value,
+      discriminator: [90, 57, 179, 207, 13, 91, 161, 190],
+    })
+  ) as Serializer<LinkAccountDataArgs, LinkAccountData>;
 }
 
-/** @deprecated Use `deserializeAdmin(rawAccount)` without any context instead. */
-export function deserializeAdmin(
-  context: object,
-  rawAccount: RpcAccount
-): Admin;
-export function deserializeAdmin(rawAccount: RpcAccount): Admin;
-export function deserializeAdmin(
+/** @deprecated Use `deserializeLink(rawAccount)` without any context instead. */
+export function deserializeLink(context: object, rawAccount: RpcAccount): Link;
+export function deserializeLink(rawAccount: RpcAccount): Link;
+export function deserializeLink(
   context: RpcAccount | object,
   rawAccount?: RpcAccount
-): Admin {
+): Link {
   return deserializeAccount(
     rawAccount ?? (context as RpcAccount),
-    getAdminAccountDataSerializer()
+    getLinkAccountDataSerializer()
   );
 }
 
-export async function fetchAdmin(
+export async function fetchLink(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<Admin> {
+): Promise<Link> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  assertAccountExists(maybeAccount, 'Admin');
-  return deserializeAdmin(maybeAccount);
+  assertAccountExists(maybeAccount, 'Link');
+  return deserializeLink(maybeAccount);
 }
 
-export async function safeFetchAdmin(
+export async function safeFetchLink(
   context: Pick<Context, 'rpc'>,
   publicKey: PublicKey | Pda,
   options?: RpcGetAccountOptions
-): Promise<Admin | null> {
+): Promise<Link | null> {
   const maybeAccount = await context.rpc.getAccount(
     toPublicKey(publicKey, false),
     options
   );
-  return maybeAccount.exists ? deserializeAdmin(maybeAccount) : null;
+  return maybeAccount.exists ? deserializeLink(maybeAccount) : null;
 }
 
-export async function fetchAllAdmin(
+export async function fetchAllLink(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<Admin[]> {
+): Promise<Link[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts.map((maybeAccount) => {
-    assertAccountExists(maybeAccount, 'Admin');
-    return deserializeAdmin(maybeAccount);
+    assertAccountExists(maybeAccount, 'Link');
+    return deserializeLink(maybeAccount);
   });
 }
 
-export async function safeFetchAllAdmin(
+export async function safeFetchAllLink(
   context: Pick<Context, 'rpc'>,
   publicKeys: Array<PublicKey | Pda>,
   options?: RpcGetAccountsOptions
-): Promise<Admin[]> {
+): Promise<Link[]> {
   const maybeAccounts = await context.rpc.getAccounts(
     publicKeys.map((key) => toPublicKey(key, false)),
     options
   );
   return maybeAccounts
     .filter((maybeAccount) => maybeAccount.exists)
-    .map((maybeAccount) => deserializeAdmin(maybeAccount as RpcAccount));
+    .map((maybeAccount) => deserializeLink(maybeAccount as RpcAccount));
 }
 
-export function getAdminGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
+export function getLinkGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return gpaBuilder(context, programId)
@@ -148,36 +148,44 @@ export function getAdminGpaBuilder(context: Pick<Context, 'rpc' | 'programs'>) {
       bump: [8, u8()],
       address: [9, publicKeySerializer()],
     })
-    .deserializeUsing<Admin>((account) => deserializeAdmin(account))
-    .whereField('discriminator', [244, 158, 220, 65, 8, 73, 4, 65]);
+    .deserializeUsing<Link>((account) => deserializeLink(account))
+    .whereField('discriminator', [90, 57, 179, 207, 13, 91, 161, 190]);
 }
 
-export function getAdminSize(): number {
+export function getLinkSize(): number {
   return 41;
 }
 
-export function findAdminPda(
-  context: Pick<Context, 'eddsa' | 'programs'>
+export function findLinkPda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: {
+    namespace: string;
+
+    identifier: string;
+  }
 ): Pda {
   const programId = context.programs.getPublicKey(
-    'underdogIdentity',
+    'passport',
     'upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd'
   );
   return context.eddsa.findPda(programId, [
-    string({ size: 'variable' }).serialize('underdog_identity_admin'),
+    string({ size: 'variable' }).serialize(seeds.namespace),
+    string({ size: 'variable' }).serialize(seeds.identifier),
   ]);
 }
 
-export async function fetchAdminFromSeeds(
+export async function fetchLinkFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findLinkPda>[1],
   options?: RpcGetAccountOptions
-): Promise<Admin> {
-  return fetchAdmin(context, findAdminPda(context), options);
+): Promise<Link> {
+  return fetchLink(context, findLinkPda(context, seeds), options);
 }
 
-export async function safeFetchAdminFromSeeds(
+export async function safeFetchLinkFromSeeds(
   context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findLinkPda>[1],
   options?: RpcGetAccountOptions
-): Promise<Admin | null> {
-  return safeFetchAdmin(context, findAdminPda(context), options);
+): Promise<Link | null> {
+  return safeFetchLink(context, findLinkPda(context, seeds), options);
 }

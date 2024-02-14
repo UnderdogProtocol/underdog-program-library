@@ -8,7 +8,7 @@ use instructions::*;
 declare_id!("upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd");
 
 #[program]
-pub mod underdog_identity {
+pub mod passport {
   use super::*;
 
   pub fn initialize_admin(ctx: Context<InitializeAdmin>) -> Result<()> {
