@@ -12,10 +12,14 @@ import {
   initializeOrgV1,
   mintNonTransferableNftV1,
   revokeNonTransferableNftV1,
+  updateLegacyProjectV0,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
 import { findLegacyNftPda } from "../../../src";
-import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
+import {
+  fetchMetadata,
+  fetchMetadataFromSeeds,
+} from "@metaplex-foundation/mpl-token-metadata";
 
 describe("Non-Transferable Projects", () => {
   const context = createContext();
@@ -26,6 +30,11 @@ describe("Non-Transferable Projects", () => {
   const projectIdStr = projectId.toString();
   const nftId = 1;
   const nftIdStr = nftId.toString();
+
+  const orgAccount = findOrgAccountPda(context, {
+    superAdminAddress,
+    orgId,
+  })[0];
 
   const claimerSigner = generateSigner(context);
   const claimerAddress = claimerSigner.publicKey;
@@ -48,19 +57,49 @@ describe("Non-Transferable Projects", () => {
       superAdminAddress,
       orgId,
       projectIdStr,
-      name,
-      symbol,
-      uri,
+      name: "",
+      symbol: "",
+      uri: "",
       projectType: "n",
     }).sendAndConfirm(context);
 
     const nonTransferableProject = await fetchLegacyProjectFromSeeds(context, {
-      orgAccount: findOrgAccountPda(context, { superAdminAddress, orgId })[0],
+      orgAccount,
       projectId: projectIdStr,
       type: "nt-proj",
     });
 
     expect(nonTransferableProject.projectId).toEqual(createBigInt(projectId));
+
+    const metadata = await fetchMetadataFromSeeds(context, {
+      mint: findLegacyProjectPda(context, {
+        type: "nt-project-mint",
+        orgAccount,
+        projectId: projectIdStr,
+      })[0],
+    });
+
+    expect(metadata.name).toEqual("");
+  });
+
+  it("updates a non-transferable project", async () => {
+    await updateLegacyProjectV0(context, {
+      superAdminAddress,
+      orgId,
+      projectIdStr,
+      projectType: "n",
+      metadata: { name, symbol, uri, sellerFeeBasisPoints: 0 },
+    }).sendAndConfirm(context);
+
+    const metadata = await fetchMetadataFromSeeds(context, {
+      mint: findLegacyProjectPda(context, {
+        type: "nt-project-mint",
+        orgAccount,
+        projectId: projectIdStr,
+      })[0],
+    });
+
+    expect(metadata.name).toEqual(name);
   });
 
   it("mints a non-transferable nft", async () => {

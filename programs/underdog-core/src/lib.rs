@@ -38,12 +38,15 @@ pub mod underdog_core {
     initialize_project_v1::handler(ctx, args)
   }
 
-  pub fn update_project_v2(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Result<()> {
-    update_project_v2::handler(ctx, args)
+  pub fn update_legacy_project_v0(
+    ctx: Context<UpdateLegacyProjectV0>,
+    args: UpdateLegacyProjectV0Args,
+  ) -> Result<()> {
+    update_legacy_project_v0::handler(ctx, args)
   }
 
-  pub fn mint_nft_v4(ctx: Context<MintNftV4>, args: MintNftV4Args) -> Result<()> {
-    mint_nft_v4::handler(ctx, args)
+  pub fn update_project_v2(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Result<()> {
+    update_project_v2::handler(ctx, args)
   }
 
   pub fn mint_nft_v5(ctx: Context<MintNftV5>, args: MintNftV5Args) -> Result<()> {
@@ -116,13 +119,6 @@ pub mod underdog_core {
     args: MintNonTransferableNftV1Args,
   ) -> Result<()> {
     mint_non_transferable_nft_v1::handler(ctx, args)
-  }
-
-  pub fn claim_non_transferable_nft(
-    ctx: Context<ClaimNonTransferableNft>,
-    args: ClaimNonTransferableNftArgs,
-  ) -> Result<()> {
-    claim_non_transferable_nft::handler(ctx, args)
   }
 
   pub fn claim_non_transferable_nft_v1(

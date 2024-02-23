@@ -698,19 +698,15 @@ kinobi.update(
     BurnNonTransferableNftV1: {
       args: nonTransferableNftDefaults.args,
     },
-    InitializeLegacyProject: {
-      args: {
-        ...defaultProjectPrefixArg,
-        ...defaultProjectMintPrefix,
-        ...defaultProjectVaultPrefix,
-      },
-    },
     InitializeLegacyProjectV1: {
       args: {
         ...defaultProjectPrefixArg,
         ...defaultProjectMintPrefix,
         ...defaultProjectVaultPrefix,
       },
+    },
+    UpdateLegacyProjectV0: {
+      args: { ...defaultProjectPrefixArg, ...defaultProjectMintPrefix },
     },
     UpdateNonTransferableNft: {
       args: {
@@ -720,19 +716,6 @@ kinobi.update(
         nftMintBump: {
           defaultsTo: k.accountBumpDefault("nonTransferableNftMint"),
         },
-      },
-    },
-    VerifyLegacyNftCollection: {
-      args: {
-        projectMintBump: {
-          defaultsTo: k.accountBumpDefault("legacyProjectMint"),
-        },
-        nftMintBump: {
-          defaultsTo: k.accountBumpDefault("legacyNftMint"),
-        },
-        ...defaultProjectPrefixArg,
-        ...defaultProjectMintPrefix,
-        ...defaultNftMintPrefix,
       },
     },
     VerifyLegacyNftCollectionV1: {

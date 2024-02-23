@@ -8,7 +8,6 @@
 
 export * from './burnAssetV1';
 export * from './burnNonTransferableNftV1';
-export * from './claimNonTransferableNft';
 export * from './claimNonTransferableNftV1';
 export * from './doStuffV0';
 export * from './initializeLegacyProjectV1';
@@ -18,7 +17,6 @@ export * from './initializeProjectV1';
 export * from './initializeTree';
 export * from './inscribeImageV0';
 export * from './inscribeV0';
-export * from './mintNftV4';
 export * from './mintNftV5';
 export * from './mintNonTransferableNftV1';
 export * from './mintSftV4';
@@ -27,6 +25,7 @@ export * from './removeFromCollectionV1';
 export * from './revokeNonTransferableNftV1';
 export * from './transferAssetV2';
 export * from './updateAssetV0';
+export * from './updateLegacyProjectV0';
 export * from './updateOwner';
 export * from './updateProjectV2';
 export * from './verifyCollectionV0';
