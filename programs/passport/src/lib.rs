@@ -53,4 +53,11 @@ pub mod passport {
   ) -> Result<()> {
     burn_asset_v0::handler(ctx, args)
   }
+
+  pub fn burn_asset_v1<'info>(
+    ctx: Context<'_, '_, '_, 'info, BurnAssetV1<'info>>,
+    args: BurnAssetV1Args,
+  ) -> Result<()> {
+    burn_asset_v1::handler(ctx, args)
+  }
 }

@@ -19,7 +19,7 @@ import {
 } from "@metaplex-foundation/umi";
 
 import {
-  burnAssetV0,
+  burnAssetV1,
   fetchLinkFromSeeds,
   findLinkPda,
   initializeLinkV0,
@@ -152,7 +152,7 @@ describe("Initialize Link", () => {
     it("can burn", async () => {
       const leafIndex = 1;
 
-      await burnAssetV0(context, {
+      await burnAssetV1(context, {
         authority: linkerSigner,
         merkleTree: merkleTreeSigner.publicKey,
         root: publicKeyBytes(getMerkleRoot(leaves, maxDepth)),

@@ -2,7 +2,9 @@ const k = require("@metaplex-foundation/kinobi");
 let path = require("path");
 
 // Instanciate Kinobi.
-const kinobi = k.createFromIdls([path.join(__dirname, "..", "..", "idls", "passport.json")]);
+const kinobi = k.createFromIdls([
+  path.join(__dirname, "..", "..", "idls", "passport.json"),
+]);
 
 // Update accounts.
 kinobi.update(
@@ -32,7 +34,17 @@ kinobi.update(
       ...k.pdaDefault("link", {
         seeds: {
           namespace: k.argDefault("namespace"),
-          identifier: k.argDefault("identifier")
+          identifier: k.argDefault("identifier"),
+        },
+      }),
+    },
+    {
+      account: "delegate",
+      ignoreIfOptional: true,
+      ...k.pdaDefault("link", {
+        seeds: {
+          namespace: k.argDefault("namespace"),
+          identifier: k.argDefault("identifier"),
         },
       }),
     },
@@ -42,7 +54,7 @@ kinobi.update(
       ...k.pdaDefault("link", {
         seeds: {
           namespace: k.argDefault("namespace"),
-          identifier: k.argDefault("identifier")
+          identifier: k.argDefault("identifier"),
         },
       }),
     },
@@ -61,17 +73,26 @@ kinobi.update(
     {
       account: "logWrapper",
       ignoreIfOptional: true,
-      ...k.programDefault("splNoop", "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"),
+      ...k.programDefault(
+        "splNoop",
+        "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"
+      ),
     },
     {
       account: "compressionProgram",
       ignoreIfOptional: true,
-      ...k.programDefault("splAccountCompression", "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"),
+      ...k.programDefault(
+        "splAccountCompression",
+        "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"
+      ),
     },
     {
       account: "bubblegumProgram",
       ignoreIfOptional: true,
-      ...k.programDefault("bubblegumProgram", "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"),
+      ...k.programDefault(
+        "bubblegumProgram",
+        "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
+      ),
     },
     {
       account: "treeAuthority",
@@ -93,7 +114,9 @@ kinobi.update(
   new k.TransformNodesVisitor([
     {
       // Use extra "proof" arg as remaining accounts.
-      selector: (node) => k.isInstructionNode(node) && ["transferAssetV0", "burnAssetV0"].includes(node.name),
+      selector: (node) =>
+        k.isInstructionNode(node) &&
+        ["transferAssetV0", "burnAssetV0", "burnAssetV1"].includes(node.name),
       transformer: (node) => {
         k.assertInstructionNode(node);
         return k.instructionNode({
