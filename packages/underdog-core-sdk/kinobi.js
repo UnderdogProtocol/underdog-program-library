@@ -695,9 +695,6 @@ kinobi.update(
           defaultsTo: ataPdaDefault("legacyProjectMint", "legacyProject"),
         },
       },
-    },
-    InitializeLegacyProjectV1: {},
-    InitializeLegacyProjectV1: {
       args: {
         ...defaultProjectPrefixArg,
         ...defaultProjectMintPrefix,

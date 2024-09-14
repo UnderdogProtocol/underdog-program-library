@@ -10,6 +10,7 @@ import {
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
   Context,
@@ -47,7 +48,7 @@ export type InitializeLegacyProjectV1InstructionAccounts = {
   orgAccount?: PublicKey | Pda;
   legacyProject?: PublicKey | Pda;
   legacyProjectMint?: PublicKey | Pda;
-  legacyProjectVault: PublicKey | Pda;
+  legacyProjectVault?: PublicKey | Pda;
   legacyProjectMetadata?: PublicKey | Pda;
   legacyProjectMasterEdition?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
@@ -152,9 +153,7 @@ export function initializeLegacyProjectV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {
-    legacyProjectVault: [input.legacyProjectVault, true] as const,
-  };
+  const resolvedAccounts = {};
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -231,6 +230,19 @@ export function initializeLegacyProjectV1(
             type: resolvingArgs.projectMintPrefix,
             orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
             projectId: input.projectIdStr,
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'legacyProjectVault',
+    input.legacyProjectVault
+      ? ([input.legacyProjectVault, true] as const)
+      : ([
+          findAssociatedTokenPda(context, {
+            mint: publicKey(resolvedAccounts.legacyProjectMint[0], false),
+            owner: publicKey(resolvedAccounts.legacyProject[0], false),
           }),
           true,
         ] as const)
