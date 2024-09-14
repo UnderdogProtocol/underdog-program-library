@@ -25,20 +25,17 @@ import {
   u32,
   u8,
 } from '@metaplex-foundation/umi/serializers';
-import { findInitialOwnerPda } from '../accounts';
 import { addAccountMeta, addObjectProperty } from '../shared';
 
 // Accounts.
 export type InitializeTreeInstructionAccounts = {
   authority?: Signer;
-  ownerAccount?: PublicKey | Pda;
   treeAuthority?: PublicKey | Pda;
   merkleTree: Signer;
   logWrapper?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   bubblegumProgram?: PublicKey | Pda;
   compressionProgram?: PublicKey | Pda;
-  rent?: PublicKey | Pda;
 };
 
 // Data.
@@ -121,13 +118,6 @@ export function initializeTree(
   );
   addObjectProperty(
     resolvedAccounts,
-    'ownerAccount',
-    input.ownerAccount
-      ? ([input.ownerAccount, true] as const)
-      : ([findInitialOwnerPda(context), true] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
     'treeAuthority',
     input.treeAuthority
       ? ([input.treeAuthority, true] as const)
@@ -190,27 +180,15 @@ export function initializeTree(
           false,
         ] as const)
   );
-  addObjectProperty(
-    resolvedAccounts,
-    'rent',
-    input.rent
-      ? ([input.rent, false] as const)
-      : ([
-          publicKey('SysvarRent111111111111111111111111111111111'),
-          false,
-        ] as const)
-  );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
-  addAccountMeta(keys, signers, resolvedAccounts.ownerAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.treeAuthority, false);
   addAccountMeta(keys, signers, resolvedAccounts.merkleTree, false);
   addAccountMeta(keys, signers, resolvedAccounts.logWrapper, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.bubblegumProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.compressionProgram, false);
-  addAccountMeta(keys, signers, resolvedAccounts.rent, false);
 
   // Data.
   const data =

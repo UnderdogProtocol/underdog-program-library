@@ -47,7 +47,7 @@ pub fn handler<'info>(
   let passport = &mut ctx.accounts.passport;
 
   passport.address = ctx.accounts.passport_authority.to_account_info().key();
-  passport.bump = *ctx.bumps.get("passport").unwrap();
+  passport.bump = ctx.bumps.passport;
 
   Ok(())
 }

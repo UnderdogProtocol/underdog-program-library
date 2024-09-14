@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
-use mpl_bubblegum::program::Bubblegum;
-use mpl_bubblegum::state::TreeConfig;
-use shared_utils::{transfer, Transfer};
+use mpl_bubblegum::instructions::TransferCpiBuilder;
 use spl_account_compression::{program::SplAccountCompression, Noop};
 
-use crate::state::*;
+use crate::{
+  state::*,
+  util::{Bubblegum, TreeConfigAccount},
+};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct TransferAssetV0Args {
@@ -40,7 +41,7 @@ pub struct TransferAssetV0<'info> {
     bump,
     seeds::program = bubblegum_program.key(),
   )]
-  pub tree_authority: Box<Account<'info, TreeConfig>>,
+  pub tree_authority: Box<Account<'info, TreeConfigAccount>>,
 
   /// CHECK: Checked by cpi
   #[account(mut)]
@@ -60,22 +61,6 @@ pub struct TransferAssetV0<'info> {
   pub system_program: Program<'info, System>,
 }
 
-impl<'info> TransferAssetV0<'info> {
-  fn transfer_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
-    let cpi_accounts = Transfer {
-      tree_authority: self.tree_authority.to_account_info(),
-      leaf_owner: self.link.to_account_info(),
-      leaf_delegate: self.link.to_account_info(),
-      new_leaf_owner: self.receiver_address.to_account_info(),
-      merkle_tree: self.merkle_tree.to_account_info(),
-      log_wrapper: self.log_wrapper.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      compression_program: self.compression_program.to_account_info(),
-    };
-    CpiContext::new(self.bubblegum_program.to_account_info(), cpi_accounts)
-  }
-}
-
 pub fn handler<'info>(
   ctx: Context<'_, '_, '_, 'info, TransferAssetV0<'info>>,
   args: TransferAssetV0Args,
@@ -86,17 +71,21 @@ pub fn handler<'info>(
     &[ctx.accounts.link.bump],
   ]];
 
-  transfer(
-    ctx
-      .accounts
-      .transfer_ctx()
-      .with_signer(&[signer_seeds[0]])
-      .with_remaining_accounts(ctx.remaining_accounts.to_vec()),
-    args.root,
-    args.data_hash,
-    args.creator_hash,
-    args.leaf_index,
-  )?;
+  TransferCpiBuilder::new(&ctx.accounts.bubblegum_program)
+    .tree_config(&ctx.accounts.tree_authority.to_account_info())
+    .leaf_owner(&ctx.accounts.link.to_account_info(), false)
+    .leaf_delegate(&ctx.accounts.link.to_account_info(), true)
+    .new_leaf_owner(&ctx.accounts.receiver_address)
+    .merkle_tree(&ctx.accounts.merkle_tree)
+    .log_wrapper(&ctx.accounts.log_wrapper)
+    .system_program(&ctx.accounts.system_program)
+    .compression_program(&ctx.accounts.compression_program)
+    .root(args.root)
+    .data_hash(args.data_hash)
+    .creator_hash(args.creator_hash)
+    .index(args.leaf_index)
+    .nonce(u64::from(args.leaf_index))
+    .invoke_signed(&[signer_seeds[0]])?;
 
   Ok(())
 }

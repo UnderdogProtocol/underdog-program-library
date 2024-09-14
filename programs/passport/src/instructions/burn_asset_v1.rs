@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
-use mpl_bubblegum::program::Bubblegum;
-use mpl_bubblegum::state::TreeConfig;
-use shared_utils::{burn, Burn};
+use mpl_bubblegum::instructions::BurnCpiBuilder;
 use spl_account_compression::{program::SplAccountCompression, Noop};
 
-use crate::state::*;
+use crate::{
+  state::*,
+  util::{Bubblegum, TreeConfigAccount},
+};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct BurnAssetV1Args {
@@ -41,7 +42,7 @@ pub struct BurnAssetV1<'info> {
     bump,
     seeds::program = bubblegum_program.key(),
   )]
-  pub tree_authority: Box<Account<'info, TreeConfig>>,
+  pub tree_authority: Box<Account<'info, TreeConfigAccount>>,
 
   /// CHECK: Checked by cpi
   #[account(mut)]
@@ -61,21 +62,6 @@ pub struct BurnAssetV1<'info> {
   pub system_program: Program<'info, System>,
 }
 
-impl<'info> BurnAssetV1<'info> {
-  fn burn_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
-    let cpi_accounts = Burn {
-      tree_authority: self.tree_authority.to_account_info(),
-      leaf_owner: self.link.to_account_info(),
-      leaf_delegate: self.delegate.to_account_info(),
-      merkle_tree: self.merkle_tree.to_account_info(),
-      log_wrapper: self.log_wrapper.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      compression_program: self.compression_program.to_account_info(),
-    };
-    CpiContext::new(self.bubblegum_program.to_account_info(), cpi_accounts)
-  }
-}
-
 pub fn handler<'info>(
   ctx: Context<'_, '_, '_, 'info, BurnAssetV1<'info>>,
   args: BurnAssetV1Args,
@@ -86,17 +72,27 @@ pub fn handler<'info>(
     &[ctx.accounts.link.bump],
   ]];
 
-  burn(
-    ctx
-      .accounts
-      .burn_ctx()
-      .with_signer(&[signer_seeds[0]])
-      .with_remaining_accounts(ctx.remaining_accounts.to_vec()),
-    args.root,
-    args.data_hash,
-    args.creator_hash,
-    args.leaf_index,
-  )?;
+  let remaining_accounts: Vec<(&AccountInfo<'info>, bool, bool)> = ctx
+    .remaining_accounts
+    .iter()
+    .map(|account| (account, account.is_writable, account.is_signer)) // Do not dereference here
+    .collect();
+
+  BurnCpiBuilder::new(&ctx.accounts.bubblegum_program)
+    .tree_config(&ctx.accounts.tree_authority.to_account_info())
+    .leaf_owner(&ctx.accounts.link.to_account_info(), true)
+    .leaf_delegate(&ctx.accounts.delegate.to_account_info(), true)
+    .merkle_tree(&ctx.accounts.merkle_tree)
+    .log_wrapper(&ctx.accounts.log_wrapper)
+    .system_program(&ctx.accounts.system_program)
+    .compression_program(&ctx.accounts.compression_program)
+    .root(args.root)
+    .data_hash(args.data_hash)
+    .creator_hash(args.creator_hash)
+    .index(args.leaf_index)
+    .nonce(u64::from(args.leaf_index))
+    .add_remaining_accounts(&remaining_accounts[..])
+    .invoke_signed(&[signer_seeds[0]])?;
 
   Ok(())
 }

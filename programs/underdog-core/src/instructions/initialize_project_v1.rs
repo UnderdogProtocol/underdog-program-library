@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
-use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
-
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use mpl_token_metadata::state::{CollectionDetails, DataV2};
-use shared_utils::{
-  create_master_edition_v3, create_metadata_accounts_v3, CreateMasterEditionV3,
-  CreateMetadataAccountsV3,
+use anchor_spl::{
+  associated_token::AssociatedToken,
+  metadata::Metadata,
+  token::{self, Mint, MintTo, Token, TokenAccount},
+};
+use mpl_token_metadata::{
+  instructions::{CreateMasterEditionV3CpiBuilder, CreateMetadataAccountV3CpiBuilder},
+  types::{CollectionDetails, DataV2},
 };
 
 use crate::state::*;
@@ -66,60 +67,27 @@ pub struct InitializeProjectV1<'info> {
   #[account(
     init,
     payer = authority,
-    seeds = [PROJECT_VAULT_PREFIX.as_ref(),org_account.key().as_ref(), args.project_id.to_le_bytes().as_ref()],
-    bump,
-    token::mint = project_mint,
-    token::authority = project_account,
+    associated_token::mint = project_mint,
+    associated_token::authority = project_account
   )]
   pub project_vault: Box<Account<'info, TokenAccount>>,
 
-  /// CHECK: Used in CPI So no Harm
+  /// CHECK: Used in CPI
   #[account(mut)]
-  pub project_metadata: AccountInfo<'info>,
+  pub project_metadata: UncheckedAccount<'info>,
 
-  /// CHECK: Used in CPI So no Harm
+  /// CHECK: Used in CPI
   #[account(mut)]
-  pub project_master_edition: AccountInfo<'info>,
+  pub project_master_edition: UncheckedAccount<'info>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  associated_token_program: Program<'info, AssociatedToken>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub token_program: Program<'info, Token>,
   pub system_program: Program<'info, System>,
   pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> InitializeProjectV1<'info> {
-  fn create_metadata_accounts_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, CreateMetadataAccountsV3<'info>> {
-    let cpi_accounts = CreateMetadataAccountsV3 {
-      metadata: self.project_metadata.to_account_info(),
-      mint: self.project_mint.to_account_info(),
-      mint_authority: self.project_account.to_account_info(),
-      payer: self.authority.to_account_info(),
-      update_authority: self.project_account.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      rent: self.rent.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
-
-  fn create_master_edition_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, CreateMasterEditionV3<'info>> {
-    let cpi_accounts = CreateMasterEditionV3 {
-      metadata: self.project_metadata.to_account_info(),
-      edition: self.project_master_edition.to_account_info(),
-      mint: self.project_mint.to_account_info(),
-      mint_authority: self.project_account.to_account_info(),
-      payer: self.authority.to_account_info(),
-      update_authority: self.project_account.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      rent: self.rent.to_account_info(),
-      token_program: self.token_program.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
-
   fn mint_to_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
     let cpi_accounts = MintTo {
       mint: self.project_mint.to_account_info(),
@@ -136,7 +104,7 @@ pub fn handler(ctx: Context<InitializeProjectV1>, args: InitializeProjectV1Args)
   ctx.accounts.project_account.super_admin_address = args.super_admin_address;
   ctx.accounts.project_account.org_address = org_account.key();
   ctx.accounts.project_account.project_id = args.project_id;
-  ctx.accounts.project_account.bump = *ctx.bumps.get("project_account").unwrap();
+  ctx.accounts.project_account.bump = ctx.bumps.project_account;
 
   let project_id = args.project_id.to_le_bytes();
 
@@ -163,24 +131,31 @@ pub fn handler(ctx: Context<InitializeProjectV1>, args: InitializeProjectV1Args)
     uses: None,
   };
 
-  create_metadata_accounts_v3(
-    ctx
-      .accounts
-      .create_metadata_accounts_ctx()
-      .with_signer(&[&signer_seeds[..]]),
-    data,
-    true,
-    true,
-    Some(CollectionDetails::V1 { size: 0 }),
-  )?;
+  let collection_details = CollectionDetails::V1 { size: 0 };
 
-  create_master_edition_v3(
-    ctx
-      .accounts
-      .create_master_edition_ctx()
-      .with_signer(&[&signer_seeds[..]]),
-    Some(0),
-  )?;
+  CreateMetadataAccountV3CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.project_metadata.to_account_info())
+    .mint(&ctx.accounts.project_mint.to_account_info())
+    .mint_authority(&ctx.accounts.project_account.to_account_info())
+    .payer(&ctx.accounts.authority.to_account_info())
+    .update_authority(&ctx.accounts.project_account.to_account_info(), true)
+    .system_program(&ctx.accounts.system_program)
+    .data(data)
+    .is_mutable(true)
+    .collection_details(collection_details)
+    .invoke_signed(&[&signer_seeds[..]])?;
+
+  CreateMasterEditionV3CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.project_metadata.to_account_info())
+    .edition(&ctx.accounts.project_master_edition.to_account_info())
+    .mint(&ctx.accounts.project_mint.to_account_info())
+    .mint_authority(&ctx.accounts.project_account.to_account_info())
+    .payer(&ctx.accounts.authority.to_account_info())
+    .update_authority(&ctx.accounts.project_account.to_account_info())
+    .system_program(&ctx.accounts.system_program)
+    .token_program(&ctx.accounts.token_program)
+    .max_supply(0)
+    .invoke_signed(&[&signer_seeds[..]])?;
 
   Ok(())
 }

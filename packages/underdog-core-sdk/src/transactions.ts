@@ -23,59 +23,7 @@ import {
   TRANSFERABLE_PROJECT_PREFIX,
   TRANSFERABLE_PROJECT_VAULT_PREFIX,
 } from "./constants";
-import {
-  verifyLegacyNftCollectionV1,
-  mintTransferableNftV1,
-  initializeTree,
-  findOrgAccountPda,
-  findProjectPda,
-} from "./generated";
-
-export const mintTransferableNftAndVerifyCollection = (
-  context: Parameters<typeof mintTransferableNftV1>[0] &
-    Parameters<typeof verifyLegacyNftCollectionV1>[0] &
-    Pick<Context, "rpc">,
-  input: Omit<
-    Parameters<typeof mintTransferableNftV1>[1] &
-      Parameters<typeof verifyLegacyNftCollectionV1>[1],
-    "projectType"
-  >
-) => {
-  const {
-    superAdminAddress,
-    orgId,
-    projectIdStr,
-    nftIdStr,
-    name,
-    symbol,
-    uri,
-  } = input;
-
-  return transactionBuilder()
-    .add(
-      mintTransferableNftV1(context, {
-        authority: input.authority,
-        receiver: input.receiver,
-        superAdminAddress: input.superAdminAddress,
-        orgId,
-        projectIdStr,
-        nftIdStr,
-        name,
-        symbol,
-        uri,
-      })
-    )
-    .add(
-      verifyLegacyNftCollectionV1(context, {
-        authority: input.authority,
-        superAdminAddress,
-        orgId,
-        projectIdStr,
-        nftIdStr,
-        projectType: "t",
-      })
-    );
-};
+import { initializeTree, findOrgAccountPda, findProjectPda } from "./generated";
 
 export const createTree = async (
   context: Parameters<typeof createAccount>[0] &

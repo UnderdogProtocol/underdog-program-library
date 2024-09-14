@@ -5,6 +5,7 @@ const idlDir = path.join(__dirname, "idls");
 const binaryInstallDir = path.join(__dirname, ".crates");
 const programDir = path.join(__dirname, "programs");
 
+// From an Anchor program.
 generateIdl({
   generator: "anchor",
   programName: "underdog_core",

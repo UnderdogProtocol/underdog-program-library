@@ -40,7 +40,7 @@ pub fn handler(ctx: Context<InitializeOrgV1Context>, args: InitializeOrgV1Args) 
 
   org_account.owner = args.super_admin_address;
   org_account.counter = args.org_id.parse::<u64>().unwrap();
-  org_account.bump = *ctx.bumps.get("org_account").unwrap();
+  org_account.bump = ctx.bumps.org_account;
 
   Ok(())
 }

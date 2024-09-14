@@ -1,13 +1,15 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use mpl_token_metadata::state::{Collection, Creator, DataV2};
-use shared_utils::{
-  create_master_edition_v3, create_metadata_accounts_v3, CreateMasterEditionV3,
-  CreateMetadataAccountsV3,
+use anchor_spl::metadata::mpl_token_metadata::instructions::{
+  FreezeDelegatedAccountCpiBuilder, SignMetadataCpiBuilder, VerifyCollectionCpiBuilder,
 };
+use anchor_spl::metadata::Metadata;
+use anchor_spl::token::{self, Approve, Mint, MintTo, Token, TokenAccount};
+use mpl_token_metadata::instructions::{
+  CreateMasterEditionV3CpiBuilder, CreateMetadataAccountV3CpiBuilder,
+};
+use mpl_token_metadata::types::{Collection, Creator, DataV2};
 
 use crate::state::*;
 
@@ -30,13 +32,15 @@ pub struct MintNonTransferableNftV1<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
 
+  #[account(mut)]
+  pub claimer: Signer<'info>,
+
   #[account(
     constraint = owner_account.owner == authority.key(),
     seeds = [OWNER_PREFIX.as_ref()],
     bump=owner_account.bump
   )]
   pub owner_account: Box<Account<'info, InitialOwner>>,
-
   #[account(
     seeds = [ORG_PREFIX.as_ref(),args.super_admin_address.as_ref(),args.org_id.as_ref()],
     bump=org_account.bump
@@ -57,13 +61,13 @@ pub struct MintNonTransferableNftV1<'info> {
   )]
   pub non_transferable_project_mint: Box<Account<'info, Mint>>,
 
-  /// CHECK: Used in CPI So no Harm
+  /// CHECK: Used in CPI
   #[account(mut)]
-  pub non_transferable_project_metadata: AccountInfo<'info>,
+  pub non_transferable_project_metadata: UncheckedAccount<'info>,
 
-  /// CHECK: Used in CPI So no Harm
+  /// CHECK: Used in CPI
   #[account(mut)]
-  pub non_transferable_project_master_edition: AccountInfo<'info>,
+  pub non_transferable_project_master_edition: UncheckedAccount<'info>,
 
   #[account(
     init,
@@ -76,25 +80,6 @@ pub struct MintNonTransferableNftV1<'info> {
   )]
   pub non_transferable_nft_mint: Box<Account<'info, Mint>>,
 
-  #[account(
-    init,
-    payer = authority,
-    seeds = [NON_TRANSFERABLE_NFT_ESCROW.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref(),args.nft_id_str.as_ref()],
-    bump,
-    token::mint = non_transferable_nft_mint,
-    token::authority = non_transferable_project,
-  )]
-  pub non_transferable_nft_escrow: Box<Account<'info, TokenAccount>>,
-
-  #[account(
-    init,
-    payer = authority,
-    space = 8 + 32 + 1,
-    seeds = [NON_TRANSFERABLE_NFT_CLAIM.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref(),args.nft_id_str.as_ref()],
-    bump
-  )]
-  pub non_transferable_nft_claim: Box<Account<'info, ClaimAccount>>,
-
   /// CHECK: Used in CPI
   #[account(mut)]
   pub non_transferable_nft_metadata: UncheckedAccount<'info>,
@@ -103,7 +88,15 @@ pub struct MintNonTransferableNftV1<'info> {
   #[account(mut)]
   pub non_transferable_nft_master_edition: UncheckedAccount<'info>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  #[account(
+    init,
+    payer=authority,
+    associated_token::mint = non_transferable_nft_mint,
+    associated_token::authority = claimer
+  )]
+  pub claimer_token_account: Box<Account<'info, TokenAccount>>,
+
+  pub token_metadata_program: Program<'info, Metadata>,
   pub associated_token_program: Program<'info, AssociatedToken>,
   pub token_program: Program<'info, Token>,
   pub system_program: Program<'info, System>,
@@ -114,42 +107,19 @@ impl<'info> MintNonTransferableNftV1<'info> {
   fn mint_to_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
     let cpi_accounts = MintTo {
       mint: self.non_transferable_nft_mint.to_account_info(),
-      to: self.non_transferable_nft_escrow.to_account_info(),
+      to: self.claimer_token_account.to_account_info(),
       authority: self.non_transferable_project.to_account_info(),
     };
     CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
   }
 
-  fn create_metadata_accounts_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, CreateMetadataAccountsV3<'info>> {
-    let cpi_accounts = CreateMetadataAccountsV3 {
-      metadata: self.non_transferable_nft_metadata.to_account_info(),
-      mint: self.non_transferable_nft_mint.to_account_info(),
-      mint_authority: self.non_transferable_project.to_account_info(),
-      payer: self.authority.to_account_info(),
-      update_authority: self.non_transferable_project.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      rent: self.rent.to_account_info(),
+  fn approve_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Approve<'info>> {
+    let cpi_accounts = Approve {
+      to: self.claimer_token_account.to_account_info().clone(),
+      delegate: self.non_transferable_project.to_account_info().clone(),
+      authority: self.claimer.to_account_info().clone(),
     };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
-
-  fn create_master_edition_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, CreateMasterEditionV3<'info>> {
-    let cpi_accounts = CreateMasterEditionV3 {
-      metadata: self.non_transferable_nft_metadata.to_account_info(),
-      edition: self.non_transferable_nft_master_edition.to_account_info(),
-      mint: self.non_transferable_nft_mint.to_account_info(),
-      mint_authority: self.non_transferable_project.to_account_info(),
-      payer: self.authority.to_account_info(),
-      update_authority: self.non_transferable_project.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      rent: self.rent.to_account_info(),
-      token_program: self.token_program.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
+    CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
   }
 }
 
@@ -157,18 +127,27 @@ pub fn handler(
   ctx: Context<MintNonTransferableNftV1>,
   args: MintNonTransferableNftV1Args,
 ) -> Result<()> {
-  let project_signer_seeds = [
+  let org_account = ctx.accounts.org_account.key();
+
+  let project_signer_seeds = &[&[
     NON_TRANSFERABLE_PROJECT_PREFIX.as_ref(),
-    ctx.accounts.non_transferable_project.org.as_ref(),
+    org_account.as_ref(),
     args.project_id_str.as_ref(),
     &[ctx.accounts.non_transferable_project.bump],
-  ];
+  ]];
+
+  let org_signer_seeds = &[&[
+    ORG_PREFIX.as_ref(),
+    args.super_admin_address.as_ref(),
+    args.org_id.as_ref(),
+    &[ctx.accounts.org_account.bump],
+  ]];
 
   token::mint_to(
     ctx
       .accounts
       .mint_to_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
+      .with_signer(&[project_signer_seeds[0]]),
     1,
   )?;
 
@@ -183,7 +162,7 @@ pub fn handler(
       share: 0,
     },
     Creator {
-      address: ctx.accounts.org_account.to_account_info().key(),
+      address: ctx.accounts.org_account.key(),
       verified: false,
       share: 0,
     },
@@ -207,29 +186,66 @@ pub fn handler(
     uses: None,
   };
 
-  create_metadata_accounts_v3(
+  CreateMetadataAccountV3CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.non_transferable_nft_metadata)
+    .mint(&ctx.accounts.non_transferable_nft_mint.to_account_info())
+    .mint_authority(&ctx.accounts.non_transferable_project.to_account_info())
+    .payer(&ctx.accounts.authority)
+    .update_authority(
+      &ctx.accounts.non_transferable_project.to_account_info(),
+      true,
+    )
+    .system_program(&ctx.accounts.system_program)
+    .data(data)
+    .is_mutable(true)
+    .invoke_signed(&[project_signer_seeds[0]])?;
+
+  CreateMasterEditionV3CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.non_transferable_nft_metadata)
+    .edition(&ctx.accounts.non_transferable_nft_master_edition)
+    .mint(&ctx.accounts.non_transferable_nft_mint.to_account_info())
+    .mint_authority(&ctx.accounts.non_transferable_project.to_account_info())
+    .payer(&ctx.accounts.authority)
+    .update_authority(&ctx.accounts.non_transferable_project.to_account_info())
+    .token_program(&ctx.accounts.token_program)
+    .system_program(&ctx.accounts.system_program)
+    .max_supply(0)
+    .invoke_signed(&[project_signer_seeds[0]])?;
+
+  VerifyCollectionCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .payer(&ctx.accounts.authority)
+    .metadata(&ctx.accounts.non_transferable_nft_metadata)
+    .collection_authority(&ctx.accounts.non_transferable_project.to_account_info())
+    .collection_mint(&ctx.accounts.non_transferable_project_mint.to_account_info())
+    .collection(
+      &ctx
+        .accounts
+        .non_transferable_project_metadata
+        .to_account_info(),
+    )
+    .collection_master_edition_account(&ctx.accounts.non_transferable_project_master_edition)
+    .invoke_signed(&[project_signer_seeds[0]])?;
+
+  SignMetadataCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .creator(&ctx.accounts.org_account.to_account_info())
+    .metadata(&ctx.accounts.non_transferable_nft_metadata)
+    .invoke_signed(&[org_signer_seeds[0]])?;
+
+  anchor_spl::token::approve(
     ctx
       .accounts
-      .create_metadata_accounts_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-    data,
-    true,
-    true,
-    None,
+      .approve_ctx()
+      .with_signer(&[project_signer_seeds[0]]),
+    1,
   )?;
 
-  create_master_edition_v3(
-    ctx
-      .accounts
-      .create_master_edition_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-    Some(0),
-  )?;
-
-  let non_transferable_nft_claim = &mut ctx.accounts.non_transferable_nft_claim;
-
-  non_transferable_nft_claim.claimer = args.claimer_address;
-  non_transferable_nft_claim.bump = *ctx.bumps.get("non_transferable_nft_claim").unwrap();
+  FreezeDelegatedAccountCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .delegate(&ctx.accounts.non_transferable_project.to_account_info())
+    .token_account(&ctx.accounts.claimer_token_account.to_account_info())
+    .edition(&ctx.accounts.non_transferable_nft_master_edition)
+    .mint(&ctx.accounts.non_transferable_nft_mint.to_account_info())
+    .token_program(&ctx.accounts.token_program)
+    .invoke_signed(&[project_signer_seeds[0]])?;
 
   Ok(())
 }

@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@metaplex-foundation/mpl-bubblegum": "2.0.0",
-    "@metaplex-foundation/mpl-token-metadata": "3.0.0-alpha.24",
+    "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@metaplex-foundation/mpl-toolbox": "^0.8.1",
     "@metaplex-foundation/umi": "^0.8.9",
     "@metaplex-foundation/umi-bundle-defaults": "^0.8.9",

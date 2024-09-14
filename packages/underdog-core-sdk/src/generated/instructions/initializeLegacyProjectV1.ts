@@ -32,7 +32,6 @@ import {
 import {
   resolveProjectMintPrefix,
   resolveProjectPrefix,
-  resolveProjectVaultPrefix,
 } from '../../resolvers';
 import {
   findInitialOwnerPda,
@@ -48,10 +47,11 @@ export type InitializeLegacyProjectV1InstructionAccounts = {
   orgAccount?: PublicKey | Pda;
   legacyProject?: PublicKey | Pda;
   legacyProjectMint?: PublicKey | Pda;
-  legacyProjectVault?: PublicKey | Pda;
+  legacyProjectVault: PublicKey | Pda;
   legacyProjectMetadata?: PublicKey | Pda;
   legacyProjectMasterEdition?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
+  associatedTokenProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   rent?: PublicKey | Pda;
@@ -66,7 +66,6 @@ export type InitializeLegacyProjectV1InstructionData = {
   projectType: string;
   projectPrefix: string;
   projectMintPrefix: string;
-  projectVaultPrefix: string;
   name: string;
   symbol: string;
   uri: string;
@@ -79,7 +78,6 @@ export type InitializeLegacyProjectV1InstructionDataArgs = {
   projectType: string;
   projectPrefix: string;
   projectMintPrefix: string;
-  projectVaultPrefix: string;
   name: string;
   symbol: string;
   uri: string;
@@ -116,7 +114,6 @@ export function getInitializeLegacyProjectV1InstructionDataSerializer(
         ['projectType', string()],
         ['projectPrefix', string()],
         ['projectMintPrefix', string()],
-        ['projectVaultPrefix', string()],
         ['name', string()],
         ['symbol', string()],
         ['uri', string()],
@@ -136,7 +133,7 @@ export function getInitializeLegacyProjectV1InstructionDataSerializer(
 // Args.
 export type InitializeLegacyProjectV1InstructionArgs = PickPartial<
   InitializeLegacyProjectV1InstructionDataArgs,
-  'projectPrefix' | 'projectMintPrefix' | 'projectVaultPrefix'
+  'projectPrefix' | 'projectMintPrefix'
 >;
 
 // Instruction.
@@ -155,7 +152,9 @@ export function initializeLegacyProjectV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    legacyProjectVault: [input.legacyProjectVault, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -237,32 +236,6 @@ export function initializeLegacyProjectV1(
         ] as const)
   );
   addObjectProperty(
-    resolvingArgs,
-    'projectVaultPrefix',
-    input.projectVaultPrefix ??
-      resolveProjectVaultPrefix(
-        context,
-        { ...input, ...resolvedAccounts },
-        { ...input, ...resolvingArgs },
-        programId,
-        false
-      )
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'legacyProjectVault',
-    input.legacyProjectVault
-      ? ([input.legacyProjectVault, true] as const)
-      : ([
-          findLegacyProjectPda(context, {
-            type: resolvingArgs.projectVaultPrefix,
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
     resolvedAccounts,
     'legacyProjectMetadata',
     input.legacyProjectMetadata
@@ -295,6 +268,19 @@ export function initializeLegacyProjectV1(
           context.programs.getPublicKey(
             'mplTokenMetadata',
             'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'
+          ),
+          false,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'associatedTokenProgram',
+    input.associatedTokenProgram
+      ? ([input.associatedTokenProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAssociatedToken',
+            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
           ),
           false,
         ] as const)
@@ -351,6 +337,7 @@ export function initializeLegacyProjectV1(
     false
   );
   addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
+  addAccountMeta(keys, signers, resolvedAccounts.associatedTokenProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.rent, false);

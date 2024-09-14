@@ -46,7 +46,7 @@ pub fn handler<'info>(
 
   domain.authority = ctx.accounts.domain_authority.to_account_info().key();
   domain.expiration = 0;
-  domain.bump = *ctx.bumps.get("domain").unwrap();
+  domain.bump = ctx.bumps.domain;
 
   Ok(())
 }

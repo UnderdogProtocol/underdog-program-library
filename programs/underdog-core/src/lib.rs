@@ -3,6 +3,7 @@ use anchor_lang::prelude::*;
 pub mod instructions;
 pub mod state;
 pub mod token_metadata;
+pub mod util;
 
 use instructions::*;
 
@@ -71,25 +72,11 @@ pub mod underdog_core {
     burn_asset_v1::handler(ctx, args)
   }
 
-  pub fn remove_from_collection_v1<'info>(
-    ctx: Context<'_, '_, '_, 'info, RemoveFromCollectionV1<'info>>,
-    args: RemoveFromCollectionV1Args,
-  ) -> Result<()> {
-    remove_from_collection_v1::handler(ctx, args)
-  }
-
   pub fn initialize_legacy_project_v1(
     ctx: Context<InitializeLegacyProjectV1>,
     args: InitializeLegacyProjectV1Args,
   ) -> Result<()> {
     initialize_legacy_project_v1::handler(ctx, args)
-  }
-
-  pub fn mint_transferable_nft_v1(
-    ctx: Context<MintTransferableNftV1>,
-    args: MintTransferableNftV1Args,
-  ) -> Result<()> {
-    mint_transferable_nft_v1::handler(ctx, args)
   }
 
   pub fn verify_legacy_nft_collection_v1(
@@ -99,33 +86,11 @@ pub mod underdog_core {
     verify_legacy_nft_collection_v1::handler(ctx, args)
   }
 
-  pub fn verify_collection_v0(
-    ctx: Context<VerifyCollectionV0>,
-    args: VerifyCollectionV0Args,
-  ) -> Result<()> {
-    verify_collection_v0::handler(ctx, args)
-  }
-
-  pub fn inscribe_image_v0(ctx: Context<InscribeImageV0>, args: InscribeImageV0Args) -> Result<()> {
-    inscribe_image_v0::handler(ctx, args)
-  }
-
-  pub fn inscribe_v0(ctx: Context<InscribeV0>, args: InscribeV0Args) -> Result<()> {
-    inscribe_v0::handler(ctx, args)
-  }
-
   pub fn mint_non_transferable_nft_v1(
     ctx: Context<MintNonTransferableNftV1>,
     args: MintNonTransferableNftV1Args,
   ) -> Result<()> {
     mint_non_transferable_nft_v1::handler(ctx, args)
-  }
-
-  pub fn claim_non_transferable_nft_v1(
-    ctx: Context<ClaimNonTransferableNftV1>,
-    args: ClaimNonTransferableNftV1Args,
-  ) -> Result<()> {
-    claim_non_transferable_nft_v1::handler(ctx, args)
   }
 
   pub fn revoke_non_transferable_nft_v1(
@@ -147,10 +112,6 @@ pub mod underdog_core {
     args: WithdrawProjectRoyaltiesV0Args,
   ) -> Result<()> {
     withdraw_project_royalties_v0::handler(ctx, args)
-  }
-
-  pub fn do_stuff_v0(ctx: Context<DoStuffV0>, args: DoStuffV0Args) -> Result<()> {
-    do_stuff_v0::handler(ctx, args)
   }
 
   pub fn update_asset_v0<'info>(

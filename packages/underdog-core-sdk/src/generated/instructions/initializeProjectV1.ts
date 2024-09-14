@@ -10,6 +10,7 @@ import {
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
   Context,
@@ -48,6 +49,7 @@ export type InitializeProjectV1InstructionAccounts = {
   projectVault?: PublicKey | Pda;
   projectMetadata?: PublicKey | Pda;
   projectMasterEdition?: PublicKey | Pda;
+  associatedTokenProgram?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
@@ -201,10 +203,9 @@ export function initializeProjectV1(
     input.projectVault
       ? ([input.projectVault, true] as const)
       : ([
-          findProjectPda(context, {
-            prefix: 'project-vault',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectId,
+          findAssociatedTokenPda(context, {
+            mint: publicKey(resolvedAccounts.projectMint[0], false),
+            owner: publicKey(resolvedAccounts.projectAccount[0], false),
           }),
           true,
         ] as const)
@@ -231,6 +232,19 @@ export function initializeProjectV1(
             mint: publicKey(resolvedAccounts.projectMint[0], false),
           }),
           true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'associatedTokenProgram',
+    input.associatedTokenProgram
+      ? ([input.associatedTokenProgram, false] as const)
+      : ([
+          context.programs.getPublicKey(
+            'splAssociatedToken',
+            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+          ),
+          false,
         ] as const)
   );
   addObjectProperty(
@@ -292,6 +306,7 @@ export function initializeProjectV1(
   addAccountMeta(keys, signers, resolvedAccounts.projectVault, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMetadata, false);
   addAccountMeta(keys, signers, resolvedAccounts.projectMasterEdition, false);
+  addAccountMeta(keys, signers, resolvedAccounts.associatedTokenProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.systemProgram, false);

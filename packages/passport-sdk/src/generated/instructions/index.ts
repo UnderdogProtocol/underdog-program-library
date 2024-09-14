@@ -7,7 +7,6 @@
  */
 
 export * from './activatePassportV1';
-export * from './burnAssetV0';
 export * from './burnAssetV1';
 export * from './initializeAdmin';
 export * from './initializeDomainV0';

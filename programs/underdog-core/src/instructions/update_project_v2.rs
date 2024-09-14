@@ -1,9 +1,10 @@
 use anchor_lang::prelude::*;
 
-use anchor_spl::token::Mint;
-use mpl_bubblegum::state::metaplex_anchor::{MplTokenMetadata, TokenMetadata};
-use mpl_token_metadata::state::DataV2;
-use shared_utils::{update_metadata_accounts_v2, UpdateMetadataAccountsV2};
+use anchor_spl::{
+  metadata::{Metadata, MetadataAccount},
+  token::Mint,
+};
+use mpl_token_metadata::{instructions::UpdateMetadataAccountV2CpiBuilder, types::DataV2};
 
 use crate::{state::*, token_metadata::UpdateMetadataArgs};
 
@@ -50,26 +51,15 @@ pub struct UpdateProjectV2<'info> {
     seeds::program = token_metadata_program.key(),
     bump,
   )]
-  pub collection_metadata: Box<Account<'info, TokenMetadata>>,
+  pub collection_metadata: Box<Account<'info, MetadataAccount>>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub system_program: Program<'info, System>,
-}
-
-impl<'info> UpdateProjectV2<'info> {
-  fn update_metadata_accounts_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, UpdateMetadataAccountsV2<'info>> {
-    let cpi_accounts = UpdateMetadataAccountsV2 {
-      metadata: self.collection_metadata.to_account_info(),
-      update_authority: self.project_account.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
 }
 
 pub fn handler(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Result<()> {
   let project_id = args.project_id.to_le_bytes();
+
   let project_seeds: &[&[&[u8]]] = &[&[
     PROJECT_PREFIX.as_ref(),
     ctx.accounts.project_account.org_address.as_ref(),
@@ -77,13 +67,10 @@ pub fn handler(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Resu
     &[ctx.accounts.project_account.bump],
   ]];
 
-  update_metadata_accounts_v2(
-    ctx
-      .accounts
-      .update_metadata_accounts_ctx()
-      .with_signer(&[project_seeds[0]]),
-    Some(ctx.accounts.project_account.key()),
-    Some(DataV2 {
+  UpdateMetadataAccountV2CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.collection_metadata.to_account_info())
+    .update_authority(&ctx.accounts.project_account.to_account_info())
+    .data(DataV2 {
       name: args.metadata.name,
       symbol: args.metadata.symbol,
       uri: args.metadata.uri,
@@ -91,10 +78,8 @@ pub fn handler(ctx: Context<UpdateProjectV2>, args: UpdateProjectV2Args) -> Resu
       collection: None,
       creators: None,
       uses: None,
-    }),
-    Some(true),
-    Some(true),
-  )?;
+    })
+    .invoke_signed(&[&project_seeds[0]])?;
 
   Ok(())
 }

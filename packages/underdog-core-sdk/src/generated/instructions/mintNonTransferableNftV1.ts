@@ -10,6 +10,7 @@ import {
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
   Context,
@@ -31,7 +32,6 @@ import {
 } from '@metaplex-foundation/umi/serializers';
 import { findLegacyNftPda } from '../../pdas';
 import {
-  findClaimAccountPda,
   findInitialOwnerPda,
   findLegacyProjectPda,
   findOrgAccountPda,
@@ -42,6 +42,7 @@ import { PickPartial, addAccountMeta, addObjectProperty } from '../shared';
 // Accounts.
 export type MintNonTransferableNftV1InstructionAccounts = {
   authority?: Signer;
+  claimer: Signer;
   ownerAccount?: PublicKey | Pda;
   orgAccount?: PublicKey | Pda;
   nonTransferableProject?: PublicKey | Pda;
@@ -49,10 +50,9 @@ export type MintNonTransferableNftV1InstructionAccounts = {
   nonTransferableProjectMetadata?: PublicKey | Pda;
   nonTransferableProjectMasterEdition?: PublicKey | Pda;
   nonTransferableNftMint?: PublicKey | Pda;
-  nonTransferableNftEscrow?: PublicKey | Pda;
-  nonTransferableNftClaim?: PublicKey | Pda;
   nonTransferableNftMetadata?: PublicKey | Pda;
   nonTransferableNftMasterEdition?: PublicKey | Pda;
+  claimerTokenAccount?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   associatedTokenProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
@@ -155,7 +155,9 @@ export function mintNonTransferableNftV1(
   );
 
   // Resolved inputs.
-  const resolvedAccounts = {};
+  const resolvedAccounts = {
+    claimer: [input.claimer, true] as const,
+  };
   const resolvingArgs = {};
   addObjectProperty(
     resolvedAccounts,
@@ -259,35 +261,6 @@ export function mintNonTransferableNftV1(
   );
   addObjectProperty(
     resolvedAccounts,
-    'nonTransferableNftEscrow',
-    input.nonTransferableNftEscrow
-      ? ([input.nonTransferableNftEscrow, true] as const)
-      : ([
-          findLegacyNftPda(context, {
-            prefix: 'nt-nft-mint-esc',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftClaim',
-    input.nonTransferableNftClaim
-      ? ([input.nonTransferableNftClaim, true] as const)
-      : ([
-          findClaimAccountPda(context, {
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
     'nonTransferableNftMetadata',
     input.nonTransferableNftMetadata
       ? ([input.nonTransferableNftMetadata, true] as const)
@@ -306,6 +279,19 @@ export function mintNonTransferableNftV1(
       : ([
           findMasterEditionPda(context, {
             mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
+    'claimerTokenAccount',
+    input.claimerTokenAccount
+      ? ([input.claimerTokenAccount, true] as const)
+      : ([
+          findAssociatedTokenPda(context, {
+            mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
+            owner: publicKey(input.claimer, false),
           }),
           true,
         ] as const)
@@ -380,6 +366,7 @@ export function mintNonTransferableNftV1(
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
+  addAccountMeta(keys, signers, resolvedAccounts.claimer, false);
   addAccountMeta(keys, signers, resolvedAccounts.ownerAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.orgAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.nonTransferableProject, false);
@@ -405,18 +392,6 @@ export function mintNonTransferableNftV1(
   addAccountMeta(
     keys,
     signers,
-    resolvedAccounts.nonTransferableNftEscrow,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.nonTransferableNftClaim,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
     resolvedAccounts.nonTransferableNftMetadata,
     false
   );
@@ -426,6 +401,7 @@ export function mintNonTransferableNftV1(
     resolvedAccounts.nonTransferableNftMasterEdition,
     false
   );
+  addAccountMeta(keys, signers, resolvedAccounts.claimerTokenAccount, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.associatedTokenProgram, false);
   addAccountMeta(keys, signers, resolvedAccounts.tokenProgram, false);

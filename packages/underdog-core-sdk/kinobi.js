@@ -186,17 +186,6 @@ kinobi.update(
       }),
     },
     {
-      account: "projectVault",
-      ignoreIfOptional: true,
-      ...k.pdaDefault("project", {
-        seeds: {
-          prefix: k.valueDefault(k.vScalar("project-vault")),
-          orgAccount: k.accountDefault("orgAccount"),
-          projectId: k.argDefault("projectId"),
-        },
-      }),
-    },
-    {
       account: "projectMetadata",
       ignoreIfOptional: true,
       ...k.pdaDefault("metadata", {
@@ -602,13 +591,16 @@ const nonTransferableNftDefaults = {
     claimerTokenAccount: {
       defaultsTo: ataPdaDefault("nonTransferableNftMint", "claimer"),
     },
+    nonTransferableNftTokenAccount: {
+      defaultsTo: ataPdaDefault(
+        "nonTransferableNftMint",
+        "nonTransferableProject"
+      ),
+    },
   },
   args: {
     nftMintBump: {
       defaultsTo: k.accountBumpDefault("nonTransferableNftMint"),
-    },
-    nftEscrowBump: {
-      defaultsTo: k.accountBumpDefault("nonTransferableNftEscrow"),
     },
   },
 };
@@ -624,6 +616,13 @@ kinobi.update(
               member: k.argDefault("superAdminAddress"),
             },
           }),
+        },
+      },
+    },
+    InitializeProjectV1: {
+      accounts: {
+        projectVault: {
+          defaultsTo: ataPdaDefault("projectMint", "projectAccount"),
         },
       },
     },
@@ -658,14 +657,12 @@ kinobi.update(
         },
       },
     },
-    MintNonTransferableNft: {
-      args: {
-        projectMintBump: {
-          defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
+    MintNonTransferableNftV1: {
+      accounts: {
+        claimerTokenAccount: {
+          defaultsTo: ataPdaDefault("nonTransferableNftMint", "claimer"),
         },
       },
-    },
-    MintNonTransferableNftV1: {
       args: {
         projectMintBump: {
           defaultsTo: k.accountBumpDefault("nonTransferableProjectMint"),
@@ -690,19 +687,20 @@ kinobi.update(
         },
       },
     },
-    RevokeNonTransferableNft: nonTransferableNftDefaults,
     RevokeNonTransferableNftV1: nonTransferableNftDefaults,
-    BurnNonTransferableNft: {
-      args: nonTransferableNftDefaults.args,
+    BurnNonTransferableNftV1: nonTransferableNftDefaults,
+    InitializeLegacyProjectV1: {
+      accounts: {
+        legacyProjectVault: {
+          defaultsTo: ataPdaDefault("legacyProjectMint", "legacyProject"),
+        },
+      },
     },
-    BurnNonTransferableNftV1: {
-      args: nonTransferableNftDefaults.args,
-    },
+    InitializeLegacyProjectV1: {},
     InitializeLegacyProjectV1: {
       args: {
         ...defaultProjectPrefixArg,
         ...defaultProjectMintPrefix,
-        ...defaultProjectVaultPrefix,
       },
     },
     UpdateLegacyProjectV0: {

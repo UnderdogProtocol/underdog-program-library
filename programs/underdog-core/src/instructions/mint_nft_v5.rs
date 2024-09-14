@@ -1,17 +1,18 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
-use mpl_bubblegum::state::metaplex_adapter::{
-  Collection, Creator, MetadataArgs, TokenProgramVersion,
+use anchor_spl::{
+  metadata::{Metadata, MetadataAccount},
+  token::Mint,
 };
-use mpl_bubblegum::state::metaplex_anchor::TokenMetadata;
-use mpl_bubblegum::state::{metaplex_adapter::TokenStandard, TreeConfig};
 use mpl_bubblegum::{
-  cpi::{accounts::MintToCollectionV1, mint_to_collection_v1},
-  program::Bubblegum,
+  instructions::MintToCollectionV1CpiBuilder,
+  types::{Collection, Creator, MetadataArgs, TokenProgramVersion, TokenStandard},
 };
 use spl_account_compression::{program::SplAccountCompression, Noop};
 
-use crate::state::*;
+use crate::{
+  state::*,
+  util::{Bubblegum, TreeConfigAccount},
+};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
 pub struct MintNftV5Args {
@@ -60,7 +61,7 @@ pub struct MintNftV5<'info> {
     seeds::program = token_metadata_program.key(),
     bump,
   )]
-  pub collection_metadata: Box<Account<'info, TokenMetadata>>,
+  pub collection_metadata: Box<Account<'info, MetadataAccount>>,
 
   /// CHECK: Handled by cpi
   #[account(
@@ -73,13 +74,14 @@ pub struct MintNftV5<'info> {
   /// CHECK: Used in cpi
   pub recipient: AccountInfo<'info>,
 
+  /// CHECK: Handled by cpi
   #[account(
     mut,
     seeds = [merkle_tree.key().as_ref()],
     bump,
     seeds::program = bubblegum_program.key(),
   )]
-  pub tree_authority: Box<Account<'info, TreeConfig>>,
+  pub tree_authority: Box<Account<'info, TreeConfigAccount>>,
 
   /// CHECK: Checked by cpi
   #[account(mut)]
@@ -93,44 +95,11 @@ pub struct MintNftV5<'info> {
   )]
   pub bubblegum_signer: UncheckedAccount<'info>,
 
-  /// CHECK: Verified by constraint
-  #[account(address = mpl_token_metadata::ID)]
-  pub token_metadata_program: AccountInfo<'info>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub log_wrapper: Program<'info, Noop>,
   pub bubblegum_program: Program<'info, Bubblegum>,
   pub compression_program: Program<'info, SplAccountCompression>,
   pub system_program: Program<'info, System>,
-}
-
-impl<'info> MintNftV5<'info> {
-  fn mint_to_collection_ctx(
-    &self,
-    is_delegated: Option<bool>,
-  ) -> CpiContext<'_, '_, '_, 'info, MintToCollectionV1<'info>> {
-    let cpi_accounts = MintToCollectionV1 {
-      tree_authority: self.tree_authority.to_account_info(),
-      leaf_owner: self.recipient.to_account_info(),
-      leaf_delegate: if is_delegated == Some(true) {
-        self.project_account.to_account_info()
-      } else {
-        self.recipient.to_account_info()
-      },
-      merkle_tree: self.merkle_tree.to_account_info(),
-      payer: self.authority.to_account_info(),
-      tree_delegate: self.authority.to_account_info(),
-      collection_authority: self.project_account.to_account_info(),
-      collection_authority_record_pda: self.bubblegum_program.to_account_info(),
-      collection_mint: self.collection_mint.to_account_info(),
-      collection_metadata: self.collection_metadata.to_account_info(),
-      edition_account: self.collection_master_edition.to_account_info(),
-      bubblegum_signer: self.bubblegum_signer.to_account_info(),
-      token_metadata_program: self.token_metadata_program.to_account_info(),
-      compression_program: self.compression_program.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-      log_wrapper: self.log_wrapper.to_account_info(),
-    };
-    CpiContext::new(self.bubblegum_program.to_account_info(), cpi_accounts)
-  }
 }
 
 pub fn handler(ctx: Context<MintNftV5>, args: MintNftV5Args) -> Result<()> {
@@ -185,29 +154,40 @@ pub fn handler(ctx: Context<MintNftV5>, args: MintNftV5Args) -> Result<()> {
     uses: None,
     token_program_version: TokenProgramVersion::Original,
     creators,
-    seller_fee_basis_points: ctx
-      .accounts
-      .collection_metadata
-      .data
-      .seller_fee_basis_points,
+    seller_fee_basis_points: ctx.accounts.collection_metadata.seller_fee_basis_points,
   };
 
-  let mut project = ctx.accounts.project_account.to_account_info();
-  project.is_signer = true;
+  let project_account_info = ctx.accounts.project_account.to_account_info(); // Store in a variable
 
-  let mut org = ctx.accounts.org_account.to_account_info();
-  org.is_signer = true;
+  let leaf_delegate = if args.is_delegated == Some(true) {
+    &project_account_info // Use the variable instead of creating a temporary value
+  } else {
+    &ctx.accounts.recipient // Use the recipient directly
+  };
 
-  mint_to_collection_v1(
-    ctx
-      .accounts
-      .mint_to_collection_ctx(args.is_delegated)
-      .with_remaining_accounts(vec![project, org])
-      .with_signer(&[project_seeds[0], org_seeds[0]]),
-    metadata,
-  )?;
+  MintToCollectionV1CpiBuilder::new(&ctx.accounts.bubblegum_program)
+    .metadata(metadata)
+    .tree_creator_or_delegate(&ctx.accounts.authority)
+    .tree_config(&ctx.accounts.tree_authority.to_account_info())
+    .leaf_owner(&ctx.accounts.recipient)
+    .leaf_delegate(leaf_delegate)
+    .merkle_tree(&ctx.accounts.merkle_tree)
+    .payer(&ctx.accounts.authority)
+    .collection_authority(&ctx.accounts.project_account.to_account_info())
+    .collection_authority_record_pda(Some(&ctx.accounts.bubblegum_program.to_account_info()))
+    .collection_mint(&ctx.accounts.collection_mint.to_account_info())
+    .collection_metadata(&ctx.accounts.collection_metadata.to_account_info())
+    .collection_edition(&ctx.accounts.collection_master_edition.to_account_info())
+    .bubblegum_signer(&ctx.accounts.bubblegum_signer)
+    .token_metadata_program(&ctx.accounts.token_metadata_program)
+    .compression_program(&ctx.accounts.compression_program)
+    .system_program(&ctx.accounts.system_program)
+    .log_wrapper(&ctx.accounts.log_wrapper)
+    .add_remaining_account(&ctx.accounts.project_account.to_account_info(), true, false)
+    .add_remaining_account(&ctx.accounts.org_account.to_account_info(), true, false)
+    .invoke_signed(&[project_seeds[0], org_seeds[0]])?;
 
-  let tree_authority: &Box<Account<'_, TreeConfig>> = &ctx.accounts.tree_authority;
+  let tree_authority = &ctx.accounts.tree_authority;
 
   msg!("leafIndex: {}", tree_authority.num_minted);
 

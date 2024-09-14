@@ -10,6 +10,7 @@ import {
   findMasterEditionPda,
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   AccountMeta,
   Context,
@@ -47,9 +48,9 @@ export type BurnNonTransferableNftV1InstructionAccounts = {
   nonTransferableProjectMint?: PublicKey | Pda;
   nonTransferableProjectMetadata?: PublicKey | Pda;
   nonTransferableNftMint?: Pda;
+  nonTransferableNftTokenAccount?: PublicKey | Pda;
   nonTransferableNftMetadata?: PublicKey | Pda;
   nonTransferableNftMasterEdition?: PublicKey | Pda;
-  nonTransferableNftEscrow?: Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   associatedTokenProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
@@ -65,7 +66,6 @@ export type BurnNonTransferableNftV1InstructionData = {
   projectIdStr: string;
   nftIdStr: string;
   nftMintBump: number;
-  nftEscrowBump: number;
 };
 
 export type BurnNonTransferableNftV1InstructionDataArgs = {
@@ -74,7 +74,6 @@ export type BurnNonTransferableNftV1InstructionDataArgs = {
   projectIdStr: string;
   nftIdStr: string;
   nftMintBump: number;
-  nftEscrowBump: number;
 };
 
 /** @deprecated Use `getBurnNonTransferableNftV1InstructionDataSerializer()` without any argument instead. */
@@ -107,7 +106,6 @@ export function getBurnNonTransferableNftV1InstructionDataSerializer(
         ['projectIdStr', string()],
         ['nftIdStr', string()],
         ['nftMintBump', u8()],
-        ['nftEscrowBump', u8()],
       ],
       { description: 'BurnNonTransferableNftV1InstructionData' }
     ),
@@ -124,7 +122,7 @@ export function getBurnNonTransferableNftV1InstructionDataSerializer(
 // Args.
 export type BurnNonTransferableNftV1InstructionArgs = PickPartial<
   BurnNonTransferableNftV1InstructionDataArgs,
-  'nftMintBump' | 'nftEscrowBump'
+  'nftMintBump'
 >;
 
 // Instruction.
@@ -232,6 +230,19 @@ export function burnNonTransferableNftV1(
   );
   addObjectProperty(
     resolvedAccounts,
+    'nonTransferableNftTokenAccount',
+    input.nonTransferableNftTokenAccount
+      ? ([input.nonTransferableNftTokenAccount, true] as const)
+      : ([
+          findAssociatedTokenPda(context, {
+            mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
+            owner: publicKey(resolvedAccounts.nonTransferableProject[0], false),
+          }),
+          true,
+        ] as const)
+  );
+  addObjectProperty(
+    resolvedAccounts,
     'nonTransferableNftMetadata',
     input.nonTransferableNftMetadata
       ? ([input.nonTransferableNftMetadata, true] as const)
@@ -250,21 +261,6 @@ export function burnNonTransferableNftV1(
       : ([
           findMasterEditionPda(context, {
             mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
-          }),
-          true,
-        ] as const)
-  );
-  addObjectProperty(
-    resolvedAccounts,
-    'nonTransferableNftEscrow',
-    input.nonTransferableNftEscrow
-      ? ([input.nonTransferableNftEscrow, true] as const)
-      : ([
-          findLegacyNftPda(context, {
-            prefix: 'nt-nft-mint-esc',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
           }),
           true,
         ] as const)
@@ -336,11 +332,6 @@ export function burnNonTransferableNftV1(
     'nftMintBump',
     input.nftMintBump ?? resolvedAccounts.nonTransferableNftMint[0][1]
   );
-  addObjectProperty(
-    resolvingArgs,
-    'nftEscrowBump',
-    input.nftEscrowBump ?? resolvedAccounts.nonTransferableNftEscrow[0][1]
-  );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
@@ -363,6 +354,12 @@ export function burnNonTransferableNftV1(
   addAccountMeta(
     keys,
     signers,
+    resolvedAccounts.nonTransferableNftTokenAccount,
+    false
+  );
+  addAccountMeta(
+    keys,
+    signers,
     resolvedAccounts.nonTransferableNftMetadata,
     false
   );
@@ -370,12 +367,6 @@ export function burnNonTransferableNftV1(
     keys,
     signers,
     resolvedAccounts.nonTransferableNftMasterEdition,
-    false
-  );
-  addAccountMeta(
-    keys,
-    signers,
-    resolvedAccounts.nonTransferableNftEscrow,
     false
   );
   addAccountMeta(keys, signers, resolvedAccounts.tokenMetadataProgram, false);

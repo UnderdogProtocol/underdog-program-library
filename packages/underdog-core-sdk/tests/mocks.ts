@@ -1,10 +1,5 @@
 import { faker } from "@faker-js/faker";
-import {
-  PublicKey,
-  Umi,
-  generateSigner,
-  publicKeyBytes,
-} from "@metaplex-foundation/umi";
+import { PublicKey, Umi, generateSigner } from "@metaplex-foundation/umi";
 import {
   AssetHash,
   OrgInput,
@@ -16,14 +11,10 @@ import {
   initializeTree,
   mintNftV5,
   mintSftV4,
-  toLeafHashes,
 } from "../src";
 import {
-  fetchTreeConfigFromSeeds,
-  getMerkleProofAtIndex,
-  getMerkleRoot,
   getMerkleTreeSize,
-  verifyLeaf,
+  SPL_ACCOUNT_COMPRESSION_PROGRAM_ID,
 } from "@metaplex-foundation/mpl-bubblegum";
 import { createAccount } from "@metaplex-foundation/mpl-toolbox";
 import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
@@ -66,7 +57,7 @@ export const setupTree = async (context: Umi) => {
     newAccount: merkleTreeSigner,
     lamports,
     space,
-    programId: context.programs.getPublicKey("splAccountCompression"),
+    programId: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID,
   })
     .add(
       initializeTree(context, {
@@ -77,6 +68,7 @@ export const setupTree = async (context: Umi) => {
     )
     .sendAndConfirm(context);
 
+  console.log(merkleTreeSigner.publicKey);
   return merkleTreeSigner.publicKey;
 };
 

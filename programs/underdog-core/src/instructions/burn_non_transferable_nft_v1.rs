@@ -2,10 +2,9 @@ use anchor_lang::prelude::*;
 
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::metadata::mpl_token_metadata::instructions::BurnNftCpiBuilder;
+use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use shared_utils::{burn_nft, BurnNft};
 
 use crate::state::*;
 
@@ -16,7 +15,6 @@ pub struct BurnNonTransferableNftV1Args {
   pub project_id_str: String,
   pub nft_id_str: String,
   pub nft_mint_bump: u8,
-  pub nft_escrow_bump: u8,
 }
 
 #[derive(Accounts)]
@@ -65,41 +63,22 @@ pub struct BurnNonTransferableNftV1<'info> {
 )]
   pub non_transferable_nft_mint: Box<Account<'info, Mint>>,
 
+  #[account(mut)]
+  pub non_transferable_nft_token_account: Box<Account<'info, TokenAccount>>,
+
   /// CHECK: Used in CPI
   #[account(mut)]
-  pub non_transferable_nft_metadata: AccountInfo<'info>,
+  pub non_transferable_nft_metadata: UncheckedAccount<'info>,
 
   /// CHECK: Used in CPI
   #[account(mut)]
-  pub non_transferable_nft_master_edition: AccountInfo<'info>,
+  pub non_transferable_nft_master_edition: UncheckedAccount<'info>,
 
-  #[account(
-    mut,
-    seeds = [NON_TRANSFERABLE_NFT_ESCROW.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref(),args.nft_id_str.as_ref()],
-    bump=args.nft_escrow_bump,
-  )]
-  pub non_transferable_nft_escrow: Box<Account<'info, TokenAccount>>,
-
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub associated_token_program: Program<'info, AssociatedToken>,
   pub token_program: Program<'info, Token>,
   pub system_program: Program<'info, System>,
   pub rent: Sysvar<'info, Rent>,
-}
-
-impl<'info> BurnNonTransferableNftV1<'info> {
-  fn burn_nft_ctx(&self) -> CpiContext<'_, '_, '_, 'info, BurnNft<'info>> {
-    let cpi_accounts = BurnNft {
-      metadata: self.non_transferable_nft_metadata.to_account_info(),
-      edition: self.non_transferable_nft_master_edition.to_account_info(),
-      mint: self.non_transferable_nft_mint.to_account_info(),
-      owner: self.non_transferable_project.to_account_info(),
-      token: self.non_transferable_nft_escrow.to_account_info(),
-      spl_token: self.token_program.to_account_info().clone(),
-      collection_metadata: self.non_transferable_project_metadata.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
 }
 
 pub fn handler(
@@ -113,12 +92,30 @@ pub fn handler(
     &[ctx.accounts.non_transferable_project.bump],
   ];
 
-  burn_nft(
-    ctx
-      .accounts
-      .burn_nft_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-  )?;
+  BurnNftCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .owner(&ctx.accounts.non_transferable_project.to_account_info())
+    .mint(&ctx.accounts.non_transferable_nft_mint.to_account_info())
+    .metadata(&ctx.accounts.non_transferable_nft_metadata.to_account_info())
+    .master_edition_account(
+      &ctx
+        .accounts
+        .non_transferable_nft_master_edition
+        .to_account_info(),
+    )
+    .token_account(
+      &ctx
+        .accounts
+        .non_transferable_nft_token_account
+        .to_account_info(),
+    )
+    .collection_metadata(Some(
+      &ctx
+        .accounts
+        .non_transferable_project_metadata
+        .to_account_info(),
+    ))
+    .spl_token_program(&ctx.accounts.token_program)
+    .invoke_signed(&[&project_signer_seeds[..]])?;
 
   Ok(())
 }

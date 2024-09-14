@@ -42,7 +42,7 @@ pub fn handler<'info>(ctx: Context<InitializeLinkV0>, _args: InitializeLinkV0Arg
   let link = &mut ctx.accounts.link;
 
   link.address = ctx.accounts.linker.to_account_info().key();
-  link.bump = *ctx.bumps.get("link").unwrap();
+  link.bump = ctx.bumps.link;
 
   Ok(())
 }

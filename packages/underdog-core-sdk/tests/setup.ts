@@ -8,11 +8,7 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 import { initializeOwner } from "../src/generated";
 import underdogSecretKey from "./keypairs/underdog-test.json";
-import {
-  createMplInscriptionProgram,
-  createShard,
-  findInscriptionShardPda,
-} from "@metaplex-foundation/mpl-inscription";
+import { createMplInscriptionProgram } from "@metaplex-foundation/mpl-inscription";
 
 export const createContext = () => {
   const context = createUmi("http://localhost:8899", "processed");
@@ -42,13 +38,7 @@ async function globalSetup() {
   await context.rpc.airdrop(context.identity.publicKey, sol(10));
 
   console.log("Initializing program owner...");
-  await initializeOwner(context, {}).sendAndConfirm(context);
-
-  const shardAccount = findInscriptionShardPda(context, { shardNumber: 0 });
-  await createShard(context, {
-    shardAccount,
-    shardNumber: 0,
-  }).sendAndConfirm(context);
+  // await initializeOwner(context, {}).sendAndConfirm(context);
 }
 
 export default globalSetup;

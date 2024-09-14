@@ -2,6 +2,11 @@ import { Umi } from "@metaplex-foundation/umi";
 import { findProjectPda } from "./generated";
 import { OrgInput, findOrgAddress } from "./orgs";
 import { PROJECT_MINT_PREFIX, PROJECT_PREFIX } from "./constants";
+import {
+  findMasterEditionPda,
+  findMetadataPda,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 
 export type ProjectInput = OrgInput & { projectId: number };
 
@@ -33,6 +38,16 @@ export const findProjectAddresses = (
   orgAddress: findOrgAddress(context, projectInput),
   projectAddress: findProjectAddress(context, projectInput),
   projectMintAddress: findProjectMintAddress(context, projectInput),
+  // projectMetadataAddress: findMetadataPda(context, {
+  //   mint: findProjectMintAddress(context, projectInput),
+  // })[0],
+  // projectMasterEditionAddress: findMasterEditionPda(context, {
+  //   mint: findProjectMintAddress(context, projectInput),
+  // })[0],
+  // projectVault: findAssociatedTokenPda(context, {
+  //   mint: findProjectMintAddress(context, projectInput),
+  //   owner: findProjectAddress(context, projectInput),
+  // }),
 });
 
 export const getProjectCreators = (

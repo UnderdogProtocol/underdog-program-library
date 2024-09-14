@@ -1,14 +1,15 @@
-use crate::state::*;
+use crate::{state::*, util::Bubblegum};
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
-use mpl_bubblegum::program::Bubblegum;
-use mpl_bubblegum::state::metaplex_adapter::{
-  Collection, MetadataArgs, TokenProgramVersion, TokenStandard,
+use anchor_spl::{
+  metadata::{Metadata, MetadataAccount},
+  token::Mint,
 };
-use mpl_bubblegum::state::metaplex_anchor::{MplTokenMetadata, TokenMetadata};
-use mpl_bubblegum::state::TreeConfig;
-use shared_utils::{update_metadata, UpdateArgs, UpdateMetadata};
-use spl_account_compression::{program::SplAccountCompression, Noop};
+use mpl_bubblegum::{
+  instructions::UpdateMetadataCpiBuilder,
+  types::{Collection, Creator, MetadataArgs, TokenProgramVersion, TokenStandard, UpdateArgs},
+};
+use spl_account_compression::program::SplAccountCompression;
+use spl_account_compression::Noop;
 
 #[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Debug, Clone)]
 pub struct CreatorInput {
@@ -83,7 +84,7 @@ pub struct UpdateAssetV0<'info> {
     seeds::program = token_metadata_program.key(),
     bump,
   )]
-  pub collection_metadata: Box<Account<'info, TokenMetadata>>,
+  pub collection_metadata: Box<Account<'info, MetadataAccount>>,
 
   /// CHECK: Used in cpi
   pub leaf_owner: AccountInfo<'info>,
@@ -91,13 +92,14 @@ pub struct UpdateAssetV0<'info> {
   /// CHECK: Used in cpi
   pub leaf_delegate: AccountInfo<'info>,
 
+  /// CHECK: Used in cpi
   #[account(
     mut,
     seeds = [merkle_tree.key().as_ref()],
     bump,
     seeds::program = bubblegum_program.key(),
   )]
-  pub tree_authority: Box<Account<'info, TreeConfig>>,
+  pub tree_authority: AccountInfo<'info>,
 
   /// CHECK: Checked by cpi
   #[account(mut)]
@@ -105,30 +107,9 @@ pub struct UpdateAssetV0<'info> {
 
   pub bubblegum_program: Program<'info, Bubblegum>,
   pub log_wrapper: Program<'info, Noop>,
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub compression_program: Program<'info, SplAccountCompression>,
   pub system_program: Program<'info, System>,
-}
-
-impl<'info> UpdateAssetV0<'info> {
-  fn update_metadata_ctx(&self) -> CpiContext<'_, '_, '_, 'info, UpdateMetadata<'info>> {
-    let cpi_accounts = UpdateMetadata {
-      authority: self.project_account.to_account_info(),
-      tree_authority: self.tree_authority.to_account_info(),
-      leaf_owner: self.leaf_owner.to_account_info(),
-      leaf_delegate: self.leaf_delegate.to_account_info(),
-      merkle_tree: self.merkle_tree.to_account_info(),
-      collection_mint: self.collection_mint.to_account_info(),
-      collection_metadata: self.collection_metadata.to_account_info(),
-      collection_authority_record_pda: self.bubblegum_program.to_account_info(),
-      payer: self.authority.to_account_info(),
-      compression_program: self.compression_program.to_account_info(),
-      token_metadata_program: self.token_metadata_program.to_account_info(),
-      log_wrapper: self.log_wrapper.to_account_info(),
-      system_program: self.system_program.to_account_info(),
-    };
-    CpiContext::new(self.bubblegum_program.to_account_info(), cpi_accounts)
-  }
 }
 
 pub fn handler<'info>(
@@ -161,7 +142,7 @@ pub fn handler<'info>(
       .current_metadata
       .creators
       .into_iter()
-      .map(|creator| mpl_bubblegum::state::metaplex_adapter::Creator {
+      .map(|creator| Creator {
         address: creator.address,
         verified: creator.verified,
         share: creator.share,
@@ -180,18 +161,26 @@ pub fn handler<'info>(
     is_mutable: None,
   };
 
-  update_metadata(
-    ctx
-      .accounts
-      .update_metadata_ctx()
-      .with_remaining_accounts(ctx.remaining_accounts.to_vec())
-      .with_signer(&[project_seeds[0]]),
-    args.root,
-    metadata,
-    updated_metadata,
-    u64::from(args.leaf_index),
-    args.leaf_index,
-  )?;
+  UpdateMetadataCpiBuilder::new(&ctx.accounts.bubblegum_program)
+    .authority(&ctx.accounts.project_account.to_account_info())
+    .leaf_owner(&ctx.accounts.leaf_owner)
+    .leaf_delegate(&ctx.accounts.leaf_delegate)
+    .merkle_tree(&ctx.accounts.merkle_tree)
+    .tree_config(&ctx.accounts.tree_authority.to_account_info())
+    .collection_mint(Some(&ctx.accounts.collection_mint.to_account_info()))
+    .collection_metadata(Some(&ctx.accounts.collection_metadata.to_account_info()))
+    .collection_authority_record_pda(Some(&ctx.accounts.bubblegum_program.to_account_info()))
+    .payer(&ctx.accounts.authority)
+    .compression_program(&ctx.accounts.compression_program)
+    .token_metadata_program(&ctx.accounts.token_metadata_program)
+    .log_wrapper(&ctx.accounts.log_wrapper)
+    .system_program(&ctx.accounts.system_program)
+    .root(args.root)
+    .current_metadata(metadata)
+    .update_args(updated_metadata)
+    .index(args.leaf_index)
+    .nonce(u64::from(args.leaf_index))
+    .invoke_signed(&[project_seeds[0]])?;
 
   Ok(())
 }

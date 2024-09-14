@@ -24,7 +24,7 @@ pub fn handler(ctx: Context<InitialOwnerContext>) -> Result<()> {
   let authority_clone = ctx.accounts.authority.to_account_info().key();
 
   owner_account.owner = authority_clone;
-  owner_account.bump = *ctx.bumps.get("owner_account").unwrap();
+  owner_account.bump = ctx.bumps.owner_account;
 
   msg!("Owner set to {}", owner_account.owner);
   msg!("Bump is set to {}", owner_account.bump);

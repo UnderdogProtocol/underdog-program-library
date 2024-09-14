@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{Mint, Token, TokenAccount, Transfer};
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-use shared_utils::{thaw_delegated_account, ThawDelegatedAccount};
+use mpl_token_metadata::instructions::ThawDelegatedAccountCpiBuilder;
 
 use crate::state::*;
 
@@ -14,7 +14,6 @@ pub struct RevokeNonTransferableNftV1Args {
   pub project_id_str: String,
   pub nft_id_str: String,
   pub nft_mint_bump: u8,
-  pub nft_escrow_bump: u8,
 }
 
 #[derive(Accounts)]
@@ -63,16 +62,17 @@ pub struct RevokeNonTransferableNftV1<'info> {
   pub non_transferable_nft_master_edition: AccountInfo<'info>,
 
   #[account(
-    mut,
-    seeds = [NON_TRANSFERABLE_NFT_ESCROW.as_ref(),org_account.key().as_ref(),args.project_id_str.as_ref(),args.nft_id_str.as_ref()],
-    bump=args.nft_escrow_bump,
+    init,
+    payer = authority,
+    associated_token::mint = non_transferable_nft_mint,
+    associated_token::authority = non_transferable_project
   )]
-  pub non_transferable_nft_escrow: Box<Account<'info, TokenAccount>>,
+  pub non_transferable_nft_token_account: Box<Account<'info, TokenAccount>>,
 
   #[account(mut)]
   pub claimer_token_account: Box<Account<'info, TokenAccount>>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub associated_token_program: Program<'info, AssociatedToken>,
   pub token_program: Program<'info, Token>,
   pub system_program: Program<'info, System>,
@@ -80,27 +80,13 @@ pub struct RevokeNonTransferableNftV1<'info> {
 }
 
 impl<'info> RevokeNonTransferableNftV1<'info> {
-  fn thaw_delegated_account_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, ThawDelegatedAccount<'info>> {
-    let cpi_accounts = ThawDelegatedAccount {
-      metadata: self.non_transferable_nft_metadata.to_account_info().clone(),
-      delegate: self.non_transferable_project.to_account_info().clone(),
-      token_account: self.claimer_token_account.to_account_info().clone(),
-      edition: self
-        .non_transferable_nft_master_edition
-        .to_account_info()
-        .clone(),
-      mint: self.non_transferable_nft_mint.to_account_info().clone(),
-      token_program: self.token_program.to_account_info().clone(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
-
   fn transfer_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
     let cpi_accounts = Transfer {
       from: self.claimer_token_account.to_account_info().clone(),
-      to: self.non_transferable_nft_escrow.to_account_info().clone(),
+      to: self
+        .non_transferable_nft_token_account
+        .to_account_info()
+        .clone(),
       authority: self.non_transferable_project.to_account_info().clone(),
     };
     CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
@@ -118,12 +104,13 @@ pub fn handler(
     &[ctx.accounts.non_transferable_project.bump],
   ];
 
-  thaw_delegated_account(
-    ctx
-      .accounts
-      .thaw_delegated_account_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-  )?;
+  ThawDelegatedAccountCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .mint(&ctx.accounts.non_transferable_nft_mint.to_account_info())
+    .delegate(&ctx.accounts.non_transferable_project.to_account_info())
+    .token_account(&ctx.accounts.claimer_token_account.to_account_info())
+    .edition(&ctx.accounts.non_transferable_nft_master_edition)
+    .token_program(&ctx.accounts.token_program)
+    .invoke_signed(&[&project_signer_seeds[..]])?;
 
   anchor_spl::token::transfer(
     ctx

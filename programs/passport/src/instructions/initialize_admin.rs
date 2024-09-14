@@ -23,7 +23,7 @@ pub fn handler(ctx: Context<InitializeAdmin>) -> Result<()> {
   let admin = &mut ctx.accounts.admin;
 
   admin.address = ctx.accounts.authority.to_account_info().key();
-  admin.bump = *ctx.bumps.get("admin").unwrap();
+  admin.bump = ctx.bumps.admin;
 
   Ok(())
 }

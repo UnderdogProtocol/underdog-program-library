@@ -1,9 +1,10 @@
 use anchor_lang::prelude::*;
 
-use anchor_spl::token::Mint;
-use mpl_bubblegum::state::metaplex_anchor::{MplTokenMetadata, TokenMetadata};
-use mpl_token_metadata::state::DataV2;
-use shared_utils::{update_metadata_accounts_v2, UpdateMetadataAccountsV2};
+use anchor_spl::{
+  metadata::{Metadata, MetadataAccount},
+  token::Mint,
+};
+use mpl_token_metadata::{instructions::UpdateMetadataAccountV2CpiBuilder, types::DataV2};
 
 use crate::{state::*, token_metadata::UpdateMetadataArgs};
 
@@ -53,22 +54,10 @@ pub struct UpdateLegacyProjectV0<'info> {
     seeds::program = token_metadata_program.key(),
     bump,
   )]
-  pub legacy_project_metadata: Box<Account<'info, TokenMetadata>>,
+  pub legacy_project_metadata: Box<Account<'info, MetadataAccount>>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub system_program: Program<'info, System>,
-}
-
-impl<'info> UpdateLegacyProjectV0<'info> {
-  fn update_metadata_accounts_ctx(
-    &self,
-  ) -> CpiContext<'_, '_, '_, 'info, UpdateMetadataAccountsV2<'info>> {
-    let cpi_accounts = UpdateMetadataAccountsV2 {
-      metadata: self.legacy_project_metadata.to_account_info(),
-      update_authority: self.legacy_project.to_account_info(),
-    };
-    CpiContext::new(self.token_metadata_program.to_account_info(), cpi_accounts)
-  }
 }
 
 pub fn handler(ctx: Context<UpdateLegacyProjectV0>, args: UpdateLegacyProjectV0Args) -> Result<()> {
@@ -79,13 +68,10 @@ pub fn handler(ctx: Context<UpdateLegacyProjectV0>, args: UpdateLegacyProjectV0A
     &[ctx.accounts.legacy_project.bump],
   ]];
 
-  update_metadata_accounts_v2(
-    ctx
-      .accounts
-      .update_metadata_accounts_ctx()
-      .with_signer(&[project_seeds[0]]),
-    Some(ctx.accounts.legacy_project.key()),
-    Some(DataV2 {
+  UpdateMetadataAccountV2CpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .metadata(&ctx.accounts.legacy_project_metadata.to_account_info())
+    .update_authority(&ctx.accounts.legacy_project.to_account_info())
+    .data(DataV2 {
       name: args.metadata.name,
       symbol: args.metadata.symbol,
       uri: args.metadata.uri,
@@ -93,10 +79,8 @@ pub fn handler(ctx: Context<UpdateLegacyProjectV0>, args: UpdateLegacyProjectV0A
       collection: None,
       creators: None,
       uses: None,
-    }),
-    Some(true),
-    Some(true),
-  )?;
+    })
+    .invoke_signed(&[project_seeds[0]])?;
 
   Ok(())
 }

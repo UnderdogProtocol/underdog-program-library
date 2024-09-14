@@ -48,7 +48,7 @@ export type RevokeNonTransferableNftV1InstructionAccounts = {
   nonTransferableNftMint?: Pda;
   nonTransferableNftMetadata?: PublicKey | Pda;
   nonTransferableNftMasterEdition?: PublicKey | Pda;
-  nonTransferableNftEscrow?: Pda;
+  nonTransferableNftTokenAccount?: PublicKey | Pda;
   claimerTokenAccount?: PublicKey | Pda;
   tokenMetadataProgram?: PublicKey | Pda;
   associatedTokenProgram?: PublicKey | Pda;
@@ -65,7 +65,6 @@ export type RevokeNonTransferableNftV1InstructionData = {
   projectIdStr: string;
   nftIdStr: string;
   nftMintBump: number;
-  nftEscrowBump: number;
 };
 
 export type RevokeNonTransferableNftV1InstructionDataArgs = {
@@ -74,7 +73,6 @@ export type RevokeNonTransferableNftV1InstructionDataArgs = {
   projectIdStr: string;
   nftIdStr: string;
   nftMintBump: number;
-  nftEscrowBump: number;
 };
 
 /** @deprecated Use `getRevokeNonTransferableNftV1InstructionDataSerializer()` without any argument instead. */
@@ -107,7 +105,6 @@ export function getRevokeNonTransferableNftV1InstructionDataSerializer(
         ['projectIdStr', string()],
         ['nftIdStr', string()],
         ['nftMintBump', u8()],
-        ['nftEscrowBump', u8()],
       ],
       { description: 'RevokeNonTransferableNftV1InstructionData' }
     ),
@@ -124,7 +121,7 @@ export function getRevokeNonTransferableNftV1InstructionDataSerializer(
 // Args.
 export type RevokeNonTransferableNftV1InstructionArgs = PickPartial<
   RevokeNonTransferableNftV1InstructionDataArgs,
-  'nftMintBump' | 'nftEscrowBump'
+  'nftMintBump'
 >;
 
 // Instruction.
@@ -229,15 +226,13 @@ export function revokeNonTransferableNftV1(
   );
   addObjectProperty(
     resolvedAccounts,
-    'nonTransferableNftEscrow',
-    input.nonTransferableNftEscrow
-      ? ([input.nonTransferableNftEscrow, true] as const)
+    'nonTransferableNftTokenAccount',
+    input.nonTransferableNftTokenAccount
+      ? ([input.nonTransferableNftTokenAccount, true] as const)
       : ([
-          findLegacyNftPda(context, {
-            prefix: 'nt-nft-mint-esc',
-            orgAccount: publicKey(resolvedAccounts.orgAccount[0], false),
-            projectId: input.projectIdStr,
-            nftId: input.nftIdStr,
+          findAssociatedTokenPda(context, {
+            mint: publicKey(resolvedAccounts.nonTransferableNftMint[0], false),
+            owner: publicKey(resolvedAccounts.nonTransferableProject[0], false),
           }),
           true,
         ] as const)
@@ -322,11 +317,6 @@ export function revokeNonTransferableNftV1(
     'nftMintBump',
     input.nftMintBump ?? resolvedAccounts.nonTransferableNftMint[0][1]
   );
-  addObjectProperty(
-    resolvingArgs,
-    'nftEscrowBump',
-    input.nftEscrowBump ?? resolvedAccounts.nonTransferableNftEscrow[0][1]
-  );
   const resolvedArgs = { ...input, ...resolvingArgs };
 
   addAccountMeta(keys, signers, resolvedAccounts.authority, false);
@@ -350,7 +340,7 @@ export function revokeNonTransferableNftV1(
   addAccountMeta(
     keys,
     signers,
-    resolvedAccounts.nonTransferableNftEscrow,
+    resolvedAccounts.nonTransferableNftTokenAccount,
     false
   );
   addAccountMeta(keys, signers, resolvedAccounts.claimerTokenAccount, false);

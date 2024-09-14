@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 pub mod instructions;
 pub mod state;
+pub mod util;
 
 use instructions::*;
 
@@ -45,13 +46,6 @@ pub mod passport {
     args: TransferAssetV0Args,
   ) -> Result<()> {
     transfer_asset_v0::handler(ctx, args)
-  }
-
-  pub fn burn_asset_v0<'info>(
-    ctx: Context<'_, '_, '_, 'info, BurnAssetV0<'info>>,
-    args: BurnAssetV0Args,
-  ) -> Result<()> {
-    burn_asset_v0::handler(ctx, args)
   }
 
   pub fn burn_asset_v1<'info>(

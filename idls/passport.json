@@ -249,64 +249,6 @@
       ]
     },
     {
-      "name": "burnAssetV0",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "link",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "treeAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "merkleTree",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "bubblegumSigner",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "bubblegumProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "logWrapper",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "compressionProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": "BurnAssetV0Args"
-          }
-        }
-      ]
-    },
-    {
       "name": "burnAssetV1",
       "accounts": [
         {
@@ -430,53 +372,6 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "namespace",
-            "type": "string"
-          },
-          {
-            "name": "identifier",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "BurnAssetV0Args",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "root",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "dataHash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "creatorHash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "leafIndex",
-            "type": "u32"
-          },
           {
             "name": "namespace",
             "type": "string"
@@ -626,7 +521,7 @@
   "metadata": {
     "address": "upUcvW7nF6ymrAFKborbq3vrbdpuokAvJheqHX5Qxtd",
     "origin": "anchor",
-    "binaryVersion": "0.26.0",
-    "libVersion": "0.26.0"
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
   }
 }

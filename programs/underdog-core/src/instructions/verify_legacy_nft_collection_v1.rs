@@ -1,10 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::rent::Rent;
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{Mint, Token};
-use mpl_bubblegum::state::metaplex_anchor::MplTokenMetadata;
-
-use shared_utils::{verify_collection, VerifyCollection};
+use mpl_token_metadata::instructions::VerifyCollectionCpiBuilder;
 
 use crate::state::*;
 
@@ -82,28 +81,11 @@ pub struct VerifyLegacyNftCollectionV1<'info> {
   #[account(mut)]
   pub legacy_nft_metadata: UncheckedAccount<'info>,
 
-  pub token_metadata_program: Program<'info, MplTokenMetadata>,
+  pub token_metadata_program: Program<'info, Metadata>,
   pub associated_token_program: Program<'info, AssociatedToken>,
   pub token_program: Program<'info, Token>,
   pub system_program: Program<'info, System>,
   pub rent: Sysvar<'info, Rent>,
-}
-
-impl<'info> VerifyLegacyNftCollectionV1<'info> {
-  fn verify_collection_ctx(&self) -> CpiContext<'_, '_, '_, 'info, VerifyCollection<'info>> {
-    let cpi_accounts = VerifyCollection {
-      payer: self.authority.to_account_info().clone(),
-      metadata: self.legacy_nft_metadata.to_account_info().clone(),
-      collection_authority: self.legacy_project.to_account_info(),
-      collection_mint: self.legacy_project_mint.to_account_info(),
-      collection_metadata: self.legacy_project_metadata.to_account_info(),
-      collection_master_edition: self.legacy_project_master_edition.to_account_info(),
-    };
-    CpiContext::new(
-      self.token_metadata_program.to_account_info().clone(),
-      cpi_accounts,
-    )
-  }
 }
 
 pub fn handler(
@@ -117,13 +99,14 @@ pub fn handler(
     &[ctx.accounts.legacy_project.bump],
   ];
 
-  verify_collection(
-    ctx
-      .accounts
-      .verify_collection_ctx()
-      .with_signer(&[&project_signer_seeds[..]]),
-    None,
-  )?;
+  VerifyCollectionCpiBuilder::new(&ctx.accounts.token_metadata_program)
+    .payer(&ctx.accounts.authority)
+    .metadata(&ctx.accounts.legacy_nft_metadata)
+    .collection_authority(&ctx.accounts.legacy_project.to_account_info())
+    .collection_mint(&ctx.accounts.legacy_project_mint)
+    .collection(&ctx.accounts.legacy_project_metadata.to_account_info())
+    .collection_master_edition_account(&ctx.accounts.legacy_project_master_edition)
+    .invoke_signed(&[&project_signer_seeds[..]])?;
 
   Ok(())
 }
