@@ -1,14 +1,11 @@
 import {
   fetchAllTokenByOwnerAndMint,
-  findAssociatedTokenPda,
   setComputeUnitLimit,
 } from "@metaplex-foundation/mpl-toolbox";
 import { createBigInt, generateSigner, sol } from "@metaplex-foundation/umi";
 
 import {
   burnNonTransferableNftV1,
-  claimNonTransferableNftV1,
-  fetchClaimAccountFromSeeds,
   fetchLegacyProjectFromSeeds,
   findLegacyProjectPda,
   findOrgAccountPda,
@@ -19,11 +16,7 @@ import {
   updateLegacyProjectV0,
 } from "../../../src/generated";
 import { createContext } from "../../setup";
-import {
-  findLegacyNftPda,
-  findOrgAddress,
-  NON_TRANSFERABLE_NFT_MINT_PREFIX,
-} from "../../../src";
+import { findLegacyNftPda } from "../../../src";
 import { fetchMetadataFromSeeds } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("Non-Transferable Projects", () => {

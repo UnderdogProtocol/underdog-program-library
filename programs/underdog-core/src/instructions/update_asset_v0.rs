@@ -161,6 +161,12 @@ pub fn handler<'info>(
     is_mutable: None,
   };
 
+  let remaining_accounts: Vec<(&AccountInfo<'info>, bool, bool)> = ctx
+    .remaining_accounts
+    .iter()
+    .map(|account| (account, account.is_writable, account.is_signer)) // Do not dereference here
+    .collect();
+
   UpdateMetadataCpiBuilder::new(&ctx.accounts.bubblegum_program)
     .authority(&ctx.accounts.project_account.to_account_info())
     .leaf_owner(&ctx.accounts.leaf_owner)
@@ -180,6 +186,7 @@ pub fn handler<'info>(
     .update_args(updated_metadata)
     .index(args.leaf_index)
     .nonce(u64::from(args.leaf_index))
+    .add_remaining_accounts(&remaining_accounts[..])
     .invoke_signed(&[project_seeds[0]])?;
 
   Ok(())

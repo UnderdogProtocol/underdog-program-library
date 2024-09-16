@@ -88,6 +88,12 @@ pub fn handler<'info>(
     &[ctx.accounts.project_account.bump],
   ]];
 
+  let remaining_accounts: Vec<(&AccountInfo<'info>, bool, bool)> = ctx
+    .remaining_accounts
+    .iter()
+    .map(|account| (account, account.is_writable, account.is_signer)) // Do not dereference here
+    .collect();
+
   TransferCpiBuilder::new(&ctx.accounts.bubblegum_program)
     .tree_config(&ctx.accounts.tree_authority)
     .leaf_owner(&ctx.accounts.leaf_owner, false)
@@ -102,6 +108,7 @@ pub fn handler<'info>(
     .creator_hash(args.creator_hash)
     .nonce(u64::from(args.leaf_index))
     .index(args.leaf_index)
+    .add_remaining_accounts(&remaining_accounts[..])
     .invoke_signed(&[project_seeds[0]])?;
 
   Ok(())
